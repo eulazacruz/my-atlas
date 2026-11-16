@@ -26,7 +26,10 @@ export function useTestIsland() {
       () => push({ kind: 'nudge', title: `${p} te mandou um carinho 🤍`, subtitle: 'Pensando em você agora.', avatar: { name: p }, actions: [{ label: 'Retribuir', primary: true, onClick: () => sendNudge('carinho') }, { label: 'Fechar' }] }),
       () => push({ kind: 'cycle', title: 'Menstruação prevista em 2 dias', subtitle: 'Hora de deixar o kit pronto e caprichar no carinho.' }),
       () => push({ kind: 'agenda', title: 'Jantar a dois em 1 hora', subtitle: '20:00 · Recife Antigo' }),
-      () => push({ kind: 'pet', title: `${p} levou o Atlas para passear 🐾`, subtitle: 'Passeio do dia registrado' }),
+      () => push({ kind: 'pet', title: `${p} mandou uma lambida do Atlas 🐾`, subtitle: 'Atlas virtual · +6 XP', avatar: { name: p } }),
+      () => push({ kind: 'status', title: `${p} está saindo do trabalho 🚀`, subtitle: 'Status de contexto', avatar: { name: p } }),
+      () => push({ kind: 'need', title: `${p}: preciso de colo 🫂`, subtitle: 'Um abraço agora', avatar: { name: p }, actions: [{ label: 'Estou indo', primary: true, onClick: () => sendNudge('carinho') }, { label: 'Ok' }] }),
+      () => push({ kind: 'sleep', title: 'Bom dia! Você dormiu 7h 32min ☀️', subtitle: 'Confirmar registro?', actions: [{ label: 'Confirmar', primary: true }, { label: 'Descartar' }] }),
     ];
     samples[step.current % samples.length]();
     step.current += 1;

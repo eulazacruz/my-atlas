@@ -2,14 +2,18 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useIsland } from '@/components/island/IslandProvider';
-import { MOODS, WATER_GOAL, WATER_STEP } from '@/lib/constants';
+import { CONTEXT_STATUS, HOUSE_TASKS, MOODS, NEEDS, PET_ACTIONS, statusOf, WATER_GOAL, WATER_STEP, type NeedKind, type PetActionKind } from '@/lib/constants';
+import { haptic, notifyNow } from '@/lib/native';
+import { activeSleep, fmtDuration } from '@/lib/body';
 import { TABLES, deleteRow, emptyDB, ensureCouple, insertNudge, joinCouple as rpcJoin, loadAll, saveCouple, saveRow, subscribeAll } from '@/lib/db';
 import { createDemoData } from '@/lib/demo-data';
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { AtlasState, Couple, HabitKey, HabitLog, Profile, TableName, Tables } from '@/lib/types';
+void CONTEXT_STATUS;
 import { firstName, money, uid, ymd } from '@/lib/utils';
 
-const DEMO_KEY = 'my-atlas:demo:v2';
+const DEMO_KEY = 'my-atlas:demo:v3';
+export type NudgeKind = 'carinho' | 'cutucao' | NeedKind | PetActionKind;
 type Status = 'loading' | 'ready' | 'unauthenticated' | 'error';
 
 interface AtlasCtx {
@@ -29,7 +33,14 @@ interface AtlasCtx {
   todayHabit: (profileId: string) => HabitLog;
   toggleHabit: (k: HabitKey) => void;
   addWater: (ml?: number) => void;
-  sendNudge: (kind: 'carinho' | 'cutucao') => void;
+  sendNudge: (kind: NudgeKind) => void;
+  setContextStatus: (v: string) => void;
+  petAction: (kind: PetActionKind) => void;
+  logHousehold: (task: string) => void;
+  startSleep: () => void;
+  finishSleep: (confirm: boolean, at?: Date) => void;
+  addCaffeine: (mg: number, kind: string) => void;
+  alert: (e: Parameters<ReturnType<typeof useIsland>['push']>[0]) => void;
   switchPerspective: () => void;
   resetDemo: () => void;
   joinCouple: (code: string) => Promise<void>;
@@ -47,7 +58,11 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
   const ref = useRef<AtlasState | null>(null);
   ref.current = state;
   const pushRef = useRef(island.push);
-  pushRef.current = island.push;
+  pushRef.current = (e) => {
+    island.push(e);
+    haptic('success');
+    if (typeof document !== 'undefined' && document.visibilityState !== 'visible') notifyNow(e.title, e.subtitle ?? '');
+  };
   const sb = useMemo(() => getSupabase(), []);
 
   const nameOf = useCallback((id: string | null | undefined) => {
@@ -116,14 +131,7 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
       if (table === 'nudges') {
         if (type !== 'INSERT' || row.fromProfile === myId || (row.toProfile && row.toProfile !== myId)) return;
         const n = nameOf(row.fromProfile);
-        pushRef.current({
-          kind: 'nudge',
-          title: row.kind === 'carinho' ? `${n} te mandou um carinho 🤍` : `${n} te cutucou 👉`,
-          subtitle: row.kind === 'carinho' ? 'Pensando em você agora.' : 'Ei! Dá uma olhadinha aqui.',
-          avatar: { name: n },
-          actions: [{ label: 'Retribuir', primary: true, onClick: () => nudgeRef.current('carinho') }, { label: 'Fechar' }],
-          duration: 8000,
-        });
+        pushRef.current(nudgeEvent(row.message || row.kind, n));
         return;
       }
       if (!TABLES.includes(table as TableName)) return;
@@ -148,7 +156,15 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
           actions: [{ label: 'Enviar carinho', primary: true, onClick: () => nudgeRef.current('carinho') }, { label: 'Ok' }],
         });
       }
+      if (t === 'profiles' && row.id !== myId && existing && row.contextStatus && existing.contextStatus !== row.contextStatus) {
+        const st = statusOf(row.contextStatus);
+        if (st) pushRef.current({ kind: 'status', title: `${firstName(row.displayName)}: ${st.label} ${st.emoji}`, subtitle: 'Status atualizado agora', avatar: { name: row.displayName, url: row.avatarUrl }, duration: 6000 });
+      }
       if (type !== 'INSERT' || !fromPartner) return;
+      if (t === 'household_tasks') {
+        const ht = HOUSE_TASKS.find((h) => h.value === row.task);
+        pushRef.current({ kind: 'success', title: `${who} fez: ${ht?.label ?? row.task} ${ht?.emoji ?? ''}`, subtitle: 'Equilíbrio da semana atualizado', duration: 3500 });
+      }
       if (t === 'transactions')
         pushRef.current({ kind: 'expense', title: `${row.type === 'expense' ? 'Nova despesa' : 'Nova entrada'}: ${money(row.amount)}`, subtitle: `${who} · ${row.description}`, avatar: { name: who } });
       if (t === 'events') pushRef.current({ kind: 'agenda', title: `${who} marcou: ${row.title}`, subtitle: new Date(row.startsAt).toLocaleString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) });
@@ -157,6 +173,30 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
       if (t === 'prayers') pushRef.current({ kind: 'prayer', title: `${who} pediu oração 🙏`, subtitle: row.title });
       if (t === 'pet_walks') pushRef.current({ kind: 'pet', title: `${who} levou o Atlas para passear 🐾`, subtitle: 'Passeio do dia registrado' });
       if (t === 'notes' && !row.parentId) pushRef.current({ kind: 'sync', title: `${who} criou uma nota`, subtitle: row.title || 'Sem título', duration: 3000 });
+    };
+  }
+
+  function nudgeEvent(kind: string, n: string): Parameters<typeof island.push>[0] {
+    const need = NEEDS.find((x) => x.kind === kind);
+    if (need)
+      return {
+        kind: 'need',
+        title: `${n}: ${need.label} ${need.emoji}`,
+        subtitle: need.hint,
+        avatar: { name: n },
+        actions: need.kind === 'silencio' ? [{ label: 'Entendido 🤍', primary: true }] : [{ label: 'Estou indo', primary: true, onClick: () => nudgeRef.current('carinho') }, { label: 'Depois' }],
+        duration: 10000,
+      };
+    const pet = PET_ACTIONS.find((x) => x.kind === kind);
+    if (pet) return { kind: 'pet', title: `${n} ${pet.notify} ${pet.emoji}`, subtitle: 'Atlas virtual', actions: [{ label: 'Brincar também', primary: true, onClick: () => petRef.current('pet_carinho') }, { label: 'Ok' }], duration: 7000 };
+    if (kind.startsWith('reply_')) return { kind: 'nudge', title: `${n} recebeu e respondeu 🤍`, subtitle: 'Já está a caminho.', avatar: { name: n }, duration: 5000 };
+    return {
+      kind: 'nudge',
+      title: kind === 'carinho' ? `${n} te mandou um carinho 🤍` : `${n} te cutucou 👉`,
+      subtitle: kind === 'carinho' ? 'Pensando em você agora.' : 'Ei! Dá uma olhadinha aqui.',
+      avatar: { name: n },
+      actions: [{ label: 'Retribuir', primary: true, onClick: () => nudgeRef.current('carinho') }, { label: 'Fechar' }],
+      duration: 8000,
     };
   }
 
@@ -247,7 +287,7 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [save]);
 
-  const sendNudge = useCallback((kind: 'carinho' | 'cutucao') => {
+  const sendNudge = useCallback((kind: NudgeKind) => {
     const s = ref.current;
     if (!s) return;
     const p = s.db.profiles.find((x) => x.id !== s.meId);
@@ -255,23 +295,97 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
       island.push({ kind: 'nudge', title: 'Seu par ainda não entrou', subtitle: `Compartilhe o código ${s.couple.inviteCode} em Ajustes.` });
       return;
     }
-    island.push({ kind: 'nudge', title: kind === 'carinho' ? `Carinho enviado para ${firstName(p.displayName)} 🤍` : `Você cutucou ${firstName(p.displayName)} 👉`, subtitle: 'Vai aparecer ao redor da câmera dele(a).', duration: 2400 });
+    haptic('medium');
+    const pn = firstName(p.displayName);
+    const need = NEEDS.find((n) => n.kind === kind);
+    if (!kind.startsWith('pet_'))
+      island.push({
+        kind: need ? 'need' : 'nudge',
+        title: need ? `Enviado para ${pn}: ${need.short} ${need.emoji}` : kind === 'carinho' ? `Carinho enviado para ${pn} 🤍` : `Você cutucou ${pn} 👉`,
+        subtitle: 'Vai aparecer ao redor da câmera dele(a).',
+        duration: 2400,
+      });
     if (mode === 'supabase') write(() => insertNudge(sb!, s.couple.id, s.meId, p.id, kind));
     else
       window.setTimeout(() => {
-        pushRef.current({
-          kind: 'nudge',
-          title: `${firstName(p.displayName)} te mandou um carinho de volta 🤍`,
-          subtitle: 'Também tô pensando em você!',
-          avatar: { name: p.displayName },
-          actions: [{ label: 'Retribuir', primary: true, onClick: () => nudgeRef.current('carinho') }, { label: 'Fechar' }],
-          duration: 7000,
-        });
+        const reply = need ? (need.kind === 'silencio' ? null : 'carinho') : kind.startsWith('pet_') ? null : 'carinho';
+        if (reply) pushRef.current(nudgeEvent(need ? `reply_${need.kind}` : 'carinho', pn));
       }, 3200);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, write, sb]);
   const nudgeRef = useRef(sendNudge);
   nudgeRef.current = sendNudge;
+
+  const setContextStatus = useCallback((v: string) => {
+    const s = ref.current;
+    const meP = s?.db.profiles.find((x) => x.id === s.meId);
+    if (!s || !meP) return;
+    haptic('light');
+    const now = new Date().toISOString();
+    save('profiles', { ...meP, contextStatus: v, contextUpdatedAt: now, updatedAt: now });
+    const st = statusOf(v);
+    island.push({ kind: 'status', title: `Status: ${st?.label} ${st?.emoji}`, subtitle: 'Seu par vê isso na Atlas Island.', duration: 2200 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [save]);
+
+  const petAction = useCallback((kind: PetActionKind) => {
+    const s = ref.current;
+    if (!s) return;
+    const a = PET_ACTIONS.find((x) => x.kind === kind)!;
+    const cur = s.db.pet_virtual_state[0];
+    const now = new Date();
+    const since = cur ? (now.getTime() - new Date(cur.updatedAt).getTime()) / 3_600_000 : 0;
+    const happiness = Math.min(100, Math.max(5, Math.round((cur?.happiness ?? 80) - since * 3)) + a.happiness);
+    const energy = Math.max(5, Math.min(100, Math.round((cur?.energy ?? 80) + since * 4) + a.energy));
+    save('pet_virtual_state', { id: cur?.id ?? uid(), happiness, energy, bonusXp: (cur?.bonusXp ?? 0) + a.xp, lastAction: kind, lastActionBy: s.meId, lastActionAt: now.toISOString(), updatedAt: now.toISOString() });
+    sendNudge(kind);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [save, sendNudge]);
+  const petRef = useRef(petAction);
+  petRef.current = petAction;
+
+  const logHousehold = useCallback((task: string) => {
+    const s = ref.current;
+    if (!s) return;
+    haptic('success');
+    save('household_tasks', { id: uid(), createdBy: s.meId, task, doneAt: new Date().toISOString() });
+    const ht = HOUSE_TASKS.find((h) => h.value === task);
+    island.push({ kind: 'success', title: `${ht?.label ?? task} ✓ +${(ht?.points ?? 1) * 10} XP`, subtitle: 'O Atlas virtual também ficou mais forte.', duration: 2600 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [save]);
+
+  const startSleep = useCallback(() => {
+    const s = ref.current;
+    if (!s || activeSleep(s.db.sleep_logs, s.meId)) return;
+    save('sleep_logs', { id: uid(), profileId: s.meId, sleptAt: new Date().toISOString(), wokeAt: null, durationMin: null, confirmed: false });
+    try {
+      localStorage.setItem('my-atlas:sleeping', '1');
+    } catch { /* noop */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [save]);
+
+  const finishSleep = useCallback((confirm: boolean, at = new Date()) => {
+    const s = ref.current;
+    if (!s) return;
+    const cur = activeSleep(s.db.sleep_logs, s.meId);
+    try {
+      localStorage.removeItem('my-atlas:sleeping');
+    } catch { /* noop */ }
+    if (!cur) return;
+    if (!confirm) return remove('sleep_logs', cur.id);
+    const dur = Math.max(1, Math.round((at.getTime() - new Date(cur.sleptAt).getTime()) / 60_000));
+    save('sleep_logs', { ...cur, wokeAt: at.toISOString(), durationMin: dur, confirmed: true });
+    island.push({ kind: 'sleep', title: `Sono registrado: ${fmtDuration(dur)} 🌙`, subtitle: dur >= 420 ? 'Noite bem dormida. Bora!' : 'Abaixo de 7h — pega leve hoje.', duration: 3500 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [save, remove]);
+
+  const addCaffeine = useCallback((mg: number, kind: string) => {
+    const s = ref.current;
+    if (!s) return;
+    haptic('light');
+    save('caffeine_logs', { id: uid(), profileId: s.meId, takenAt: new Date().toISOString(), mg, kind });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [save]);
 
   const switchPerspective = useCallback(() => {
     const s = ref.current;
@@ -332,7 +446,9 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
   const value: AtlasCtx = {
     mode, status, error, state, me, partner, couple: state?.couple ?? null,
     rows, save, patch, remove, updateCouple, nameOf, todayHabit, toggleHabit, addWater,
-    sendNudge, switchPerspective, resetDemo, joinCouple, signOut,
+    sendNudge, setContextStatus, petAction, logHousehold, startSleep, finishSleep, addCaffeine,
+    alert: (e) => pushRef.current(e),
+    switchPerspective, resetDemo, joinCouple, signOut,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

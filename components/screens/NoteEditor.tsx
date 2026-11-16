@@ -244,7 +244,7 @@ export function NoteEditor() {
       >
         <div className="ambient" />
         {/* barra superior */}
-        <div className="flex items-center justify-between gap-2 px-3 pb-2 pt-[calc(3.2rem+env(safe-area-inset-top))]">
+        <div className="flex items-center justify-between gap-2 px-3 pb-2 pt-[calc(3.2rem+var(--sat,env(safe-area-inset-top)))]">
           <button onClick={close} className="flex min-w-0 items-center gap-0.5 text-[15px] font-medium muted">
             <ChevronLeft size={22} className="shrink-0" /> <span className="truncate">{parent ? `${parent.icon ?? ''} ${parent.title || 'Sem título'}` : 'Notas'}</span>
           </button>

@@ -1,15 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Heart } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
-
-const ERRORS: Record<string, string> = {
-  not_allowed: 'Este e-mail não tem acesso ao My Atlas.',
-  auth: 'Não foi possível concluir o login. Tente de novo.',
-};
+import { closeExternal, isNative, onDeepLink, openExternal } from '@/lib/native';
+import { getSupabase, isSupabaseConfigured, NATIVE_REDIRECT } from '@/lib/supabase';
 
 function GoogleIcon() {
   return (
@@ -22,65 +17,91 @@ function GoogleIcon() {
   );
 }
 
+function errorMessage(raw: string) {
+  if (/acesso|database error|saving new user/i.test(raw)) return 'Este e-mail não tem acesso ao My Atlas.';
+  return 'Não foi possível concluir o login. Tente de novo.';
+}
+
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const e = new URLSearchParams(window.location.search).get('error');
-    if (e) setError(ERRORS[e] ?? ERRORS.auth);
-    getSupabase()?.auth.getSession().then(({ data }) => {
-      if (data.session) window.location.replace('/');
+    const sb = getSupabase();
+    if (!sb) return;
+    const params = new URLSearchParams(window.location.search);
+    const desc = params.get('error_description') ?? params.get('error');
+    if (desc) setError(errorMessage(desc));
+
+    const { data: sub } = sb.auth.onAuthStateChange((ev, session) => {
+      if (session && (ev === 'SIGNED_IN' || ev === 'INITIAL_SESSION')) window.location.replace('/');
     });
+
+    // App nativo: o Google volta por deep link app.myatlas://auth?code=…
+    let off = () => {};
+    onDeepLink(async (url) => {
+      if (!url.startsWith(NATIVE_REDIRECT)) return;
+      await closeExternal();
+      const u = new URL(url.replace('app.myatlas://', 'https://x/'));
+      const code = u.searchParams.get('code');
+      const err = u.searchParams.get('error_description');
+      if (err) return setError(errorMessage(err));
+      if (!code) return;
+      setLoading(true);
+      const { error } = await sb.auth.exchangeCodeForSession(code);
+      if (error) {
+        setError(errorMessage(error.message));
+        setLoading(false);
+      }
+    }).then((f) => (off = f));
+    return () => {
+      sub.subscription.unsubscribe();
+      off();
+    };
   }, []);
 
   const signIn = async () => {
     const sb = getSupabase();
     if (!sb) return;
     setLoading(true);
-    const { error } = await sb.auth.signInWithOAuth({
+    setError(null);
+    const native = isNative();
+    const { data, error } = await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback`, queryParams: { prompt: 'select_account' } },
+      options: {
+        redirectTo: native ? NATIVE_REDIRECT : `${window.location.origin}/login/`,
+        skipBrowserRedirect: native,
+        queryParams: { prompt: 'select_account' },
+      },
     });
     if (error) {
       setError(error.message);
+      setLoading(false);
+      return;
+    }
+    if (native && data.url) {
+      await openExternal(data.url);
       setLoading(false);
     }
   };
 
   return (
     <main className="grid min-h-dvh place-items-center px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: 'spring', stiffness: 220, damping: 26 }}
-        className="glass w-full max-w-sm p-8 text-center"
-      >
-        <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-[22px] bg-black dark:bg-white">
-          <Heart className="text-white dark:text-black" fill="currentColor" size={26} />
-        </div>
-        <h1 className="text-3xl font-bold tracking-[-0.03em]">My Atlas</h1>
+      <motion.div initial={{ opacity: 0, y: 20, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 220, damping: 26 }} className="glass w-full max-w-sm p-8 text-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/icons/icon-192.png" alt="" className="mx-auto mb-5 h-20 w-20 rounded-[24px] shadow-xl" />
+        <h1 className="text-[30px] font-bold tracking-[-0.03em]">My Atlas</h1>
         <p className="mt-1 text-[14px] muted">Life & Couple OS · só para nós dois.</p>
-
         {isSupabaseConfigured ? (
-          <button
-            onClick={signIn}
-            disabled={loading}
-            className="mt-8 flex h-12 w-full items-center justify-center gap-2.5 rounded-2xl bg-white text-[15px] font-semibold text-black shadow-lg ring-1 ring-black/10 transition active:scale-[0.98] disabled:opacity-60"
-          >
-            <GoogleIcon /> {loading ? 'Abrindo Google…' : 'Entrar com Google'}
+          <button onClick={signIn} disabled={loading} className="mt-8 flex h-12 w-full items-center justify-center gap-2.5 rounded-2xl bg-white text-[15px] font-semibold text-black shadow-lg ring-1 ring-black/10 transition active:scale-[0.98] disabled:opacity-60">
+            <GoogleIcon /> {loading ? 'Entrando…' : 'Entrar com Google'}
           </button>
         ) : (
-          <div className="mt-8 space-y-3">
-            <p className="rounded-2xl bg-black/5 p-3 text-[12px] muted dark:bg-white/[0.06]">
-              Supabase ainda não configurado. Preencha <code>NEXT_PUBLIC_SUPABASE_URL</code> e <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>.
-            </p>
-            <Link href="/" className="flex h-12 w-full items-center justify-center rounded-2xl bg-black text-[15px] font-semibold text-white dark:bg-white dark:text-black">
-              Abrir modo demonstração
-            </Link>
-          </div>
+          <Link href="/" className="mt-8 flex h-12 w-full items-center justify-center rounded-2xl bg-black text-[15px] font-semibold text-white dark:bg-white dark:text-black">
+            Abrir modo demonstração
+          </Link>
         )}
-        {error && <p className="mt-4 text-[13px] font-medium text-rose-500">{error}</p>}
+        {error && <p className="mt-4 text-[13px] font-medium text-red-500">{error}</p>}
       </motion.div>
     </main>
   );

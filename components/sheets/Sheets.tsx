@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useIsland } from '@/components/island/IslandProvider';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI } from '@/components/providers/UIProvider';
+import { NewSheets } from './NewSheets';
 import { Button, Chip, Field, Segmented, Sheet, Switch } from '@/components/ui/primitives';
 import { CYCLE_MOODS, DATE_KINDS, DISCHARGE, FLOWS, PRIORITY, PROTECTION, SYMPTOMS, TX_CATEGORIES } from '@/lib/constants';
 import type { CalEvent, CycleDay, Flow, Goal, IntimacyLog, Prayer, SpecialDate, Task } from '@/lib/types';
@@ -527,6 +528,7 @@ export function Sheets() {
       <SpecialDateSheet />
       <GoalSheet />
       <PrayerSheet />
+      <NewSheets />
     </>
   );
 }

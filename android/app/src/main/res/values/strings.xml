@@ -1,9 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">My Atlas</string>
-    <string name="asset_statements">[{\"relation\": [\"delegate_permission/common.handle_all_urls\"], \"target\": {\"namespace\": \"web\", \"site\": \"https://my-atlas-zeta.vercel.app\"}}]</string>
-    <string name="sc_breathe">Respirar</string>
-    <string name="sc_expense">Nova despesa</string>
-    <string name="sc_water">+500ml de água</string>
-    <string name="sc_nudge">Enviar carinho</string>
+    <string name="title_activity_main">My Atlas</string>
+    <string name="package_name">app.myatlas.twa</string>
+    <string name="custom_url_scheme">app.myatlas</string>
+    <string name="w_couple">Nós dois — humor, status e bateria</string>
+    <string name="w_today">Hoje — agenda e tarefas</string>
+    <string name="w_water">Água — +500ml num toque</string>
+    <string name="w_cycle">Ciclo — dia e fase</string>
+    <string name="w_pet">Atlas virtual — brinque com o pitbull</string>
+    <string name="w_finance">Finanças — saldo do mês</string>
+    <string name="w_date">Próxima data especial</string>
+    <string name="w_word">Versículo do dia</string>
+    <string name="w_quick">Ações rápidas</string>
+    <string name="w_needs">Preciso de… — avise seu amor</string>
+    <string name="w_habits">Hábitos e sono</string>
 </resources>

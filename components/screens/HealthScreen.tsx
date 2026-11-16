@@ -7,6 +7,7 @@ import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI } from '@/components/providers/UIProvider';
 import { useCycle } from '@/components/shell/useCycle';
 import { MonthCalendar } from '@/components/ui/MonthCalendar';
+import { CaffeineCard, SleepCard } from './BodyBits';
 import { Avatar, Button, CheckCircle, Empty, Field, Glass, IconButton, PageHeader, Progress, Section, Segmented, Switch } from '@/components/ui/primitives';
 import { ACCENT, HABITS, PHASES, PROTECTION, WATER_GOAL, wordOfTheDay } from '@/lib/constants';
 import { dayKind } from '@/lib/cycle';
@@ -389,9 +390,30 @@ function HabitsView() {
   const word = wordOfTheDay();
   const week = Array.from({ length: 7 }, (_, i) => addDays(new Date(), i - 6));
   const logs = rows('habit_logs');
+  const streak = (key: (typeof HABITS)[number]['key']) => {
+    let n = 0;
+    for (let i = 0; i < 60; i++) {
+      const d = ymd(addDays(new Date(), -i));
+      const l = logs.find((x) => x.profileId === me.id && x.logDate === d);
+      if (l?.[key]) n++;
+      else if (i > 0 || !l?.[key]) { if (i > 0) break; }
+    }
+    return n;
+  };
 
   return (
     <>
+      <div className="no-scrollbar -mx-4 mb-6 flex gap-2 overflow-x-auto px-4">
+        {HABITS.map((x) => {
+          const n = streak(x.key);
+          return (
+            <span key={x.key} className={cn('shrink-0 rounded-full px-3 py-1.5 text-[12px] font-semibold', n ? 'text-white' : 'bg-black/5 muted dark:bg-white/[0.07]')} style={n ? { background: '#10B981' } : undefined}>
+              {x.emoji} {n} {n === 1 ? 'dia' : 'dias'}
+            </span>
+          );
+        })}
+      </div>
+
       <Section title={`${word.kind} do dia`}>
         <Glass className="p-5">
           <p className="text-[17px] font-medium leading-snug">“{word.text}”</p>
@@ -442,7 +464,7 @@ function HabitsView() {
               return (
                 <div key={ymd(d)} className="flex flex-col items-center gap-1.5">
                   <div className="relative h-24 w-7 overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.07]">
-                    <motion.div className="absolute inset-x-0 bottom-0 rounded-full bg-black dark:bg-white" initial={{ height: 0 }} animate={{ height: `${Math.max(pct * 100, 5)}%` }} transition={{ type: 'spring', stiffness: 140, damping: 20 }} />
+                    <motion.div className={cn('absolute inset-x-0 bottom-0 rounded-full', pct >= 0.8 ? '' : 'bg-black dark:bg-white')} style={pct >= 0.8 ? { background: '#10B981' } : undefined} initial={{ height: 0 }} animate={{ height: `${Math.max(pct * 100, 5)}%` }} transition={{ type: 'spring', stiffness: 140, damping: 20 }} />
                   </div>
                   <span className={cn('text-[11px]', isToday ? 'font-bold' : 'muted')}>{WEEK_LETTERS[d.getDay()]}</span>
                 </div>
@@ -452,12 +474,20 @@ function HabitsView() {
         </Glass>
       </Section>
 
+      <Section title="Sono inteligente">
+        <SleepCard />
+      </Section>
+
+      <Section title="Cafeína">
+        <CaffeineCard />
+      </Section>
+
       {ph && (
         <Section title={`${firstName(partner.displayName)} hoje`}>
           <Glass className="p-4">
             <div className="flex flex-wrap gap-2">
               {HABITS.map((x) => (
-                <span key={x.key} className={cn('rounded-full px-3 py-1.5 text-[12px] font-medium', ph[x.key] ? 'bg-black text-white dark:bg-white dark:text-black' : 'bg-black/5 muted dark:bg-white/[0.07]')}>
+                <span key={x.key} className={cn('rounded-full px-3 py-1.5 text-[12px] font-medium', ph[x.key] ? 'text-white' : 'bg-black/5 muted dark:bg-white/[0.07]')} style={ph[x.key] ? { background: '#10B981' } : undefined}>
                   {x.emoji} {x.label}
                 </span>
               ))}

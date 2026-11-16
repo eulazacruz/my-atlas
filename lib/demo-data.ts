@@ -167,6 +167,39 @@ export function createDemoData(): AtlasState {
     { id: uid(), createdBy: DEMO_A, title: 'Aprovação do financiamento', answered: true, answeredAt: at(-10), answerNote: 'Aprovado com taxa menor que o esperado!', createdAt: at(-40) },
   ];
 
+  /* ───── v3 ───── */
+  db.profiles[0].contextStatus = 'foco';
+  db.profiles[0].contextUpdatedAt = at(0, Math.max(0, new Date().getHours() - 2));
+  db.profiles[1].contextStatus = 'casa';
+  db.profiles[1].contextUpdatedAt = at(0, Math.max(0, new Date().getHours() - 1));
+  db.pet_virtual_state = [{ id: 'demo-vpet', happiness: 82, energy: 70, bonusXp: 40, lastAction: 'pet_petisco', lastActionBy: DEMO_B, lastActionAt: at(0, Math.max(0, new Date().getHours() - 3)), updatedAt: at(0, Math.max(0, new Date().getHours() - 3)) }];
+  const hk = ['louca', 'lixo', 'atlas', 'casa', 'compras'];
+  for (let i = 0; i < 11; i++) db.household_tasks.push({ id: uid(), createdBy: i % 3 === 0 ? DEMO_B : i % 2 ? DEMO_A : DEMO_B, task: hk[i % 5], doneAt: at(-(i % 6), 19) });
+  for (let i = 1; i <= 6; i++) {
+    const dur = [412, 385, 445, 360, 470, 398][i - 1];
+    const slept = new Date(at(-i, 23, 10));
+    db.sleep_logs.push({ id: uid(), profileId: DEMO_A, sleptAt: slept.toISOString(), wokeAt: new Date(slept.getTime() + dur * 60_000).toISOString(), durationMin: dur, confirmed: true });
+  }
+  db.caffeine_logs = [
+    { id: uid(), profileId: DEMO_A, takenAt: at(0, 7, 30), mg: 95, kind: 'Café coado' },
+    { id: uid(), profileId: DEMO_A, takenAt: at(0, 13, 10), mg: 65, kind: 'Espresso' },
+  ];
+  const v = (label: string, value: string, category: string, sort: number, by = DEMO_A) => ({ id: uid(), createdBy: by, label, value, category, sort });
+  db.vault_items = [
+    v('CPF · Lázaro', '000.000.000-00', 'Documentos', 1),
+    v('CPF · Vitória', '111.111.111-11', 'Documentos', 2, DEMO_B),
+    v('Pix do casal (e-mail)', 'casal@exemplo.com', 'Pix', 3),
+    v('Placa da moto', 'ABC1D23', 'Veículo', 4),
+    v('Renavam', '00000000000', 'Veículo', 5),
+    v('Wi-Fi de casa', 'senha-exemplo', 'Casa', 6),
+    v('Medidas · Lázaro', 'Camisa M · Calça 40 · Tênis 41', 'Medidas', 7),
+    v('Medidas · Vitória', 'Blusa P · Calça 36 · Tênis 36', 'Medidas', 8, DEMO_B),
+  ];
+  db.locations = [
+    { id: DEMO_A, sharing: true, lat: -8.0476, lng: -34.877, accuracy: 18, speed: 0, battery: 64, updatedAt: at(0, new Date().getHours(), Math.max(0, new Date().getMinutes() - 4)) },
+    { id: DEMO_B, sharing: true, lat: -7.9007, lng: -34.8984, accuracy: 12, speed: 0, battery: 81, updatedAt: at(0, new Date().getHours(), Math.max(0, new Date().getMinutes() - 1)) },
+  ];
+
   return {
     couple: { id: 'demo-couple', name: 'Nós Dois', inviteCode: 'ATLAS7', monthlyBudget: 4500, startedAt: db.special_dates[0].date },
     meId: DEMO_A,

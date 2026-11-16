@@ -3,7 +3,6 @@ name: APK Android
 on:
   push:
     branches: [main]
-    paths: ['android/**', '.github/workflows/android.yml']
   workflow_dispatch:
 
 permissions:
@@ -12,8 +11,19 @@ permissions:
 jobs:
   apk:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://hbpjgdvfguqqjzlpqtkh.supabase.co
+      # chave pública (anon) — protegida por RLS, pode ficar aqui
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhicGpnZHZmZ3VxcWp6bHBxdGtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ3OTAxMzUsImV4cCI6MjExMDM2NjEzNX0.BhCuA4lzN6n0oSxVPQ3R1cMD00gqfmTBK5w8OSURAAg
+      VERSION_CODE: ${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
+
+      - id: node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
 
       - id: java
         uses: actions/setup-java@v4
@@ -21,20 +31,25 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - id: web
+        name: Build do app (Next.js) e sync com Android
+        run: |
+          set -o pipefail
+          mkdir -p logs
+          npm ci 2>&1 | tail -n 30 | tee logs/web.log
+          npm run build 2>&1 | tee -a logs/web.log
+          npx cap sync android 2>&1 | tee -a logs/web.log
+
       - id: gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
 
       - name: Compilar APK assinado
         id: build
         working-directory: android
-        env:
-          VERSION_CODE: ${{ github.run_number }}
         run: |
           set -o pipefail
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          gradle assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | tee ../logs/build.log
 
       - name: Publicar release "latest"
         id: release
@@ -42,10 +57,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp android/app/build/outputs/apk/release/app-release.apk MyAtlas.apk
+          ls -la MyAtlas.apk
           gh release delete latest --yes --cleanup-tag || true
           gh release create latest MyAtlas.apk \
-            --title "My Atlas — build ${{ github.run_number }}" \
-            --notes "Baixe o arquivo MyAtlas.apk no celular Android e instale. Atualizações futuras instalam por cima, sem perder nada."
+            --title "My Atlas 3.0 — build ${{ github.run_number }}" \
+            --notes "App nativo Android. Baixe MyAtlas.apk no celular e instale por cima da versão anterior — seus dados continuam."
 
       - name: Registrar status do build
         if: always()
@@ -54,7 +70,10 @@ jobs:
           git init -q -b ci-status
           git config user.name "atlas-bot"
           git config user.email "atlas-bot@users.noreply.github.com"
-          echo "${{ job.status }} run=${{ github.run_number }} sha=${{ github.sha }} java=${{ steps.java.outcome }} gradle=${{ steps.gradle.outcome }} build=${{ steps.build.outcome }} release=${{ steps.release.outcome }}" > status.txt
-          tail -n 250 "$GITHUB_WORKSPACE/android/build.log" > build.log 2>/dev/null || echo "sem log" > build.log
+          echo "${{ job.status }} run=${{ github.run_number }} sha=${{ github.sha }} node=${{ steps.node.outcome }} java=${{ steps.java.outcome }} web=${{ steps.web.outcome }} gradle=${{ steps.gradle.outcome }} build=${{ steps.build.outcome }} release=${{ steps.release.outcome }}" > status.txt
+          tail -n 120 "$GITHUB_WORKSPACE/logs/web.log" > web.log 2>/dev/null || echo "sem log" > web.log
+          grep -n "error\|FAILED\|What went wrong" -A8 "$GITHUB_WORKSPACE/logs/build.log" | head -n 200 > errors.log 2>/dev/null || true
+          tail -n 200 "$GITHUB_WORKSPACE/logs/build.log" > build.log 2>/dev/null || echo "sem log" > build.log
+          ls -la "$GITHUB_WORKSPACE/MyAtlas.apk" >> status.txt 2>/dev/null || true
           git add . && git commit -qm "build ${{ github.run_number }}: ${{ job.status }}"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ci-status

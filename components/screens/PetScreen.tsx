@@ -1,9 +1,13 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { AlertTriangle, Bath, Bone, Footprints, Syringe } from 'lucide-react';
+import { useState } from 'react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
-import { Avatar, Button, Glass, PageHeader, Progress, Section } from '@/components/ui/primitives';
-import { ACCENT } from '@/lib/constants';
+import { Pitbull } from '@/components/ui/Pitbull';
+import { Avatar, Button, Glass, PageHeader, Progress, Section, Segmented } from '@/components/ui/primitives';
+import { ACCENT, HOUSE_TASKS, PET_ACTIONS } from '@/lib/constants';
+import { petStats } from '@/lib/pet';
 import type { Vaccine } from '@/lib/types';
 import { addDays, addMonths, daysBetween, firstName, fmtDay, hhmm, parseYmd, uid, WEEK_LETTERS, ymd } from '@/lib/utils';
 
@@ -15,14 +19,81 @@ function status(v: Vaccine) {
   return { label: `Em dia até ${fmtDay(v.validUntil, { month: '2-digit', year: '2-digit' })}`, tone: null };
 }
 
+export function VirtualAtlas({ compact = false }: { compact?: boolean }) {
+  const { rows, petAction, nameOf, me } = useAtlas();
+  const st = petStats(rows('pet_virtual_state')[0], rows('habit_logs'), rows('household_tasks'));
+  const last = rows('pet_virtual_state')[0];
+  return (
+    <Glass className={compact ? 'p-4' : 'p-5'}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="label">Atlas virtual · nível {st.level}</p>
+          <p className="text-[19px] font-bold tracking-tight">{st.label}</p>
+        </div>
+        <span className="rounded-full bg-black/[0.06] px-3 py-1 text-[12px] font-semibold tabular-nums dark:bg-white/[0.08]">{st.xp} XP</span>
+      </div>
+      <div className="flex justify-center py-1">
+        <Pitbull pose={st.pose} size={compact ? 170 : 230} />
+      </div>
+      <div className="space-y-2.5">
+        {[
+          { l: 'Felicidade', v: st.happiness },
+          { l: 'Energia', v: st.energy },
+          { l: `Nível ${st.level} → ${st.level + 1}`, v: st.levelPct },
+        ].map((b) => (
+          <div key={b.l} className="flex items-center gap-3">
+            <span className="w-28 shrink-0 text-[12px] muted">{b.l}</span>
+            <Progress value={b.v} className="flex-1" />
+            <span className="w-9 text-right text-[12px] font-semibold tabular-nums">{Math.round(b.v)}%</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 grid grid-cols-4 gap-2">
+        {PET_ACTIONS.map((a) => (
+          <motion.button key={a.kind} whileTap={{ scale: 0.9 }} onClick={() => petAction(a.kind)} className="glass-thin flex flex-col items-center gap-1 py-2.5">
+            <span className="text-[20px]">{a.emoji}</span>
+            <span className="text-center text-[10.5px] font-medium leading-tight">{a.label}</span>
+          </motion.button>
+        ))}
+      </div>
+      {!compact && last?.lastActionAt && (
+        <p className="mt-3 text-center text-[12px] muted">
+          Última interação: {last.lastActionBy === me?.id ? 'você' : nameOf(last.lastActionBy)} · {PET_ACTIONS.find((a) => a.kind === last.lastAction)?.label.toLowerCase()}
+        </p>
+      )}
+      {!compact && <p className="mt-2 text-center text-[11px] muted">Ganha XP com hábitos batidos e tarefas da casa ({HOUSE_TASKS.map((h) => h.emoji).join(' ')}).</p>}
+    </Glass>
+  );
+}
+
 export function PetScreen() {
+  const [tab, setTab] = useState<'virtual' | 'real'>('virtual');
+  const { rows } = useAtlas();
+  const pet = rows('pets')[0];
+  return (
+    <div>
+      <PageHeader title={pet?.name ?? 'Atlas'} subtitle={tab === 'virtual' ? 'Nosso pitbull · co-op' : pet?.breed ?? 'Prontuário'} back />
+      <div className="mb-6">
+        <Segmented id="pet-tab" value={tab} onChange={setTab} options={[{ value: 'virtual', label: 'Atlas virtual' }, { value: 'real', label: 'Prontuário & saúde' }]} />
+      </div>
+      {tab === 'virtual' ? (
+        <Section>
+          <VirtualAtlas />
+        </Section>
+      ) : (
+        <PetHealth />
+      )}
+    </div>
+  );
+}
+
+function PetHealth() {
   const { rows, me, save, patch, nameOf } = useAtlas();
   const pet = rows('pets')[0];
   if (!me) return null;
   if (!pet)
     return (
       <div>
-        <PageHeader title="Atlas" back />
         <p className="muted">Pet ainda não cadastrado.</p>
       </div>
     );
@@ -36,8 +107,17 @@ export function PetScreen() {
 
   return (
     <div>
-      <PageHeader title={pet.name} subtitle={pet.breed ?? 'Nosso cachorro'} back />
 
+      <Section>
+        <Glass className="flex items-center gap-4 p-5">
+          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-black text-white dark:bg-white dark:text-black"><Bath size={24} /></span>
+          <div className="flex-1">
+            <p className="text-[13px] muted">Último banho</p>
+            <p className="text-[22px] font-bold tracking-tight">{bathDays === null ? 'Sem registro' : bathDays === 0 ? 'Hoje ✨' : `há ${bathDays} dia${bathDays > 1 ? 's' : ''}`}</p>
+          </div>
+          <Button variant="primary" disabled={bathDays === 0} onClick={() => patch('pets', pet.id, { lastBathAt: new Date().toISOString() })}>Tomou banho hoje</Button>
+        </Glass>
+      </Section>
       <Section title="Hoje">
         <div className="grid grid-cols-3 gap-3">
           <Glass className="p-3.5">

@@ -8,6 +8,7 @@ import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI } from '@/components/providers/UIProvider';
 import { Avatar, Glass, IconButton, PageHeader, Progress, Section, Segmented } from '@/components/ui/primitives';
 import { ACCENT } from '@/lib/constants';
+import { Vault } from './Vault';
 import { addDays, cn, firstName, fmtDay, money, MONTHS, WEEK_LETTERS, ymd } from '@/lib/utils';
 
 export function FinanceScreen() {
@@ -16,6 +17,7 @@ export function FinanceScreen() {
   const { resolvedTheme } = useTheme();
   const [tab, setTab] = useState<'all' | 'shared' | 'individual'>('all');
   const [showAll, setShowAll] = useState(false);
+  const [area, setArea] = useState<'wallet' | 'vault'>('wallet');
   if (!me || !couple) return null;
 
   const now = new Date();
@@ -49,11 +51,15 @@ export function FinanceScreen() {
         subtitle={MONTHS[now.getMonth()]}
         back
         actions={
-          <IconButton label="Novo lançamento" onClick={() => openSheet('expense')}>
+          <IconButton label={area === 'vault' ? 'Novo item' : 'Novo lançamento'} onClick={() => openSheet(area === 'vault' ? 'vaultItem' : 'expense')}>
             <Plus size={20} />
           </IconButton>
         }
       />
+      <div className="mb-6">
+        <Segmented id="fin-area" value={area} onChange={setArea} options={[{ value: 'wallet', label: 'Carteira' }, { value: 'vault', label: 'Cofre 🔒' }]} />
+      </div>
+      {area === 'vault' ? <Vault /> : <>
       <Section>
         <Glass className="p-5">
           <p className="label">Saldo conjunto</p>
@@ -167,6 +173,7 @@ export function FinanceScreen() {
           </button>
         )}
       </Section>
+      </>}
     </div>
   );
 }

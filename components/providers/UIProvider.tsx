@@ -3,9 +3,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 export type Tab = 'home' | 'agenda' | 'notes' | 'health' | 'more';
-export type SubView = 'couple' | 'finance' | 'shopping' | 'pet' | 'settings';
+export type SubView = 'couple' | 'finance' | 'shopping' | 'pet' | 'settings' | 'location';
 export type View = Tab | SubView;
-export type SheetKind = 'event' | 'task' | 'expense' | 'cycleDay' | 'intimacy' | 'specialDate' | 'goal' | 'prayer' | 'shopItem' | 'widgets';
+export type SheetKind = 'event' | 'task' | 'expense' | 'cycleDay' | 'intimacy' | 'specialDate' | 'goal' | 'prayer' | 'shopItem' | 'widgets' | 'permissions' | 'vaultItem' | 'editHome';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface SheetState { kind: SheetKind; payload?: any }

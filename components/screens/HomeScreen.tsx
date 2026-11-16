@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { BellRing, CalendarPlus, CheckSquare, ChevronRight, Droplets, FilePlus2, Heart, Moon, PawPrint, Plus, ShoppingBag, Sun, Wallet, Wind } from 'lucide-react';
+import { BellRing, LayoutGrid, CalendarPlus, CheckSquare, ChevronRight, Droplets, FilePlus2, Heart, Moon, PawPrint, Plus, ShoppingBag, Sun, Wallet, Wind } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
@@ -9,7 +9,12 @@ import { useUI } from '@/components/providers/UIProvider';
 import { useCycle } from '@/components/shell/useCycle';
 import { useTestIsland } from '@/components/shell/useTestIsland';
 import { Avatar, CheckCircle, Glass, IconButton, PageHeader, Progress, Section } from '@/components/ui/primitives';
-import { ACCENT, DATE_KINDS, HABITS, MOODS, PHASES, WATER_GOAL, wordOfTheDay } from '@/lib/constants';
+import { RingAvatar, StatusPicker } from './CoupleBits';
+import { CaffeineCard, SleepCard } from './BodyBits';
+import { VirtualAtlas } from './PetScreen';
+import { useHomeLayout } from '@/lib/homeLayout';
+import type { HomeSectionId } from '@/lib/constants';
+import { ACCENT, DATE_KINDS, HABITS, MOODS, PHASES, statusOf, WATER_GOAL, wordOfTheDay } from '@/lib/constants';
 import type { Profile } from '@/lib/types';
 import { cn, daysBetween, firstName, fmtDay, greeting, hhmm, money, nextOccurrence, uid, ymd } from '@/lib/utils';
 
@@ -25,7 +30,7 @@ function QuickAction({ icon: Icon, label, onClick }: { icon: typeof Plus; label:
 function PersonMini({ p, me }: { p: Profile; me?: boolean }) {
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3">
-      <Avatar profile={p} size={44} />
+      <RingAvatar p={p} size={40} />
       <div className="min-w-0">
         <p className="truncate text-[15px] font-semibold">{me ? 'Você' : p.pending ? 'Convide' : firstName(p.displayName)}</p>
         {!p.pending && (
@@ -33,7 +38,7 @@ function PersonMini({ p, me }: { p: Profile; me?: boolean }) {
             <p className="truncate text-[12px] muted">
               {MOODS[p.mood].emoji} {MOODS[p.mood].label}
             </p>
-            <Progress value={p.mentalBattery} className="mt-1.5 w-20" />
+            {statusOf(p.contextStatus) && <p className="truncate text-[11px] muted">{statusOf(p.contextStatus)!.emoji} {statusOf(p.contextStatus)!.label}</p>}
           </>
         )}
       </div>
@@ -44,7 +49,8 @@ function PersonMini({ p, me }: { p: Profile; me?: boolean }) {
 export function HomeScreen() {
   const { me, partner, couple, rows, patch, todayHabit, toggleHabit, addWater, sendNudge } = useAtlas();
   const { navigate, openSheet, openNote, setBreathingOpen } = useUI();
-  const { save } = useAtlas();
+  const { save, startSleep } = useAtlas();
+  const { layout } = useHomeLayout();
   const cycle = useCycle();
   const testIsland = useTestIsland();
   const { resolvedTheme, setTheme } = useTheme();
@@ -83,23 +89,16 @@ export function HomeScreen() {
     openNote(id);
   };
 
-  return (
-    <div>
-      <PageHeader
-        subtitle={new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
-        title={`${greeting()}, ${firstName(me.displayName)}`}
-        actions={
-          <>
-            <IconButton label="Testar notificação da câmera" onClick={testIsland}>
-              <BellRing size={18} />
-            </IconButton>
-            <IconButton label="Alternar tema" onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}>
-              {mounted && resolvedTheme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-            </IconButton>
-          </>
-        }
-      />
-
+  const blocks: Record<HomeSectionId, JSX.Element | null> = {
+    status: (
+      <>
+      <Section title="Agora" action={<button onClick={() => navigate('couple')} className="text-[13px] font-medium muted">Preciso de…</button>}>
+        <StatusPicker compact />
+      </Section>
+      </>
+    ),
+    quick: (
+      <>
       <div className="no-scrollbar -mx-4 mb-7 flex gap-2 overflow-x-auto px-4 pb-1">
         <QuickAction icon={Wallet} label="Despesa" onClick={() => openSheet('expense')} />
         <QuickAction icon={CalendarPlus} label="Evento" onClick={() => openSheet('event', { date: today })} />
@@ -108,8 +107,13 @@ export function HomeScreen() {
         <QuickAction icon={Droplets} label="+500ml" onClick={() => addWater(500)} />
         <QuickAction icon={Wind} label="Respirar" onClick={() => setBreathingOpen(true)} />
         <QuickAction icon={Heart} label="Carinho" onClick={() => sendNudge('carinho')} />
+        <QuickAction icon={Moon} label="Dormir" onClick={startSleep} />
       </div>
 
+      </>
+    ),
+    couple: (
+      <>
       <Section title="Nós dois" action={<button onClick={() => navigate('couple')} className="text-[13px] font-medium muted">Abrir</button>}>
         <Glass className="p-4" onClick={() => navigate('couple')}>
           <div className="flex items-center gap-3">
@@ -125,6 +129,10 @@ export function HomeScreen() {
         </Glass>
       </Section>
 
+      </>
+    ),
+    today: (
+      <>
       <Section title="Hoje" action={<button onClick={() => navigate('agenda')} className="text-[13px] font-medium muted">Agenda</button>}>
         <div className="glass overflow-hidden">
           {events.length === 0 && tasks.length === 0 && <p className="px-4 py-5 text-[14px] muted">Dia livre. Nenhum compromisso ou tarefa pendente. ✨</p>}
@@ -150,6 +158,10 @@ export function HomeScreen() {
         </div>
       </Section>
 
+      </>
+    ),
+    body: (
+      <>
       <Section title="Corpo & mente">
         <div className="grid grid-cols-2 gap-3">
           <Glass className="p-4">
@@ -211,6 +223,27 @@ export function HomeScreen() {
         </Glass>
       </Section>
 
+      </>
+    ),
+    sleep: (
+      <>
+      <Section title="Sono & cafeína">
+        <div className="space-y-3">
+          <SleepCard />
+          <CaffeineCard />
+        </div>
+      </Section>
+      </>
+    ),
+    pet: (
+      <>
+      <Section title="Atlas virtual" action={<button onClick={() => navigate('pet')} className="text-[13px] font-medium muted">Prontuário</button>}>
+        <VirtualAtlas compact />
+      </Section>
+      </>
+    ),
+    word: (
+      <>
       <Section title={`${word.kind} do dia`}>
         <Glass className="p-5">
           <p className="text-[17px] font-medium leading-snug tracking-[-0.01em]">“{word.text}”</p>
@@ -218,6 +251,10 @@ export function HomeScreen() {
         </Glass>
       </Section>
 
+      </>
+    ),
+    house: (
+      <>
       <Section title="Casa">
         <div className="grid grid-cols-2 gap-3">
           <Glass className="p-4" onClick={() => navigate('finance')}>
@@ -249,6 +286,36 @@ export function HomeScreen() {
           )}
         </div>
       </Section>
+      </>
+    ),
+  };
+
+  return (
+    <div>
+      <PageHeader
+        subtitle={new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+        title={`${greeting()}, ${firstName(me.displayName)}`}
+        actions={
+          <>
+            <IconButton label="Editar tela" onClick={() => openSheet('editHome')}>
+              <LayoutGrid size={18} />
+            </IconButton>
+            <IconButton label="Testar notificação da câmera" onClick={testIsland}>
+              <BellRing size={18} />
+            </IconButton>
+            <IconButton label="Alternar tema" onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}>
+              {mounted && resolvedTheme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+            </IconButton>
+          </>
+        }
+      />
+
+      {layout.order.filter((id) => !layout.hidden.includes(id)).map((id) => (
+        <div key={id}>{blocks[id]}</div>
+      ))}
+      <button onClick={() => openSheet('editHome')} className="mx-auto mt-2 flex h-10 items-center gap-2 rounded-full px-5 text-[13px] font-medium muted">
+        <LayoutGrid size={15} /> Editar tela
+      </button>
     </div>
   );
 }

@@ -19,6 +19,8 @@ export interface Profile {
   mood: Mood;
   mentalBattery: number;
   updatedAt: string;
+  contextStatus?: string | null;
+  contextUpdatedAt?: string | null;
   pending?: boolean;
 }
 
@@ -151,6 +153,22 @@ export interface Prayer {
   createdAt: string;
 }
 
+export interface HouseholdLog { id: string; createdBy: string; task: string; doneAt: string }
+export interface PetVirtual {
+  id: string;
+  happiness: number;
+  energy: number;
+  bonusXp: number;
+  lastAction?: string | null;
+  lastActionBy?: string | null;
+  lastActionAt?: string | null;
+  updatedAt: string;
+}
+export interface SleepLog { id: string; profileId: string; sleptAt: string; wokeAt?: string | null; durationMin?: number | null; confirmed: boolean }
+export interface CaffeineLog { id: string; profileId: string; takenAt: string; mg: number; kind: string }
+export interface VaultItem { id: string; createdBy: string; label: string; value: string; category: string; sort: number; createdAt?: string }
+export interface LocationRow { id: string; sharing: boolean; lat?: number | null; lng?: number | null; accuracy?: number | null; speed?: number | null; battery?: number | null; updatedAt: string }
+
 export interface Tables {
   profiles: Profile;
   mood_logs: MoodLog;
@@ -169,6 +187,12 @@ export interface Tables {
   special_dates: SpecialDate;
   goals: Goal;
   prayers: Prayer;
+  household_tasks: HouseholdLog;
+  pet_virtual_state: PetVirtual;
+  sleep_logs: SleepLog;
+  caffeine_logs: CaffeineLog;
+  vault_items: VaultItem;
+  locations: LocationRow;
 }
 export type TableName = keyof Tables;
 export type DB = { [K in TableName]: Tables[K][] };
@@ -179,7 +203,7 @@ export interface AtlasState {
   db: DB;
 }
 
-export type IslandKind = 'mood' | 'expense' | 'water' | 'breathing' | 'nudge' | 'pet' | 'sync' | 'success' | 'agenda' | 'task' | 'cycle' | 'shopping' | 'prayer';
+export type IslandKind = 'mood' | 'expense' | 'water' | 'breathing' | 'nudge' | 'pet' | 'sync' | 'success' | 'agenda' | 'task' | 'cycle' | 'shopping' | 'prayer' | 'status' | 'need' | 'sleep' | 'caffeine' | 'vault' | 'location';
 export interface IslandAction { label: string; onClick?: () => void; primary?: boolean }
 export interface IslandEvent {
   id: string;

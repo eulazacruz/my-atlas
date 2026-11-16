@@ -6,7 +6,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI } from '@/components/providers/UIProvider';
-import { Avatar, Button, Chip, Empty, Glass, PageHeader, Progress, Section, Segmented } from '@/components/ui/primitives';
+import { Button, Chip, Empty, Glass, PageHeader, Progress, Section, Segmented } from '@/components/ui/primitives';
+import { HouseholdCard, NeedsGrid, RingAvatar, StatusPicker } from './CoupleBits';
 import { DATE_KINDS, MOOD_ORDER, MOODS } from '@/lib/constants';
 import type { Profile } from '@/lib/types';
 import { addDays, cn, daysBetween, firstName, fmtDay, money, nextOccurrence, timeAgo, uid, WEEK_LETTERS, ymd } from '@/lib/utils';
@@ -15,7 +16,7 @@ function PersonCard({ p, isMe }: { p: Profile; isMe: boolean }) {
   return (
     <Glass className="flex-1 p-4 text-center">
       <div className="flex justify-center">
-        <Avatar profile={p} size={56} />
+        <RingAvatar p={p} size={56} />
       </div>
       <p className="mt-2 truncate text-[15px] font-semibold">{isMe ? 'Você' : p.pending ? 'Aguardando' : firstName(p.displayName)}</p>
       {!p.pending && (
@@ -35,7 +36,7 @@ function PersonCard({ p, isMe }: { p: Profile; isMe: boolean }) {
 }
 
 export function CoupleScreen() {
-  const [seg, setSeg] = useState<'now' | 'dates' | 'goals' | 'prayer'>('now');
+  const [seg, setSeg] = useState<'now' | 'home' | 'dates' | 'goals' | 'prayer'>('now');
   return (
     <div>
       <PageHeader title="Nós dois" back />
@@ -47,6 +48,7 @@ export function CoupleScreen() {
             onChange={setSeg}
             options={[
               { value: 'now', label: 'Agora' },
+              { value: 'home', label: 'Casa' },
               { value: 'dates', label: 'Datas' },
               { value: 'goals', label: 'Metas' },
               { value: 'prayer', label: 'Oração' },
@@ -55,6 +57,11 @@ export function CoupleScreen() {
         </div>
       </div>
       {seg === 'now' && <NowView />}
+      {seg === 'home' && (
+        <Section title="Acordos & termostato doméstico">
+          <HouseholdCard />
+        </Section>
+      )}
       {seg === 'dates' && <DatesView />}
       {seg === 'goals' && <GoalsView />}
       {seg === 'prayer' && <PrayerView />}
@@ -97,6 +104,9 @@ function NowView() {
 
   return (
     <>
+      <Section title="Status agora">
+        <StatusPicker />
+      </Section>
       <Section>
         <div className="flex gap-3">
           <PersonCard p={me} isMe />
@@ -138,6 +148,9 @@ function NowView() {
             </Button>
           </div>
         </Glass>
+      </Section>
+      <Section title="Preciso de…">
+        <NeedsGrid />
       </Section>
       <Section title="Energia da semana">
         <Glass className="p-4">

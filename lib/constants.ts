@@ -120,3 +120,63 @@ export function wordOfTheDay(date = new Date()) {
   const day = Math.floor((date.getTime() - start.getTime()) / 86_400_000);
   return DAILY_WORDS[day % DAILY_WORDS.length];
 }
+
+/* ═══════════════ v3 ═══════════════ */
+export const CONTEXT_STATUS = [
+  { value: 'foco', label: 'Em foco / Trabalho', short: 'Trabalhando', emoji: '💻' },
+  { value: 'transito', label: 'No trânsito', short: 'No trânsito', emoji: '🛵' },
+  { value: 'treino', label: 'Treinando', short: 'Treinando', emoji: '🏋️' },
+  { value: 'saindo', label: 'Saindo do trabalho', short: 'Saindo do trabalho', emoji: '🚀' },
+  { value: 'casa', label: 'Em casa', short: 'Em casa', emoji: '🏠' },
+] as const;
+export const statusOf = (v?: string | null) => CONTEXT_STATUS.find((s) => s.value === v);
+
+export const NEEDS = [
+  { kind: 'silencio', label: 'Preciso de silêncio / espaço', short: 'Silêncio', hint: 'Bateria 0%', emoji: '🔇' },
+  { kind: 'colo', label: 'Preciso de colo / atenção', short: 'Colo', hint: 'Um abraço agora', emoji: '🫂' },
+  { kind: 'desabafar', label: 'Preciso só desabafar', short: 'Desabafar', hint: 'Sem soluções, só ouvir', emoji: '🗣️' },
+  { kind: 'comer', label: 'Bora sair pra comer algo', short: 'Comer fora', hint: 'Fome de rua', emoji: '🍔' },
+] as const;
+export type NeedKind = (typeof NEEDS)[number]['kind'];
+
+export const HOUSE_TASKS = [
+  { value: 'louca', label: 'Lavar louça', emoji: '🍽️', points: 2 },
+  { value: 'lixo', label: 'Tirar o lixo', emoji: '🗑️', points: 1 },
+  { value: 'atlas', label: 'Passear com o Atlas', emoji: '🐕', points: 2 },
+  { value: 'casa', label: 'Organizar a casa', emoji: '🧹', points: 3 },
+  { value: 'compras', label: 'Fazer compras', emoji: '🛒', points: 3 },
+] as const;
+
+export const PET_ACTIONS = [
+  { kind: 'pet_cabo', label: 'Cabo de guerra', emoji: '🪢', happiness: 12, energy: -10, xp: 6, pose: 'playing', notify: 'está brincando de cabo de guerra com o Atlas' },
+  { kind: 'pet_petisco', label: 'Dar petisco', emoji: '🦴', happiness: 8, energy: 12, xp: 3, pose: 'happy', notify: 'deu um petisco pro Atlas' },
+  { kind: 'pet_carinho', label: 'Fazer carinho', emoji: '👋', happiness: 10, energy: 0, xp: 2, pose: 'happy', notify: 'está fazendo carinho no Atlas' },
+  { kind: 'pet_lambida', label: 'Mandar lambida', emoji: '🐾', happiness: 6, energy: -2, xp: 4, pose: 'alert', notify: 'mandou uma lambida do Atlas pra você' },
+] as const;
+export type PetActionKind = (typeof PET_ACTIONS)[number]['kind'];
+
+export const CAFFEINE_PRESETS = [
+  { kind: 'Café coado', mg: 95 },
+  { kind: 'Espresso', mg: 65 },
+  { kind: 'Pré-treino', mg: 200 },
+  { kind: 'Energético', mg: 80 },
+  { kind: 'Chá preto', mg: 45 },
+];
+export const CAFFEINE_HALF_LIFE_H = 5;
+export const CAFFEINE_SLEEP_LIMIT = 50; // mg ativos na hora de dormir que já atrapalham o sono
+
+export const VAULT_CATEGORIES = ['Documentos', 'Pix', 'Veículo', 'Casa', 'Medidas', 'Outros'];
+export const DEFAULT_VAULT_PIN = '1234';
+
+export const HOME_SECTIONS = [
+  { id: 'status', label: 'Status & Preciso de…' },
+  { id: 'quick', label: 'Ações rápidas' },
+  { id: 'couple', label: 'Nós dois' },
+  { id: 'today', label: 'Hoje (agenda e tarefas)' },
+  { id: 'body', label: 'Corpo & mente' },
+  { id: 'sleep', label: 'Sono & cafeína' },
+  { id: 'pet', label: 'Atlas virtual' },
+  { id: 'word', label: 'Palavra do dia' },
+  { id: 'house', label: 'Casa (finanças, compras, datas)' },
+] as const;
+export type HomeSectionId = (typeof HOME_SECTIONS)[number]['id'];

@@ -9,6 +9,9 @@ import { AgendaScreen } from '@/components/screens/AgendaScreen';
 import { CoupleScreen } from '@/components/screens/CoupleScreen';
 import { FinanceScreen } from '@/components/screens/FinanceScreen';
 import { HealthScreen } from '@/components/screens/HealthScreen';
+import { LocationScreen } from '@/components/screens/LocationScreen';
+import { NativeEffects } from '@/components/providers/NativeEffects';
+import { SleepOverlay } from '@/components/screens/BodyBits';
 import { HomeScreen } from '@/components/screens/HomeScreen';
 import { MoreScreen } from '@/components/screens/MoreScreen';
 import { NoteEditor } from '@/components/screens/NoteEditor';
@@ -31,6 +34,7 @@ const SCREENS: Record<View, () => JSX.Element | null> = {
   shopping: ShoppingScreen,
   pet: PetScreen,
   settings: SettingsScreen,
+  location: LocationScreen,
 };
 
 function Splash() {
@@ -42,31 +46,13 @@ function Splash() {
 }
 
 export function AppShell() {
-  const { status, error, addWater, sendNudge } = useAtlas();
-  const { view, navigate, openSheet, setBreathingOpen } = useUI();
+  const { status, error } = useAtlas();
+  const { view } = useUI();
   const router = useRouter();
 
   useEffect(() => {
     if (status === 'unauthenticated') router.replace('/login');
   }, [status, router]);
-
-  // atalhos do app (segurar o ícone no Android)
-  useEffect(() => {
-    if (status !== 'ready') return;
-    const action = new URLSearchParams(window.location.search).get('action');
-    if (!action) return;
-    window.history.replaceState({ v: 'home' }, '', '/');
-    const t = window.setTimeout(() => {
-      if (action === 'breathe') setBreathingOpen(true);
-      if (action === 'expense') openSheet('expense');
-      if (action === 'water') addWater(500);
-      if (action === 'nudge') sendNudge('carinho');
-      if (action === 'cycle') navigate('health');
-      if (action === 'task') openSheet('task');
-    }, 400);
-    return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status]);
 
   if (status === 'loading' || status === 'unauthenticated') return <Splash />;
   if (status === 'error')
@@ -94,6 +80,8 @@ export function AppShell() {
       <Sheets />
       <NoteEditor />
       <BoxBreathing />
+      <SleepOverlay />
+      <NativeEffects />
     </>
   );
 }

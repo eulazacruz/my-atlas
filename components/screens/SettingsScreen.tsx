@@ -5,6 +5,7 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useTestIsland } from '@/components/shell/useTestIsland';
+import { IslandCalibration, IslandSimulator, PrivacyAndPermissions } from './SettingsExtras';
 import { Button, Chip, Field, Glass, PageHeader, Section } from '@/components/ui/primitives';
 import { firstName, money, parseMoney } from '@/lib/utils';
 
@@ -111,13 +112,16 @@ export function SettingsScreen() {
           </div>
         </Glass>
       </Section>
+      <IslandSimulator />
+      <IslandCalibration />
+      <PrivacyAndPermissions />
 
       <Section title="Instalar no celular">
         <Glass className="p-4">
           <div className="flex items-start gap-3">
             <Smartphone size={18} className="mt-0.5 shrink-0" />
             <p className="text-[13px] leading-relaxed muted">
-              Baixe o APK em <b className="text-black dark:text-white">github.com/eulazacruz/my-atlas/releases</b>, abra o arquivo e permita “instalar apps desconhecidos”. O app abre em tela cheia e se atualiza sozinho.
+              Baixe o APK em <b className="text-black dark:text-white">github.com/eulazacruz/my-atlas/releases</b>, abra o arquivo e permita “instalar apps desconhecidos”. Ao instalar a versão nova por cima, seus dados continuam.
             </p>
           </div>
         </Glass>
@@ -141,7 +145,7 @@ export function SettingsScreen() {
           </Button>
         </Section>
       )}
-      <p className="pb-4 text-center text-[11px] muted">My Atlas · Life & Couple OS · v2.0</p>
+      <p className="pb-4 text-center text-[11px] muted">My Atlas · Life & Couple OS · v3.0</p>
     </div>
   );
 }

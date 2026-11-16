@@ -1,0 +1,21 @@
+{
+  "appId": "app.myatlas.twa",
+  "appName": "My Atlas",
+  "webDir": "out",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#000000"
+  },
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_atlas",
+      "iconColor": "#FFFFFF"
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
+}

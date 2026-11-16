@@ -9,9 +9,10 @@ export const TABLES: TableName[] = [
   'profiles', 'mood_logs', 'habit_logs', 'transactions', 'pets', 'pet_walks', 'pet_vaccines',
   'cycle_settings', 'cycle_days', 'intimacy_logs', 'events', 'tasks', 'notes',
   'shopping_items', 'special_dates', 'goals', 'prayers',
+  'household_tasks', 'pet_virtual_state', 'sleep_logs', 'caffeine_logs', 'vault_items', 'locations',
 ];
 
-const NUMERIC = new Set(['amount', 'target', 'current', 'monthlyBudget', 'temperature']);
+const NUMERIC = new Set(['amount', 'target', 'current', 'monthlyBudget', 'temperature', 'lat', 'lng', 'accuracy', 'speed']);
 const camel = (s: string) => s.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
 const snake = (s: string) => s.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
 
@@ -75,7 +76,9 @@ export async function saveCouple(sb: SupabaseClient, couple: Partial<Couple> & {
   if (error) throw error;
 }
 export async function insertNudge(sb: SupabaseClient, coupleId: string, from: string, to: string, kind: string) {
-  const { error } = await sb.from('nudges').insert({ couple_id: coupleId, from_profile: from, to_profile: to, kind });
+  // tipos estendidos ("Preciso de…", Atlas virtual) vão em `message`; `kind` fica no formato original
+  const base = kind === 'carinho' || kind === 'cutucao' ? kind : 'cutucao';
+  const { error } = await sb.from('nudges').insert({ couple_id: coupleId, from_profile: from, to_profile: to, kind: base, message: base === kind ? null : kind });
   if (error) throw error;
 }
 
@@ -94,4 +97,9 @@ export function subscribeAll(sb: SupabaseClient, coupleId: string, onChange: Cha
   return () => {
     sb.removeChannel(ch);
   };
+}
+
+export async function savePushToken(sb: SupabaseClient, coupleId: string, profileId: string, token: string) {
+  const { error } = await sb.from('push_tokens').upsert({ token, couple_id: coupleId, profile_id: profileId, platform: 'android', updated_at: new Date().toISOString() });
+  if (error) throw error;
 }

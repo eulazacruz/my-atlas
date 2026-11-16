@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Heart, PawPrint, Settings, ShoppingBag, Sparkles, Target, Wallet } from 'lucide-react';
+import { ChevronRight, Heart, MapPin, PawPrint, Settings, ShoppingBag, Sparkles, Target, Wallet } from 'lucide-react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI, type SubView } from '@/components/providers/UIProvider';
 import { Glass, PageHeader, Section } from '@/components/ui/primitives';
@@ -15,7 +15,8 @@ export function MoreScreen() {
     { id: 'couple', title: 'Nós dois', hint: 'Humor, datas, metas e oração', icon: Heart },
     { id: 'finance', title: 'Finanças', hint: `Saldo do mês ${money(balance)}`, icon: Wallet },
     { id: 'shopping', title: 'Compras', hint: `${rows('shopping_items').filter((i) => !i.checked).length} itens na lista`, icon: ShoppingBag },
-    { id: 'pet', title: 'Atlas', hint: 'Banho, passeio, ração e vacinas', icon: PawPrint },
+    { id: 'pet', title: 'Atlas', hint: 'Bichinho virtual e prontuário', icon: PawPrint },
+    { id: 'location', title: 'Localização', hint: 'Onde cada um está agora', icon: MapPin },
   ];
   return (
     <div>

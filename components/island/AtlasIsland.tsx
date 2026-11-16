@@ -1,7 +1,12 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bell, CalendarDays, Check, CheckSquare, Droplets, Flower2, Heart, PawPrint, RefreshCw, ShoppingBag, Smile, Sparkles, Wallet, Wind, X } from 'lucide-react';
+import { Bell, CalendarDays, Check, CheckSquare, Coffee, Droplets, Flower2, Heart, KeyRound, MapPin, Moon, PawPrint, Radio, RefreshCw, ShoppingBag, Smile, Sparkles, Wallet, Wind, X } from 'lucide-react';
+import { useAtlas } from '@/components/providers/AtlasProvider';
+import { activeSleep } from '@/lib/body';
+import { statusOf } from '@/lib/constants';
+import { getCutout, isNative, type Cutout } from '@/lib/native';
+import { firstName } from '@/lib/utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ACCENT } from '@/lib/constants';
 import type { IslandKind, SyncState } from '@/lib/types';
@@ -25,6 +30,12 @@ const KIND: Record<IslandKind, { icon: typeof Smile; label: string; color?: stri
   cycle: { icon: Flower2, label: 'Ciclo', color: ACCENT.cycle },
   shopping: { icon: ShoppingBag, label: 'Compras' },
   prayer: { icon: Sparkles, label: 'Oração' },
+  status: { icon: Radio, label: 'Status' },
+  need: { icon: Heart, label: 'Preciso de…' },
+  sleep: { icon: Moon, label: 'Sono' },
+  caffeine: { icon: Coffee, label: 'Cafeína' },
+  vault: { icon: KeyRound, label: 'Cofre' },
+  location: { icon: MapPin, label: 'Localização' },
 };
 
 const SYNC: Record<SyncState, { label: string; dot: string }> = {
@@ -62,7 +73,15 @@ const fmt = (ms: number) => {
 };
 
 export function AtlasIsland() {
-  const { current, dismiss, sync, breathingStartedAt, history, queueSize } = useIsland();
+  const { current, dismiss, sync, breathingStartedAt, history, queueSize, calib } = useIsland();
+  const { partner, rows, me } = useAtlas();
+  const [cutout, setCutout] = useState<Cutout | null>(null);
+  useEffect(() => {
+    getCutout().then(setCutout);
+    const on = () => getCutout().then(setCutout);
+    window.addEventListener('orientationchange', on);
+    return () => window.removeEventListener('orientationchange', on);
+  }, []);
   const [peek, setPeek] = useState(false);
   const [, tick] = useState(0);
   const [measureRef, contentH] = useMeasuredHeight();
@@ -95,14 +114,32 @@ export function AtlasIsland() {
   const breathing = Boolean(breathingStartedAt);
   const meta = current ? KIND[current.kind] : null;
   const glow = meta?.color ?? '#ffffff';
+  // Geometria da câmera: o Android informa o retângulo do furo (px físicos → px CSS)
+  const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+  const hole = cutout?.hasCutout ? { cx: (cutout.left + cutout.right) / 2 / dpr, cy: (cutout.top + cutout.bottom) / 2 / dpr, h: (cutout.bottom - cutout.top) / dpr } : null;
+  const idleH = Math.round((hole ? Math.max(30, hole.h + 12) : IDLE_H) * calib.scale);
+  const centerX = (hole ? hole.cx : vw / 2) + calib.dx;
+  const centerY = (hole ? hole.cy : 6 + IDLE_H / 2) + calib.dy;
+  const top = Math.max(2, centerY - idleH / 2);
+
+  // Repouso: status de contexto do parceiro ou modo sono
+  const sleeping = me ? activeSleep(rows('sleep_logs'), me.id) : undefined;
+  const pStatus = partner && !partner.pending ? statusOf(partner.contextStatus) : undefined;
+  const idleLeft = sleeping ? '😴' : pStatus?.emoji;
+  const idleRight = breathing ? null : sleeping ? 'Sono' : pStatus ? firstName(partner!.displayName) : SYNC[sync].label;
+
   const expandedW = Math.min(vw * 0.92, 384);
-  const width = expanded ? expandedW : breathing ? 156 : 122;
-  const height = expanded ? Math.max(contentH + 3, 64) : IDLE_H;
-  const radius = expanded ? 30 : IDLE_H / 2;
+  const width = expanded ? expandedW : (breathing ? 156 : idleLeft ? 148 : 122) * calib.scale;
+  const height = expanded ? Math.max(contentH + 3, 64) : idleH;
+  const radius = expanded ? 30 : idleH / 2;
   const Icon = meta?.icon ?? Bell;
 
   return (
-    <div className="pointer-events-none fixed left-1/2 top-1.5 z-50 -translate-x-1/2" style={{ marginTop: 'env(safe-area-inset-top)' }} aria-live="polite">
+    <div
+      className="pointer-events-none fixed z-50 -translate-x-1/2"
+      style={{ left: centerX, top: isNative() || hole ? top : `calc(${top}px + var(--sat,env(safe-area-inset-top)) * 0.5 - 4px)` }}
+      aria-live="polite"
+    >
       <motion.div
         role="status"
         className="pointer-events-auto relative cursor-pointer select-none overflow-hidden bg-black text-white"
@@ -230,7 +267,7 @@ export function AtlasIsland() {
           ) : (
             <motion.div
               key="idle"
-              className="absolute inset-0 flex items-center justify-between px-3"
+              className="absolute inset-0 grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 [&>*:first-child]:justify-self-start [&>*:last-child]:justify-self-end"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
@@ -240,6 +277,8 @@ export function AtlasIsland() {
                 <motion.span animate={{ scale: [0.8, 1.15, 1.15, 0.8, 0.8] }} transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut', times: [0, 0.25, 0.5, 0.75, 1] }}>
                   <Wind size={14} strokeWidth={2.6} />
                 </motion.span>
+              ) : idleLeft ? (
+                <span className="text-[13px] leading-none">{idleLeft}</span>
               ) : (
                 <span className="relative flex h-2 w-2">
                   {sync === 'syncing' && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-60" />}
@@ -247,7 +286,7 @@ export function AtlasIsland() {
                 </span>
               )}
               <Lens />
-              <span className="text-[11px] font-semibold tabular-nums text-white/60">{breathing ? fmt(Date.now() - (breathingStartedAt ?? 0)) : SYNC[sync].label}</span>
+              <span className="max-w-[56px] truncate text-[11px] font-semibold tabular-nums text-white/60">{breathing ? fmt(Date.now() - (breathingStartedAt ?? 0)) : idleRight}</span>
             </motion.div>
           )}
         </AnimatePresence>

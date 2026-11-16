@@ -34,7 +34,7 @@ export function Section({ title, action, children, className }: { title?: string
 export function PageHeader({ title, subtitle, actions, back }: { title: string; subtitle?: string; actions?: ReactNode; back?: boolean }) {
   const { back: goBack } = useUI();
   return (
-    <header className="mb-6 pt-[calc(3.6rem+env(safe-area-inset-top))]">
+    <header className="mb-6 pt-[calc(3.6rem+var(--sat,env(safe-area-inset-top)))]">
       {back && (
         <button onClick={goBack} className="-ml-1 mb-2 flex items-center gap-0.5 text-[15px] font-medium muted active:opacity-60">
           <ChevronLeft size={20} /> Voltar

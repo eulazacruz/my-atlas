@@ -129,6 +129,11 @@ export function GoogleCalendarSettings() {
       push({ kind: 'agenda', title: 'Endereço inválido', subtitle: 'Cole o "Endereço secreto no formato iCal"', duration: 3500 });
       return;
     }
+    if (/\/public\/basic\.ics/i.test(url)) {
+      push({ kind: 'agenda', title: 'Esse é o endereço público', subtitle: 'Use o "Endereço secreto no formato iCal" (tem "private-" no link)', duration: 6000 });
+      setHelp(true);
+      return;
+    }
     setBusy(true);
     try {
       await saveMyFeed(me.id, state.couple.id, url);
@@ -147,7 +152,7 @@ export function GoogleCalendarSettings() {
           <div className="flex-1">
             <p className="text-[15px] font-medium">Sua agenda do Google</p>
             <p className="text-[12px] muted">
-              {mode === 'demo' ? 'Disponível com a conta conectada.' : saved ? (mine?.ok ? `${mine.count ?? 0} compromissos sincronizados` : mine?.error ? `Erro: ${mine.error}` : 'Conectada') : 'Não conectada'}
+              {mode === 'demo' ? 'Disponível com a conta conectada.' : saved ? (mine?.ok ? `${mine.count ?? 0} compromissos sincronizados` : mine?.error ? (/404|403/.test(mine.error) ? 'Link não aceito pelo Google: use o endereço secreto' : `Erro: ${mine.error}`) : 'Conectada') : 'Não conectada'}
             </p>
           </div>
           {saved && <button onClick={() => refreshCalendar(true)} className="text-[12px] font-semibold muted">{ext.loading ? '…' : 'Atualizar'}</button>}
@@ -161,7 +166,7 @@ export function GoogleCalendarSettings() {
           <ol className="list-decimal space-y-1.5 pl-5 text-[13px] leading-snug muted">
             <li>No computador, abra <b>calendar.google.com</b> (no celular, use “Versão para computador” no Chrome).</li>
             <li>Na lista “Minhas agendas”, passe o mouse na sua agenda → ⋮ → <b>Configurações e compartilhamento</b>.</li>
-            <li>Role até <b>Integrar agenda</b> e copie o <b>Endereço secreto no formato iCal</b>.</li>
+            <li>Role até <b>Integrar agenda</b> e copie o <b>Endereço secreto no formato iCal</b> (o último da seção, termina com <b>private-…/basic.ics</b>). O “Endereço público” não funciona.</li>
             <li>Cole aqui e salve. O endereço fica guardado só no servidor; seu amor vê os compromissos, nunca o link.</li>
           </ol>
         )}

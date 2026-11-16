@@ -111,6 +111,7 @@ export function AtlasIsland() {
   }, [breathingStartedAt]);
 
   const expanded = Boolean(current) || peek;
+  // só aparece quando há notificação (ou uma atividade ao vivo, como a respiração)
   const breathing = Boolean(breathingStartedAt);
   const meta = current ? KIND[current.kind] : null;
   const glow = meta?.color ?? '#ffffff';
@@ -134,6 +135,7 @@ export function AtlasIsland() {
   const radius = expanded ? 30 : idleH / 2;
   const Icon = meta?.icon ?? Bell;
 
+  const visible = expanded || breathing;
   return (
     <div
       className="pointer-events-none fixed z-50 -translate-x-1/2"
@@ -142,10 +144,12 @@ export function AtlasIsland() {
     >
       <motion.div
         role="status"
-        className="pointer-events-auto relative cursor-pointer select-none overflow-hidden bg-black text-white"
+        className={`relative cursor-pointer select-none overflow-hidden bg-black text-white ${visible ? 'pointer-events-auto' : 'pointer-events-none'}`}
         initial={false}
         animate={{
-          width,
+          opacity: visible ? 1 : 0,
+          scale: visible ? 1 : 0.6,
+          width: visible ? width : idleH,
           height,
           borderRadius: radius,
           boxShadow: expanded

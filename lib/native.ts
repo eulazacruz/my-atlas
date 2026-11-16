@@ -128,7 +128,15 @@ export async function onDeepLink(cb: (url: string) => void) {
   const { App } = await import('@capacitor/app');
   const h = await App.addListener('appUrlOpen', ({ url }) => cb(url));
   const launch = await App.getLaunchUrl();
-  if (launch?.url) cb(launch.url);
+  if (launch?.url) {
+    // a URL de abertura só vale uma vez (evita reusar um código de login já trocado)
+    let seen = '';
+    try { seen = sessionStorage.getItem('atlas:launch-url') || ''; } catch { /* noop */ }
+    if (seen !== launch.url) {
+      try { sessionStorage.setItem('atlas:launch-url', launch.url); } catch { /* noop */ }
+      cb(launch.url);
+    }
+  }
   return () => h.remove();
 }
 

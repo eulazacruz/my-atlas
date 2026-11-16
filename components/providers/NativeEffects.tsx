@@ -131,9 +131,23 @@ export function NativeEffects() {
     let stopped = false;
     let last = 0;
     let cleanup = () => {};
+    let lastPos: { lat: number; lng: number; acc: number } | null = null;
+    const moved = (lat: number, lng: number) => {
+      if (!lastPos) return Infinity;
+      const dy = (lat - lastPos.lat) * 111_320;
+      const dx = (lng - lastPos.lng) * 111_320 * Math.cos((lat * Math.PI) / 180);
+      return Math.sqrt(dx * dx + dy * dy);
+    };
     const send = async (lat: number, lng: number, accuracy?: number | null, speed?: number | null) => {
-      if (Date.now() - last < 25_000) return;
+      const acc = accuracy ?? 999;
+      const since = Date.now() - last;
+      // descarta leituras imprecisas quando já temos uma boa e recente
+      if (lastPos && acc > 120 && acc > lastPos.acc * 2 && since < 120_000) return;
+      // envia quando andou 15 m+, melhorou a precisão ou a cada 60 s
+      if (since < 8_000) return;
+      if (lastPos && moved(lat, lng) < 15 && acc >= lastPos.acc && since < 60_000) return;
       last = Date.now();
+      lastPos = { lat, lng, acc };
       let battery: number | null = null;
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -143,24 +157,33 @@ export function NativeEffects() {
       const A = atlasRef.current;
       if (!A.state || stopped) return;
       const cur = A.state.db.locations.find((l) => l.id === A.state!.meId);
-      A.save('locations', { id: A.state.meId, sharing: cur?.sharing ?? true, lat, lng, accuracy: accuracy ?? null, speed: speed ?? null, battery, updatedAt: new Date().toISOString() });
+      A.save('locations', { id: A.state.meId, sharing: cur?.sharing ?? true, lat, lng, accuracy: accuracy != null ? Math.round(accuracy) : null, speed: speed ?? null, battery, updatedAt: new Date().toISOString() });
     };
     (async () => {
       if (isNative()) {
         const { registerPlugin } = await import('@capacitor/core');
+        const { Geolocation } = await import('@capacitor/geolocation');
+        // GPS de alta precisão com o app aberto
+        const fg = await Geolocation.watchPosition({ enableHighAccuracy: true, timeout: 20_000, maximumAge: 5_000 }, (p) => {
+          if (p) send(p.coords.latitude, p.coords.longitude, p.coords.accuracy, p.coords.speed);
+        }).catch(() => null);
+        // segue atualizando em segundo plano (serviço com aviso fixo)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const BG = registerPlugin<any>('BackgroundGeolocation');
         const id = await BG.addWatcher(
-          { backgroundTitle: 'My Atlas', backgroundMessage: 'Compartilhando sua localização com seu par', requestPermissions: true, stale: false, distanceFilter: 30 },
+          { backgroundTitle: 'My Atlas', backgroundMessage: 'Compartilhando sua localização com seu amor', requestPermissions: true, stale: false, distanceFilter: 10 },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (loc: any, err: any) => {
             if (err || !loc) return;
             send(loc.latitude, loc.longitude, loc.accuracy, loc.speed);
           },
-        );
-        cleanup = () => BG.removeWatcher({ id });
+        ).catch(() => null);
+        cleanup = () => {
+          if (fg) Geolocation.clearWatch({ id: fg }).catch(() => {});
+          if (id) BG.removeWatcher({ id }).catch(() => {});
+        };
       } else if (navigator.geolocation) {
-        const id = navigator.geolocation.watchPosition((p) => send(p.coords.latitude, p.coords.longitude, p.coords.accuracy, p.coords.speed), () => {}, { enableHighAccuracy: true, maximumAge: 15_000 });
+        const id = navigator.geolocation.watchPosition((p) => send(p.coords.latitude, p.coords.longitude, p.coords.accuracy, p.coords.speed), () => {}, { enableHighAccuracy: true, maximumAge: 5_000, timeout: 20_000 });
         cleanup = () => navigator.geolocation.clearWatch(id);
       }
       if (stopped) cleanup();

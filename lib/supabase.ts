@@ -9,6 +9,9 @@ export const isSupabaseConfigured = Boolean(url && anon && !url.includes('xxxx')
 
 /** Deep link usado pelo app Android para voltar do login do Google. */
 export const NATIVE_REDIRECT = 'app.myatlas://auth';
+/** O Google volta para o site, que devolve o código ao app (não depende da lista de URLs do Supabase). */
+export const SITE_URL = 'https://my-atlas-zeta.vercel.app';
+export const NATIVE_RETURN_URL = `${SITE_URL}/app-return.html?app=1`;
 
 let client: SupabaseClient | null = null;
 export function getSupabase(): SupabaseClient | null {

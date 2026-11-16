@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { closeExternal, isNative, onDeepLink, openExternal } from '@/lib/native';
-import { getSupabase, isSupabaseConfigured, NATIVE_REDIRECT } from '@/lib/supabase';
+import { getSupabase, isSupabaseConfigured, NATIVE_REDIRECT, NATIVE_RETURN_URL } from '@/lib/supabase';
 
 function GoogleIcon() {
   return (
@@ -39,8 +39,10 @@ export default function LoginPage() {
 
     // App nativo: o Google volta por deep link app.myatlas://auth?code=…
     let off = () => {};
+    let handled = '';
     onDeepLink(async (url) => {
-      if (!url.startsWith(NATIVE_REDIRECT)) return;
+      if (!url.startsWith(NATIVE_REDIRECT) || handled === url) return;
+      handled = url;
       await closeExternal();
       const u = new URL(url.replace('app.myatlas://', 'https://x/'));
       const code = u.searchParams.get('code');
@@ -69,7 +71,7 @@ export default function LoginPage() {
     const { data, error } = await sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: native ? NATIVE_REDIRECT : `${window.location.origin}/login/`,
+        redirectTo: native ? NATIVE_RETURN_URL : `${window.location.origin}/login/`,
         skipBrowserRedirect: native,
         queryParams: { prompt: 'select_account' },
       },

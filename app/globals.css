@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f2f2f4;
+  --fg: #0a0a0a;
+  --ring-gap: #f2f2f4;
+  color-scheme: light;
+}
+.dark {
+  --bg: #000000;
+  --fg: #ffffff;
+  --ring-gap: #000000;
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ───────── Liquid Glass ─────────
+   Camada translúcida + desfoque + borda especular em gradiente (máscara). */
+@layer components {
+  .glass {
+    @apply relative rounded-[26px] bg-white/60 backdrop-blur-2xl backdrop-saturate-150;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.9) inset,
+      0 0 0 1px rgba(0, 0, 0, 0.05),
+      0 18px 40px -24px rgba(0, 0, 0, 0.25);
+  }
+  .dark .glass {
+    @apply bg-white/[0.045];
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.07) inset,
+      0 0 0 1px rgba(255, 255, 255, 0.07),
+      0 24px 48px -28px rgba(0, 0, 0, 0.9);
+  }
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.5));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .dark .glass::before {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.08));
+  }
+  .glass-thin {
+    @apply rounded-2xl bg-black/[0.035] ring-1 ring-inset ring-black/[0.05];
+  }
+  .dark .glass-thin {
+    @apply bg-white/[0.04] ring-white/[0.06];
+  }
+  .label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.16em] text-black/40 dark:text-white/40;
+  }
+  .muted {
+    @apply text-black/50 dark:text-white/45;
+  }
+  .hairline {
+    @apply border-black/[0.06] dark:border-white/[0.07];
+  }
+  .input {
+    @apply w-full rounded-2xl bg-black/[0.04] px-4 py-3 text-[15px] outline-none ring-1 ring-inset ring-black/[0.06] placeholder:text-black/30 focus:ring-black/25 dark:bg-white/[0.05] dark:ring-white/[0.08] dark:placeholder:text-white/25 dark:focus:ring-white/30;
+  }
+}
+
+/* ───────── Fundo: luz difusa monocromática para o vidro refratar ───────── */
+.ambient {
+  position: fixed;
+  inset: -20vmax;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(36vmax 36vmax at 18% 8%, rgba(0, 0, 0, 0.06), transparent 60%),
+    radial-gradient(30vmax 30vmax at 92% 30%, rgba(0, 0, 0, 0.04), transparent 60%),
+    radial-gradient(40vmax 40vmax at 50% 100%, rgba(0, 0, 0, 0.05), transparent 60%);
+  animation: drift 30s ease-in-out infinite alternate;
+}
+.dark .ambient {
+  background:
+    radial-gradient(34vmax 34vmax at 15% 5%, rgba(255, 255, 255, 0.09), transparent 60%),
+    radial-gradient(28vmax 28vmax at 95% 35%, rgba(255, 255, 255, 0.05), transparent 60%),
+    radial-gradient(40vmax 40vmax at 45% 105%, rgba(255, 255, 255, 0.06), transparent 60%);
+}
+@keyframes drift {
+  to {
+    transform: translate3d(-3vmax, 2vmax, 0) scale(1.06);
+  }
+}
+
+/* Atlas Island: borda girando */
+.animate-island-spin {
+  animation: island-spin 3.6s linear infinite;
+}
+@keyframes island-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Range monocromático */
+input[type='range'].range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--fg) var(--pct), rgba(127, 127, 140, 0.25) var(--pct));
+  outline: none;
+}
+input[type='range'].range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+input[type='range'].range::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.recharts-wrapper *:focus {
+  outline: none;
+}
+textarea {
+  resize: none;
+}

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">My Atlas</string>
+    <string name="asset_statements">[{\"relation\": [\"delegate_permission/common.handle_all_urls\"], \"target\": {\"namespace\": \"web\", \"site\": \"https://my-atlas-zeta.vercel.app\"}}]</string>
+    <string name="sc_breathe">Respirar</string>
+    <string name="sc_expense">Nova despesa</string>
+    <string name="sc_water">+500ml de água</string>
+    <string name="sc_nudge">Enviar carinho</string>
+</resources>

@@ -1,0 +1,42 @@
+plugins { id 'com.android.application' }
+
+def ks = new Properties()
+ks.load(new FileInputStream(rootProject.file('keystore/keystore.properties')))
+
+android {
+    namespace 'app.myatlas.twa'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'app.myatlas.twa'
+        minSdk 23
+        targetSdk 34
+        versionCode((System.getenv('VERSION_CODE') ?: '1').toInteger())
+        versionName '2.0.' + (System.getenv('VERSION_CODE') ?: '1')
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(ks['storeFile'])
+            storePassword ks['storePassword']
+            keyAlias ks['keyAlias']
+            keyPassword ks['keyPassword']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}

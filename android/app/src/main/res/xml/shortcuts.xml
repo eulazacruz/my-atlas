@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut android:shortcutId="breathe" android:enabled="true" android:icon="@drawable/sc_breathe" android:shortcutShortLabel="@string/sc_breathe">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="app.myatlas.twa" android:targetClass="com.google.androidbrowserhelper.trusted.LauncherActivity" android:data="https://my-atlas-zeta.vercel.app/?action=breathe" />
+    </shortcut>
+    <shortcut android:shortcutId="expense" android:enabled="true" android:icon="@drawable/sc_expense" android:shortcutShortLabel="@string/sc_expense">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="app.myatlas.twa" android:targetClass="com.google.androidbrowserhelper.trusted.LauncherActivity" android:data="https://my-atlas-zeta.vercel.app/?action=expense" />
+    </shortcut>
+    <shortcut android:shortcutId="water" android:enabled="true" android:icon="@drawable/sc_water" android:shortcutShortLabel="@string/sc_water">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="app.myatlas.twa" android:targetClass="com.google.androidbrowserhelper.trusted.LauncherActivity" android:data="https://my-atlas-zeta.vercel.app/?action=water" />
+    </shortcut>
+    <shortcut android:shortcutId="nudge" android:enabled="true" android:icon="@drawable/sc_nudge" android:shortcutShortLabel="@string/sc_nudge">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="app.myatlas.twa" android:targetClass="com.google.androidbrowserhelper.trusted.LauncherActivity" android:data="https://my-atlas-zeta.vercel.app/?action=nudge" />
+    </shortcut>
+</shortcuts>

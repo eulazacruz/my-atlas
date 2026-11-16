@@ -1,0 +1,92 @@
+{
+  "id": "/",
+  "name": "My Atlas — Life & Couple OS",
+  "short_name": "My Atlas",
+  "description": "Produtividade, fé, saúde mental, treinos, finanças do casal e cuidados com o Atlas.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": [
+    "lifestyle",
+    "productivity",
+    "health",
+    "finance"
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Reset Mental (Respirar)",
+      "short_name": "Respirar",
+      "description": "Abrir o Box Breathing guiado",
+      "url": "/?action=breathe",
+      "icons": [
+        {
+          "src": "/icons/shortcut-breathe.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Nova despesa",
+      "short_name": "Despesa",
+      "description": "Lançar um gasto na carteira do casal",
+      "url": "/?action=expense",
+      "icons": [
+        {
+          "src": "/icons/shortcut-expense.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Beber 500ml de água",
+      "short_name": "+500ml",
+      "description": "Registrar 500ml no contador de água",
+      "url": "/?action=water",
+      "icons": [
+        {
+          "src": "/icons/shortcut-water.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Enviar carinho",
+      "short_name": "Carinho",
+      "description": "Mandar um carinho para a Atlas Island do seu par",
+      "url": "/?action=nudge",
+      "icons": [
+        {
+          "src": "/icons/shortcut-nudge.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}

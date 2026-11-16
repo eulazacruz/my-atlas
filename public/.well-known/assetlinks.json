@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.myatlas.twa",
+      "sha256_cert_fingerprints": ["5F:E5:A1:C2:E4:C7:45:FF:54:28:B8:5A:95:84:10:43:8B:10:C8:75:44:06:12:86:EB:37:0F:FF:F0:6A:A4:D8"]
+    }
+  }
+]

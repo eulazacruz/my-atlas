@@ -43,6 +43,7 @@ export interface SearchHit { book: number; chapter: number; verse: number; text:
 export async function searchBible(q: string, limit = 80, onProgress?: (hits: SearchHit[]) => void): Promise<SearchHit[]> {
   const terms = norm(q).split(' ').filter((t) => t.length > 1);
   if (!terms.length) return [];
+  const res = terms.map((t) => new RegExp(`(^|[^a-z0-9])${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
   const hits: SearchHit[] = [];
   for (const b of BOOKS) {
     const chs = await loadBook(b.id);
@@ -50,7 +51,7 @@ export async function searchBible(q: string, limit = 80, onProgress?: (hits: Sea
       vs.forEach((t, vi) => {
         if (hits.length >= limit) return;
         const n = norm(t);
-        if (terms.every((x) => n.includes(x))) hits.push({ book: b.id, chapter: ci + 1, verse: vi + 1, text: t });
+        if (res.every((x) => x.test(n))) hits.push({ book: b.id, chapter: ci + 1, verse: vi + 1, text: t });
       }),
     );
     onProgress?.([...hits]);

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { LifeBuoy, LayoutGrid, CalendarPlus, CheckSquare, ChevronRight, Droplets, FilePlus2, Heart, Moon, PawPrint, Plus, ShoppingBag, Sun, Wallet, Wind } from 'lucide-react';
+import { Eye, EyeOff, LifeBuoy, LayoutGrid, Search, CalendarPlus, CheckSquare, ChevronRight, Droplets, FilePlus2, Heart, Moon, PawPrint, Plus, ShoppingBag, Sun, Wallet, Wind } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
@@ -16,6 +16,8 @@ import { CaffeineCard, SleepCard } from './BodyBits';
 import { VirtualAtlas } from './PetScreen';
 import { useHomeLayout } from '@/lib/homeLayout';
 import { useExternalEvents } from '@/lib/calendar';
+import { usePrefs } from '@/lib/fx';
+import { SeasonBanner } from '@/components/fx/Guard';
 import { DaySummaryCard, FocusStarter, PrioritiesCard } from '@/components/hubs/FocusHub';
 import { DevotionalCard, QuestionOfDay } from '@/components/hubs/FaithHub';
 import { FatigueThermometer, ListenFirst, openSos } from '@/components/hubs/MindBody';
@@ -59,6 +61,7 @@ export function HomeScreen() {
   const { navigate, openSheet, openNote, setBreathingOpen } = useUI();
   const { save, startSleep } = useAtlas();
   const { layout } = useHomeLayout();
+  const { prefs: { discreet }, set: setPref } = usePrefs();
   const { mode } = useAtlas();
   const gcal = useExternalEvents(mode !== 'demo');
   const cycle = useCycle();
@@ -210,7 +213,7 @@ export function HomeScreen() {
           </Glass>
         </div>
 
-        {cycle.active && cycle.info.lastStart && (
+        {cycle.active && cycle.info.lastStart && !discreet && (
           <Glass className="mt-3 p-4" onClick={() => navigate('health')}>
             <div className="flex items-center gap-4">
               <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full" style={{ boxShadow: `inset 0 0 0 2px ${ACCENT.cycle}` }}>
@@ -359,8 +362,11 @@ export function HomeScreen() {
         title={`${greeting()}, ${firstName(me.displayName)}`}
         actions={
           <>
-            <IconButton label="Editar tela" onClick={() => openSheet('editHome')}>
-              <LayoutGrid size={18} />
+            <IconButton label="Buscar" onClick={() => window.dispatchEvent(new Event('atlas:search'))}>
+              <Search size={18} />
+            </IconButton>
+            <IconButton label={discreet ? 'Mostrar valores' : 'Modo discreto'} onClick={() => setPref({ discreet: !discreet })}>
+              {discreet ? <EyeOff size={18} /> : <Eye size={18} />}
             </IconButton>
             <IconButton label="Alternar tema" onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}>
               {mounted && resolvedTheme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
@@ -368,6 +374,7 @@ export function HomeScreen() {
           </>
         }
       />
+      <SeasonBanner />
 
       {layout.order.filter((id) => !layout.hidden.includes(id)).map((id) => (
         <div key={id}>{blocks[id]}</div>

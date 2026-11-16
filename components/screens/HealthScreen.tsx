@@ -10,6 +10,7 @@ import { MonthCalendar } from '@/components/ui/MonthCalendar';
 import { CaffeineCard, SleepCard } from './BodyBits';
 import { BodyView, MindView } from '@/components/hubs/MindBody';
 import { CustomHabits } from '@/components/hubs/FocusHub';
+import { usePrefs } from '@/lib/fx';
 import { Avatar, Button, CheckCircle, Empty, Field, Glass, IconButton, PageHeader, Progress, Section, Segmented, Switch } from '@/components/ui/primitives';
 import { ACCENT, HABITS, PHASES, PROTECTION, WATER_GOAL, wordOfTheDay } from '@/lib/constants';
 import { dayKind } from '@/lib/cycle';
@@ -17,6 +18,7 @@ import { addDays, cn, daysBetween, firstName, fmtDay, parseYmd, uid, WEEK_LETTER
 
 export function HealthScreen() {
   const [seg, setSeg] = useState<'cycle' | 'habits' | 'mind' | 'body'>('cycle');
+  const { prefs: { discreet } } = usePrefs();
   const { openSheet } = useUI();
   const cycle = useCycle();
   return (
@@ -35,7 +37,7 @@ export function HealthScreen() {
       <div className="mb-6">
         <Segmented id="health-seg" value={seg} onChange={setSeg} options={[{ value: 'cycle', label: 'Ciclo' }, { value: 'habits', label: 'Hábitos' }, { value: 'mind', label: 'Mente' }, { value: 'body', label: 'Corpo' }]} />
       </div>
-      {seg === 'cycle' ? <CycleView /> : seg === 'habits' ? <HabitsView /> : seg === 'mind' ? <MindView /> : <BodyView />}
+      {seg === 'cycle' ? (discreet ? <p className="px-2 py-10 text-center text-[14px] muted">🔒 Modo discreto ligado. Desligue no olho da tela inicial para ver o ciclo.</p> : <CycleView />) : seg === 'habits' ? <HabitsView /> : seg === 'mind' ? <MindView /> : <BodyView />}
     </div>
   );
 }

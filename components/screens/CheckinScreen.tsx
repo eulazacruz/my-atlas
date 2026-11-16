@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { Avatar, Button, Glass, PageHeader, Section } from '@/components/ui/primitives';
 import type { Checkin, Profile } from '@/lib/types';
+import { celebrate, playSound } from '@/lib/fx';
 import { addDays, cn, firstName, fmtDay, parseYmd, uid, ymd } from '@/lib/utils';
 
 export const CHECKIN_QUESTIONS = [
@@ -35,7 +36,7 @@ export function useCheckinStatus() {
 }
 
 function Form({ initial, onDone }: { initial?: Checkin; onDone: () => void }) {
-  const { me, save } = useAtlas();
+  const { me, save, rows, partner } = useAtlas();
   const [score, setScore] = useState<number | null>(initial?.score ?? null);
   const [ans, setAns] = useState<Record<string, string>>(initial?.answers ?? {});
   const filled = CHECKIN_QUESTIONS.filter((q) => ans[q.key]?.trim()).length;
@@ -43,6 +44,8 @@ function Form({ initial, onDone }: { initial?: Checkin; onDone: () => void }) {
   const submit = () => {
     save('checkins', { id: initial?.id ?? uid(), profileId: me.id, week: weekOf(), score, answers: Object.fromEntries(Object.entries(ans).map(([k, v]) => [k, v.trim()])), createdAt: initial?.createdAt ?? new Date().toISOString() });
     onDone();
+    if (!initial && partner && rows('checkins').some((c) => c.profileId === partner.id && c.week === weekOf())) celebrate('Check-in completo 💬');
+    else playSound('done');
   };
   return (
     <div className="space-y-3">

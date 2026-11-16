@@ -9,6 +9,7 @@ import { useUI } from '@/components/providers/UIProvider';
 import { Button, Empty, Glass, Section } from '@/components/ui/primitives';
 import { DEFAULT_VAULT_PIN, VAULT_CATEGORIES } from '@/lib/constants';
 import { haptic } from '@/lib/native';
+import { PrivateGate } from '@/components/fx/MoreSettings';
 import { cn } from '@/lib/utils';
 
 const PIN_KEY = 'my-atlas:vault-pin';
@@ -70,7 +71,7 @@ export function Vault() {
       if (Date.now() - at < 5 * 60_000) setUnlocked(true);
     } catch { /* noop */ }
   }, []);
-  if (!unlocked) return <PinPad onOk={() => setUnlocked(true)} />;
+  if (!unlocked) return <PrivateGate><PinPad onOk={() => setUnlocked(true)} /></PrivateGate>;
   const items = rows('vault_items').sort((a, b) => a.sort - b.sort);
   const copy = async (label: string, value: string) => {
     try {

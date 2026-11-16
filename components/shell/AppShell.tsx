@@ -16,6 +16,10 @@ import { InsightsScreen, MindView, SosOverlay } from '@/components/hubs/MindBody
 import { WeeklyScreen } from '@/components/hubs/Weekly';
 import { PageHeader } from '@/components/ui/primitives';
 import { AutoNight } from '@/components/providers/AutoNight';
+import { Confetti, Onboarding } from '@/components/fx/Intro';
+import { DiscreetMode, TextScale } from '@/components/fx/Guard';
+import { QuickAdd, Spotlight } from '@/components/fx/Spotlight';
+import { WrappedScreen } from '@/components/fx/Wrapped';
 import { BibleScreen } from '@/components/screens/BibleScreen';
 import { CheckinScreen } from '@/components/screens/CheckinScreen';
 import { LocationScreen } from '@/components/screens/LocationScreen';
@@ -53,6 +57,7 @@ const SCREENS: Record<View, () => JSX.Element | null> = {
   col: ColScreen,
   insights: InsightsScreen,
   weekly: WeeklyScreen,
+  wrapped: WrappedScreen,
 };
 
 function MindPage() {
@@ -74,7 +79,8 @@ function Splash() {
 
 export function AppShell() {
   const { status, error } = useAtlas();
-  const { view } = useUI();
+  const { view, param } = useUI();
+  const TAB_VIEWS = ['home', 'agenda', 'faith', 'health', 'more'];
   const router = useRouter();
 
   useEffect(() => {
@@ -99,7 +105,12 @@ export function AppShell() {
   return (
     <>
       <main className="mx-auto max-w-2xl px-4 pb-36">
-        <motion.div key={view} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: 'easeOut' }}>
+        <motion.div
+          key={view + (view === 'col' ? param ?? '' : '')}
+          initial={TAB_VIEWS.includes(view) ? { opacity: 0, scale: 0.985 } : { opacity: 0, x: 42, scale: 0.99 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={TAB_VIEWS.includes(view) ? { duration: 0.2, ease: 'easeOut' } : { type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
+        >
           <Screen />
         </motion.div>
       </main>
@@ -111,6 +122,12 @@ export function AppShell() {
       <SosOverlay />
       <FocusPill />
       <AutoNight />
+      <Spotlight />
+      <QuickAdd />
+      <Confetti />
+      <Onboarding />
+      <DiscreetMode />
+      <TextScale />
       <NativeEffects />
     </>
   );

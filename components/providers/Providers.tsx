@@ -4,6 +4,8 @@ import { useEffect, type ReactNode } from 'react';
 import { AtlasIsland } from '@/components/island/AtlasIsland';
 import { IslandProvider } from '@/components/island/IslandProvider';
 import { AtlasProvider } from './AtlasProvider';
+import { Intro } from '@/components/fx/Intro';
+import { LockGate } from '@/components/fx/Guard';
 import { ThemeProvider } from './ThemeProvider';
 import { UIProvider } from './UIProvider';
 
@@ -24,6 +26,8 @@ export function Providers({ children }: { children: ReactNode }) {
           <AtlasProvider>
             <PwaRegister />
             <AtlasIsland />
+            <Intro />
+            <LockGate />
             {children}
           </AtlasProvider>
         </IslandProvider>

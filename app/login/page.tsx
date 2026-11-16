@@ -91,7 +91,7 @@ export default function LoginPage() {
     <main className="grid min-h-dvh place-items-center px-6">
       <motion.div initial={{ opacity: 0, y: 20, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 220, damping: 26 }} className="glass w-full max-w-sm p-8 text-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/icons/icon-192.png" alt="" className="mx-auto mb-5 h-20 w-20 rounded-[24px] shadow-xl" />
+        <img src={new Date().getHours() >= 6 && new Date().getHours() < 18 ? "/icons/icon-day.png" : "/icons/icon-night.png"} alt="" className="mx-auto mb-5 h-20 w-20 rounded-[24px] shadow-xl" suppressHydrationWarning />
         <h1 className="text-[30px] font-bold tracking-[-0.03em]">My Atlas</h1>
         <p className="mt-1 text-[14px] muted">Life & Couple OS · só para nós dois.</p>
         {isSupabaseConfigured ? (

@@ -1,13 +1,15 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { BookOpen, Check, ChevronDown, ChevronLeft, ChevronRight, Copy, Minus, PenLine, Plus, Search, Share2, Trash2, X } from 'lucide-react';
+import { BookOpen, Check, Image as ImageIcon, ChevronDown, ChevronLeft, ChevronRight, Copy, Minus, PenLine, Plus, Search, Share2, Trash2, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useIsland } from '@/components/island/IslandProvider';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { Avatar, Button, Glass, PageHeader, Section, Sheet } from '@/components/ui/primitives';
 import { BIBLE_ATTRIBUTION, BOOKS, bookOf, hasRead, loadBook, MARK_COLORS, parseRef, PLANS, readingFor, refLabel, searchBible, type SearchHit } from '@/lib/bible';
 import { haptic } from '@/lib/native';
+import { celebrate, playSound } from '@/lib/fx';
+import { shareStory } from '@/lib/share';
 import type { BibleMark, Profile } from '@/lib/types';
 import { cn, firstName, timeAgo, uid, ymd } from '@/lib/utils';
 
@@ -296,6 +298,7 @@ function Reader({ pos, setPos, onClose }: { pos: Pos; setPos: (p: Pos) => void; 
     }
     save('bible_reads', { id: uid(), profileId: me.id, book: pos.book, chapter: pos.chapter, readAt: new Date().toISOString() });
     haptic('success');
+    if (partnerRead) celebrate('Leram juntos 📖'); else playSound('chime');
     island.push({ kind: 'bible', title: `${book.name} ${pos.chapter} lido ✓`, subtitle: partnerRead ? `${firstName(partner?.displayName ?? '')} também já leu 🤍` : 'Seu amor vai ser avisado', duration: 3000 });
     void mode;
   };
@@ -385,6 +388,7 @@ function Reader({ pos, setPos, onClose }: { pos: Pos; setPos: (p: Pos) => void; 
                 <button onClick={openNote} aria-label="Anotação" className="grid h-9 w-9 place-items-center rounded-full"><PenLine size={17} /></button>
                 <button onClick={copy} aria-label="Copiar" className="grid h-9 w-9 place-items-center rounded-full"><Copy size={17} /></button>
                 <button onClick={share} aria-label="Compartilhar" className="grid h-9 w-9 place-items-center rounded-full"><Share2 size={17} /></button>
+                <button onClick={() => { shareStory({ kicker: selRef(), body: `“${selectedText().replace(/^\d+\s/, '').replace(/\s\d+\s/g, ' ')}”`, serif: true, theme: 'night', foot: 'Lendo a Bíblia a dois' }); setSel([]); }} aria-label="Imagem para stories" className="grid h-9 w-9 place-items-center rounded-full"><ImageIcon size={17} /></button>
               </div>
             </div>
           </motion.div>

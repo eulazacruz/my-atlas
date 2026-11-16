@@ -8,6 +8,7 @@ import { useUI } from '@/components/providers/UIProvider';
 import { CollectionScreen, EntrySheet, Photo, Sorteio, useEntries, useEntryActions } from '@/components/ui/Collection';
 import { Button, Chip, Glass, PageHeader, Section, Sheet } from '@/components/ui/primitives';
 import { KINDS } from '@/lib/entries';
+import { PrivateGate } from '@/components/fx/MoreSettings';
 import { haptic } from '@/lib/native';
 import type { Entry } from '@/lib/types';
 import { addDays, cn, daysBetween, firstName, fmtDay, money, parseYmd, uid, ymd } from '@/lib/utils';
@@ -161,6 +162,7 @@ export function ColScreen() {
   const watch = useEntries('watch').filter((w) => w.data?.status !== 'Visto').map((w) => w.title);
   if (!KINDS[kind]) return null;
   const extra = kind === 'recipe' ? (e: Entry) => <RecipeToShopping e={e} /> : kind === 'goal' ? (e: Entry) => <GoalQuick e={e} /> : undefined;
+  if (kind === 'emotion' || kind === 'measure') return <PrivateGate><CollectionScreen kind={kind} /></PrivateGate>;
   return (
     <CollectionScreen kind={kind} extraRow={extra}>
       {kind === 'memory' && <Section><MemoryReview /></Section>}

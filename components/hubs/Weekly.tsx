@@ -1,10 +1,11 @@
 'use client';
 
-import { AlertTriangle, ChevronRight, Sparkles } from 'lucide-react';
+import { AlertTriangle, ChevronRight, Share2, Sparkles } from 'lucide-react';
+import { shareStory } from '@/lib/share';
 import { useMemo } from 'react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI } from '@/components/providers/UIProvider';
-import { Avatar, Glass, PageHeader, Section } from '@/components/ui/primitives';
+import { Avatar, Glass, IconButton, PageHeader, Section } from '@/components/ui/primitives';
 import { MOODS } from '@/lib/constants';
 import type { Profile } from '@/lib/types';
 import { addDays, firstName, money, ymd } from '@/lib/utils';
@@ -103,7 +104,7 @@ export function WeeklyScreen() {
   ].filter(Boolean) as string[];
   return (
     <div>
-      <PageHeader title="Resumo da semana" subtitle="Últimos 7 dias" back />
+      <PageHeader title="Resumo da semana" subtitle="Últimos 7 dias" back actions={<IconButton label="Compartilhar" onClick={() => shareStory({ kicker: 'Nossa semana', title: `${firstName(w.a.p.displayName)} & ${firstName(w.b.p.displayName)}`, body: '', stats: [{ v: String(w.a.reads + w.b.reads), l: 'capítulos lidos' }, { v: String(w.devs), l: 'devocionais' }, { v: String(w.house), l: 'tarefas da casa' }, { v: String(w.walks), l: 'passeios com o Atlas' }], foot: w.answered ? `${w.answered} oração(ões) respondida(s) 🙌` : 'Um passo de cada vez, juntos.', theme: 'emerald' })}><Share2 size={18} /></IconButton>} />
       <Section>
         <Glass className="p-5">
           <Sparkles size={18} />

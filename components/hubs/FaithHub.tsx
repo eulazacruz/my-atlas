@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { BellOff, BookOpen, Check, ChevronRight, Eye, HandHeart, MessageCircle, Phone, Plus, RotateCcw, Sparkles } from 'lucide-react';
+import { BellOff, BookOpen, Share2, Check, ChevronRight, Eye, HandHeart, MessageCircle, Phone, Plus, RotateCcw, Sparkles } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI } from '@/components/providers/UIProvider';
@@ -11,6 +11,7 @@ import { Avatar, Button, Glass, PageHeader, Section, Sheet } from '@/components/
 import { BOOKS, parseRef, readingFor, refLabel } from '@/lib/bible';
 import { KINDS } from '@/lib/entries';
 import { haptic, setDoNotDisturb } from '@/lib/native';
+import { shareStory } from '@/lib/share';
 import type { Entry } from '@/lib/types';
 import { addDays, cn, daysBetween, firstName, fmtDay, money, parseYmd, ymd } from '@/lib/utils';
 import { HubTiles } from './FocusHub';
@@ -54,7 +55,10 @@ export function DevotionalCard() {
                 <p className={cn('mt-1 text-[15px] leading-relaxed', k === 's' && 'font-serif')}>{view.data[k]}</p>
               </div>
             ) : null)}
-            {view.data?.ref && <Button className="w-full" onClick={() => { const r = parseRef(String(view.data.ref).split(',')[0]); if (r) openBibleAt(r); }}><BookOpen size={15} /> Abrir na Bíblia</Button>}
+            <div className="flex gap-2">
+              {view.data?.ref && <Button className="flex-1" onClick={() => { const r = parseRef(String(view.data.ref).split(',')[0]); if (r) openBibleAt(r); }}><BookOpen size={15} /> Bíblia</Button>}
+              <Button className="flex-1" onClick={() => shareStory({ kicker: `Devocional · ${view.data?.ref ?? ''}`, title: view.title || undefined, body: view.data?.a ? `Aplicação: ${view.data.a}` : view.data?.o ?? '', foot: view.data?.s ? `“${String(view.data.s).slice(0, 120)}”` : undefined, theme: 'night' })}><Share2 size={15} /> Story</Button>
+            </div>
           </div>
         )}
       </Sheet>
@@ -354,7 +358,7 @@ export function Testimonies() {
   return (
     <div className="no-scrollbar -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1">
       {cards.slice(0, 12).map((c) => (
-        <div key={c.id} className="w-[250px] shrink-0 snap-start rounded-[26px] p-5 text-black" style={{ background: 'linear-gradient(150deg,#F7E7B4,#E9C46A)' }}>
+        <div key={c.id} onClick={() => shareStory({ kicker: '🙌 Deus respondeu', title: c.title, body: c.body ?? '', foot: `${firstName(c.who)}${c.at ? ' · ' + new Date(c.at).toLocaleDateString('pt-BR') : ''}`, theme: 'gold' })} className="w-[250px] shrink-0 cursor-pointer snap-start rounded-[26px] p-5 text-black" style={{ background: 'linear-gradient(150deg,#F7E7B4,#E9C46A)' }}>
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] opacity-60">🙌 Deus respondeu</p>
           <p className="mt-2 text-[17px] font-bold leading-snug">{c.title}</p>
           {c.body && <p className="mt-1.5 line-clamp-3 text-[13px] opacity-75">{c.body}</p>}

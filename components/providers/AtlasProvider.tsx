@@ -1,6 +1,7 @@
 'use client';
 
 import { bookOf } from '@/lib/bible';
+import { playSound, vibe } from '@/lib/fx';
 import { applyQueue, clearCache, enqueue, isNetworkError, readCache, readQueue, writeCache, writeQueue, type QueueOp } from '@/lib/offline';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useIsland } from '@/components/island/IslandProvider';
@@ -63,7 +64,12 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
   const pushRef = useRef(island.push);
   pushRef.current = (e) => {
     island.push(e);
-    haptic('success');
+    const love = /carinho|lambida|colo|🤍|❤/.test(e.title);
+    const sos = /precisa de você agora|ansiedade/i.test(e.title);
+    if (sos) { vibe('sos'); playSound('calm'); }
+    else if (love) { vibe('love'); playSound('love'); }
+    else if (e.kind === 'sync') haptic('light');
+    else { haptic('success'); playSound('chime'); }
     if (typeof document !== 'undefined' && document.visibilityState !== 'visible') notifyNow(e.title, e.subtitle ?? '');
   };
   const sb = useMemo(() => getSupabase(), []);
@@ -191,6 +197,14 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
       if (t === 'tasks' && (row.assignee === myId || !row.assignee)) pushRef.current({ kind: 'task', title: `Nova tarefa${row.assignee ? ' para você' : ' para vocês'}`, subtitle: row.title });
       if (t === 'shopping_items') pushRef.current({ kind: 'shopping', title: `${who} adicionou à lista`, subtitle: row.name, duration: 3000 });
       if (t === 'prayers') pushRef.current({ kind: 'prayer', title: `${who} pediu oração 🙏`, subtitle: row.title });
+      if (t === 'entries') {
+        const k = row.kind as string;
+        if (k === 'sos') pushRef.current({ kind: 'need', title: `${who} precisa de você agora 🫂`, subtitle: 'Momento de ansiedade — liga ou manda um carinho', avatar: { name: who }, duration: 10000, actions: [{ label: 'Mandar carinho', primary: true, onClick: () => window.dispatchEvent(new Event('atlas:send-love')) }, { label: 'Ok' }] });
+        if (k === 'prayed' && (!row.data?.to || row.data.to === myId)) pushRef.current({ kind: 'bible', title: `${who} orou pelo seu pedido 🙏`, subtitle: row.title, avatar: { name: who } });
+        if (k === 'devotional') pushRef.current({ kind: 'bible', title: `${who} escreveu o devocional de hoje ✍️`, subtitle: row.title, avatar: { name: who } });
+        if (k === 'focus') pushRef.current({ kind: 'status', title: `${who} entrou em modo foco 🎯`, subtitle: `${row.data?.minutes ?? 25} min`, avatar: { name: who }, duration: 3500 });
+        if (k === 'capsule') pushRef.current({ kind: 'success', title: `${who} deixou uma cápsula do tempo 💌`, subtitle: 'Abre no futuro', avatar: { name: who } });
+      }
       if (t === 'checkins') pushRef.current({ kind: 'checkin', title: `${who} fez o check-in da semana 💬`, subtitle: 'Faça o seu para ver as respostas de vocês dois', avatar: { name: who }, actions: [{ label: 'Fazer agora', primary: true, onClick: () => window.dispatchEvent(new CustomEvent('atlas:navigate', { detail: 'checkin' })) }, { label: 'Depois' }] });
       if (t === 'bible_reads') pushRef.current({ kind: 'bible', title: `${who} leu ${bookName(row.book)} ${row.chapter} 📖`, subtitle: 'Leitura a dois', avatar: { name: who }, duration: 4000 });
       if (t === 'bible_marks') pushRef.current({ kind: 'bible', title: `${who} marcou ${bookName(row.book)} ${row.chapter}:${row.verse}`, subtitle: row.note || 'Toque na Bíblia para ver', avatar: { name: who }, duration: 4000 });
@@ -284,6 +298,8 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
     setState(ns);
     write({ op: 'save', table: t, row, at: Date.now() });
   }, [write, sb]);
+  const saveRef = useRef<(t: TableName, row: any) => void>(() => {});
+  saveRef.current = save as (t: TableName, row: any) => void;
 
   const patch = useCallback(<K extends TableName>(t: K, id: string, partial: Partial<Tables[K]>) => {
     const cur = (ref.current?.db[t] as any[] | undefined)?.find((x) => x.id === id);
@@ -293,10 +309,24 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
   const remove = useCallback((t: TableName, id: string) => {
     const s = ref.current;
     if (!s) return;
+    const old = (s.db[t] as any[]).find((x) => x.id === id);
     const ns = { ...s, db: { ...s.db, [t]: (s.db[t] as any[]).filter((x) => x.id !== id) } };
     ref.current = ns;
     setState(ns);
     write({ op: 'delete', table: t, id, at: Date.now() });
+    // desfazer: itens que a pessoa apaga de propósito
+    const UNDO: TableName[] = ['notes', 'tasks', 'events', 'transactions', 'entries', 'prayers', 'special_dates', 'goals', 'vault_items'];
+    const quiet = t === 'entries' && ['setting', 'prayed', 'qa', 'focus', 'block', 'priority'].includes(old?.kind);
+    if (old && UNDO.includes(t) && !quiet) {
+      const label = old.title ?? old.description ?? old.name ?? old.label ?? '';
+      pushRef.current({
+        kind: 'sync',
+        title: 'Apagado',
+        subtitle: String(label).slice(0, 60),
+        duration: 5000,
+        actions: [{ label: 'Desfazer', primary: true, onClick: () => saveRef.current(t, old) }, { label: 'Ok' }],
+      });
+    }
   }, [write, sb]);
 
   const updateCouple = useCallback((partial: Partial<Couple>) => {
@@ -369,6 +399,13 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
       }, 3200);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, write, sb]);
+  const sendNudgeRef2 = useRef(sendNudge);
+  sendNudgeRef2.current = sendNudge;
+  useEffect(() => {
+    const on = () => sendNudgeRef2.current('carinho');
+    window.addEventListener('atlas:send-love', on);
+    return () => window.removeEventListener('atlas:send-love', on);
+  }, []);
   const nudgeRef = useRef(sendNudge);
   nudgeRef.current = sendNudge;
 

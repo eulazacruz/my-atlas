@@ -10,6 +10,7 @@ import { CollectionList, EntrySheet, useEntries, useEntryActions } from '@/compo
 import { Button, Glass, PageHeader, Section, Switch } from '@/components/ui/primitives';
 import { KINDS } from '@/lib/entries';
 import { haptic } from '@/lib/native';
+import { playSound } from '@/lib/fx';
 import { addDays, cn, firstName, fmtDay, parseYmd, ymd } from '@/lib/utils';
 import { HubTiles, streakOf } from './FocusHub';
 
@@ -109,7 +110,7 @@ export function SosOverlay() {
           </div>
           <div className="space-y-2">
             {partner && !partner.pending && (
-              <Button className={cn('h-12 w-full !text-[15px]', sent ? '!bg-white/10 !text-white' : '!bg-white !text-black')} disabled={sent} onClick={() => { put('sos', { title: 'Momento de ansiedade', date: ymd() }); setSent(true); haptic('medium'); }}>
+              <Button className={cn('h-12 w-full !text-[15px]', sent ? '!bg-white/10 !text-white' : '!bg-white !text-black')} disabled={sent} onClick={() => { put('sos', { title: 'Momento de ansiedade', date: ymd() }); setSent(true); haptic('medium'); playSound('love'); }}>
                 <HeartHandshake size={17} /> {sent ? `${firstName(partner.displayName)} foi avisada 🤍` : `Avisar ${firstName(partner.displayName)}`}
               </Button>
             )}

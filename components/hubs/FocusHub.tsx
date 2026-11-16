@@ -10,6 +10,7 @@ import { Avatar, Button, Glass, PageHeader, Section, Sheet } from '@/components/
 import { useExternalEvents } from '@/lib/calendar';
 import { KINDS } from '@/lib/entries';
 import { cancelNotif, haptic, notifyAt } from '@/lib/native';
+import { celebrate, playSound, vibe } from '@/lib/fx';
 import type { Entry } from '@/lib/types';
 import { addDays, cn, firstName, hhmm, ymd } from '@/lib/utils';
 import { weekOf } from '@/components/screens/CheckinScreen';
@@ -39,7 +40,7 @@ export function PrioritiesCard({ compact = false }: { compact?: boolean }) {
       <div className="mt-3 space-y-2">
         {mine.map((e, i) => (
           <div key={e.id} className="flex items-center gap-3">
-            <button onClick={() => { put('priority', { done: !e.done }, e); if (!e.done) haptic('success'); }} className={cn('grid h-7 w-7 shrink-0 place-items-center rounded-full text-[12px] font-bold ring-1', e.done ? 'text-white ring-transparent' : 'ring-black/20 dark:ring-white/25')} style={e.done ? { background: '#10B981' } : undefined}>
+            <button onClick={() => { put('priority', { done: !e.done }, e); if (!e.done) { haptic('success'); playSound('done'); if (mine.length === 3 && mine.filter((x) => x.done).length === 2) celebrate('3 de 3 prioridades ✓'); } }} className={cn('grid h-7 w-7 shrink-0 place-items-center rounded-full text-[12px] font-bold ring-1', e.done ? 'text-white ring-transparent' : 'ring-black/20 dark:ring-white/25')} style={e.done ? { background: '#10B981' } : undefined}>
               {e.done ? <Check size={14} strokeWidth={3} /> : i + 1}
             </button>
             <p className={cn('flex-1 text-[15px]', e.done && 'line-through muted')}>{e.title}</p>
@@ -129,7 +130,7 @@ export function stopFocus(setContextStatus: (v: string) => void, done: boolean, 
   writeFocus(null);
   cancelNotif(900_100);
   if (f?.prev && f.prev !== 'foco') setContextStatus(f.prev);
-  if (done && alert) alert({ kind: 'success', title: 'Foco concluído 🎯', subtitle: `${f?.minutes ?? 0} minutos. Respire e beba água.` });
+  if (done && alert) { alert({ kind: 'success', title: 'Foco concluído 🎯', subtitle: `${f?.minutes ?? 0} minutos. Respire e beba água.` }); vibe('focusDone'); playSound('celebrate'); }
 }
 
 function FocusMini() {
@@ -180,7 +181,7 @@ export function FocusPill() {
   if (!f) return null;
   const left = f.start + f.minutes * 60_000 - Date.now();
   return (
-    <motion.button initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} onClick={() => window.dispatchEvent(new CustomEvent('atlas:navigate', { detail: 'focus' }))} className="fixed bottom-[96px] right-4 z-30 flex items-center gap-2 rounded-full bg-black px-3.5 py-2 text-[13px] font-semibold text-white shadow-lg dark:bg-white dark:text-black">
+    <motion.button initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} onClick={() => window.dispatchEvent(new CustomEvent('atlas:navigate', { detail: 'focus' }))} className="fixed bottom-[100px] left-4 z-30 flex items-center gap-2 rounded-full bg-black px-3.5 py-2 text-[13px] font-semibold text-white shadow-lg dark:bg-white dark:text-black">
       <span className="h-2 w-2 animate-pulse rounded-full" style={{ background: '#10B981' }} /> Foco · {fmtClock(left)}
     </motion.button>
   );
@@ -224,7 +225,7 @@ export function CustomHabits() {
                 </div>
               </div>
               {st > 0 && <span className="flex items-center gap-0.5 text-[12px] font-semibold" style={{ color: '#10B981' }}><Flame size={13} />{st}</span>}
-              <button onClick={() => { put('habit', { data: { days: { ...days, [today]: !on } } }, h); if (!on) haptic('success'); }} onContextMenu={(e) => { e.preventDefault(); if (confirm(`Apagar "${h.title}"?`)) del(h.id); }} className={cn('grid h-9 w-9 place-items-center rounded-full ring-1', on ? 'text-white ring-transparent' : 'ring-black/15 dark:ring-white/20')} style={on ? { background: '#10B981' } : undefined}>
+              <button onClick={() => { put('habit', { data: { days: { ...days, [today]: !on } } }, h); if (!on) { haptic('success'); playSound('pop'); } }} onContextMenu={(e) => { e.preventDefault(); if (confirm(`Apagar "${h.title}"?`)) del(h.id); }} className={cn('grid h-9 w-9 place-items-center rounded-full ring-1', on ? 'text-white ring-transparent' : 'ring-black/15 dark:ring-white/20')} style={on ? { background: '#10B981' } : undefined}>
                 <Check size={16} strokeWidth={3} className={on ? '' : 'opacity-30'} />
               </button>
             </div>
@@ -459,7 +460,7 @@ export function GoalQuick({ e }: { e: Entry }) {
   return (
     <div className="flex gap-2 px-4 pb-3">
       <Button className="h-8 px-3 text-[12px]" onClick={() => put('goal', { data: { current: Math.max(0, (e.data.current ?? 0) - 1) } }, e)}>−1</Button>
-      <Button className="h-8 px-3 text-[12px]" onClick={() => { put('goal', { data: { current: (e.data.current ?? 0) + 1 } }, e); haptic('success'); }}>+1 {e.data.unit ?? ''}</Button>
+      <Button className="h-8 px-3 text-[12px]" onClick={() => { const n = (e.data.current ?? 0) + 1; put('goal', { data: { current: n } }, e); haptic('success'); if (n === e.data.target) celebrate(`Meta batida: ${e.title} 🎯`); }}>+1 {e.data.unit ?? ''}</Button>
     </div>
   );
 }

@@ -125,7 +125,7 @@ export function NativeEffects() {
   useEffect(() => {
     if (status !== 'ready' || !isNative()) return;
     try {
-      if (localStorage.getItem('my-atlas:perm-asked')) return;
+      if (localStorage.getItem('my-atlas:perm-asked') || !localStorage.getItem('my-atlas:onboarded')) return;
       localStorage.setItem('my-atlas:perm-asked', '1');
     } catch { /* noop */ }
     window.setTimeout(() => uiRef.current.openSheet('permissions'), 1200);

@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 export type Tab = 'home' | 'agenda' | 'faith' | 'health' | 'more';
-export type SubView = 'couple' | 'finance' | 'shopping' | 'pet' | 'settings' | 'location' | 'bible' | 'checkin' | 'notes' | 'focus' | 'mind' | 'life' | 'col' | 'insights' | 'weekly';
+export type SubView = 'couple' | 'finance' | 'shopping' | 'pet' | 'settings' | 'location' | 'bible' | 'checkin' | 'notes' | 'focus' | 'mind' | 'life' | 'col' | 'insights' | 'weekly' | 'wrapped';
 export type View = Tab | SubView;
 export type SheetKind = 'event' | 'task' | 'expense' | 'cycleDay' | 'intimacy' | 'specialDate' | 'goal' | 'prayer' | 'shopItem' | 'widgets' | 'permissions' | 'vaultItem' | 'editHome';
 

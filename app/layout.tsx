@@ -31,7 +31,7 @@ export const viewport: Viewport = {
   ],
 };
 
-const NATIVE_RETURN = `(function(){try{var s=location.search;if(location.pathname.indexOf('/app-return')===0)return;var p=new URLSearchParams(s);if(!p.get('code')&&!p.get('error_description'))return;if(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())return;var mine=false;try{mine=!!localStorage.getItem('my-atlas-auth-code-verifier')}catch(e){}if(p.get('app')==='1'||!mine){location.replace('/app-return.html'+s);}}catch(e){}})();`;
+const NATIVE_RETURN = `(function(){try{var s=location.search;if(location.pathname.indexOf('/voltar')===0)return;var p=new URLSearchParams(s);if(!p.get('code')&&!p.get('error_description'))return;if(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())return;var mine=false;try{mine=!!localStorage.getItem('my-atlas-auth-code-verifier')}catch(e){}if(p.get('app')==='1'||!mine){location.replace('/voltar/'+s);}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

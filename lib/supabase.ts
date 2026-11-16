@@ -11,7 +11,7 @@ export const isSupabaseConfigured = Boolean(url && anon && !url.includes('xxxx')
 export const NATIVE_REDIRECT = 'app.myatlas://auth';
 /** O Google volta para o site, que devolve o código ao app (não depende da lista de URLs do Supabase). */
 export const SITE_URL = 'https://my-atlas-zeta.vercel.app';
-export const NATIVE_RETURN_URL = `${SITE_URL}/app-return.html?app=1`;
+export const NATIVE_RETURN_URL = `${SITE_URL}/voltar/?app=1`;
 
 let client: SupabaseClient | null = null;
 export function getSupabase(): SupabaseClient | null {
@@ -23,7 +23,7 @@ export function getSupabase(): SupabaseClient | null {
         persistSession: true,
         autoRefreshToken: true,
         // no app nativo o código chega por deep link e é trocado manualmente
-        detectSessionInUrl: typeof window !== 'undefined' && !isNative(),
+        detectSessionInUrl: typeof window !== 'undefined' && !isNative() && !window.location.pathname.startsWith('/voltar'),
         storageKey: 'my-atlas-auth',
       },
     });

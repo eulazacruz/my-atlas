@@ -15,26 +15,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - id: java
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - uses: android-actions/setup-android@v3
-
-      - uses: gradle/actions/setup-gradle@v4
+      - id: gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
       - name: Compilar APK assinado
+        id: build
         working-directory: android
         env:
           VERSION_CODE: ${{ github.run_number }}
         run: |
           set -o pipefail
+          echo "ANDROID_HOME=$ANDROID_HOME"
           gradle assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log
 
       - name: Publicar release "latest"
+        id: release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -51,7 +54,7 @@ jobs:
           git init -q -b ci-status
           git config user.name "atlas-bot"
           git config user.email "atlas-bot@users.noreply.github.com"
-          echo "${{ job.status }} run=${{ github.run_number }} sha=${{ github.sha }}" > status.txt
+          echo "${{ job.status }} run=${{ github.run_number }} sha=${{ github.sha }} java=${{ steps.java.outcome }} gradle=${{ steps.gradle.outcome }} build=${{ steps.build.outcome }} release=${{ steps.release.outcome }}" > status.txt
           tail -n 250 "$GITHUB_WORKSPACE/android/build.log" > build.log 2>/dev/null || echo "sem log" > build.log
           git add . && git commit -qm "build ${{ github.run_number }}: ${{ job.status }}"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ci-status

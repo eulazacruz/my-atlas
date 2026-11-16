@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bell, CalendarDays, Check, CheckSquare, Coffee, Droplets, Flower2, Heart, KeyRound, MapPin, Moon, PawPrint, Radio, RefreshCw, ShoppingBag, Smile, Sparkles, Wallet, Wind, X } from 'lucide-react';
+import { Bell, BookOpen, CalendarDays, MessagesSquare, Check, CheckSquare, Coffee, Droplets, Flower2, Heart, KeyRound, MapPin, Moon, PawPrint, Radio, RefreshCw, ShoppingBag, Smile, Sparkles, Wallet, Wind, X } from 'lucide-react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { activeSleep } from '@/lib/body';
 import { statusOf } from '@/lib/constants';
@@ -18,6 +18,8 @@ const IDLE_H = 34;
 
 const KIND: Record<IslandKind, { icon: typeof Smile; label: string; color?: string }> = {
   mood: { icon: Smile, label: 'Humor' },
+  bible: { icon: BookOpen, label: 'Bíblia', color: '#E9C46A' },
+  checkin: { icon: MessagesSquare, label: 'Check-in', color: '#10B981' },
   expense: { icon: Wallet, label: 'Carteira' },
   water: { icon: Droplets, label: 'Hidratação', color: ACCENT.water },
   breathing: { icon: Wind, label: 'Respiração' },

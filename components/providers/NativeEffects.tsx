@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAtlas, type NudgeKind } from '@/components/providers/AtlasProvider';
 import { useUI, type View } from '@/components/providers/UIProvider';
 import { useCycle } from '@/components/shell/useCycle';
@@ -9,6 +9,8 @@ import { DATE_KINDS, HABITS, MOODS, PHASES, statusOf, WATER_GOAL, wordOfTheDay }
 import { savePushToken } from '@/lib/db';
 import { getCutout, isNative, onDeepLink, pushWidgetData, registerPush, scheduleLocal, type Scheduled } from '@/lib/native';
 import { petStats } from '@/lib/pet';
+import { hasRead, readingFor, refLabel } from '@/lib/bible';
+import { useExternalEvents } from '@/lib/calendar';
 import { getSupabase } from '@/lib/supabase';
 import { addDays, daysBetween, firstName, hhmm, money, nextOccurrence, ymd } from '@/lib/utils';
 
@@ -24,6 +26,7 @@ export function NativeEffects() {
   const { state, me, partner, couple, rows, mode, status } = atlas;
   const ui = useUI();
   const cycle = useCycle();
+  const gcal = useExternalEvents(status === 'ready' && mode === 'supabase');
   const atlasRef = useRef(atlas);
   atlasRef.current = atlas;
   const uiRef = useRef(ui);
@@ -126,6 +129,12 @@ export function NativeEffects() {
   /* ───── Localização em tempo real ───── */
   const myLoc = state ? state.db.locations.find((l) => l.id === state.meId) : undefined;
   const sharing = !!myLoc?.sharing;
+  const [bgTick, setBgTick] = useState(0);
+  useEffect(() => {
+    const on = () => setBgTick((t) => t + 1);
+    window.addEventListener('atlas:bg-location', on);
+    return () => window.removeEventListener('atlas:bg-location', on);
+  }, []);
   useEffect(() => {
     if (status !== 'ready' || !sharing) return;
     let stopped = false;
@@ -167,10 +176,12 @@ export function NativeEffects() {
         const fg = await Geolocation.watchPosition({ enableHighAccuracy: true, timeout: 20_000, maximumAge: 5_000 }, (p) => {
           if (p) send(p.coords.latitude, p.coords.longitude, p.coords.accuracy, p.coords.speed);
         }).catch(() => null);
-        // segue atualizando em segundo plano (serviço com aviso fixo)
+        // segundo plano só se a pessoa ligar (o Android exige um aviso fixo)
+        let bgOn = false;
+        try { bgOn = localStorage.getItem('my-atlas:bg-location') === '1'; } catch { /* noop */ }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const BG = registerPlugin<any>('BackgroundGeolocation');
-        const id = await BG.addWatcher(
+        const id = !bgOn ? null : await BG.addWatcher(
           { backgroundTitle: 'My Atlas', backgroundMessage: 'Compartilhando sua localização com seu amor', requestPermissions: true, stale: false, distanceFilter: 10 },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (loc: any, err: any) => {
@@ -192,7 +203,7 @@ export function NativeEffects() {
       stopped = true;
       cleanup();
     };
-  }, [status, sharing]);
+  }, [status, sharing, bgTick]);
 
   /* ───── Lembretes locais (agenda, datas, ciclo, água, sono) ───── */
   const schedule = useMemo<Scheduled[]>(() => {
@@ -221,11 +232,27 @@ export function NativeEffects() {
         at.setHours(h, 0, 0, 0);
         list.push({ id: hashId('wa' + h), title: 'Hora de beber 500ml de água 💧', body: `Você está em ${(water / 1000).toFixed(1)}L de 3L`, at });
       });
+    // Google Agenda: aviso 30 min antes (só os seus compromissos)
+    gcal.events.filter((e) => e.owner === me.id && !e.allDay).forEach((e) => {
+      const at = new Date(new Date(e.start).getTime() - 30 * 60_000);
+      if (at > now && at < addDays(now, 7)) list.push({ id: hashId('g' + e.id), title: `Em 30 min: ${e.title}`, body: e.location ? `📍 ${e.location}` : 'Google Agenda', at });
+    });
+    // check-in no domingo às 19h
+    const sunday = new Date(); sunday.setDate(sunday.getDate() + ((7 - sunday.getDay()) % 7)); sunday.setHours(19, 0, 0, 0);
+    list.push({ id: hashId('checkin' + ymd(sunday)), title: 'Check-in da semana 💬', body: 'Dois minutos para conversar sobre a semana de vocês.', at: sunday });
+    // leitura a dois às 21h se ainda não leu
+    const plan = state.db.bible_plan[0];
+    if (plan) {
+      const t = readingFor(plan.plan, plan.startDate);
+      const pending = t.chapters.some((c) => !hasRead(state.db.bible_reads, me.id, c.book, c.chapter));
+      const at = new Date(); at.setHours(21, 0, 0, 0);
+      if (pending && t.chapters.length) list.push({ id: hashId('bible' + ymd()), title: 'Leitura de hoje 📖', body: t.chapters.map((c) => refLabel(c.book, c.chapter)).join(' · '), at });
+    }
     const night = new Date();
     night.setHours(22, 30, 0, 0);
     list.push({ id: hashId('sleep'), title: 'Hora de desacelerar 🌙', body: 'Toque em "Iniciar sono" quando for deitar.', at: night });
     return list;
-  }, [state, me, rows, cycle]);
+  }, [state, me, rows, cycle, gcal.events]);
 
   useEffect(() => {
     if (status !== 'ready') return;
@@ -259,7 +286,10 @@ export function NativeEffects() {
         me: person(me),
         partner: person(partner),
         today: {
-          events: state.db.events.filter((e) => ymd(new Date(e.startsAt)) === today).sort((a, b) => a.startsAt.localeCompare(b.startsAt)).slice(0, 4).map((e) => `${e.allDay ? 'Dia' : hhmm(e.startsAt)}  ${e.title}`),
+          events: [
+            ...state.db.events.filter((e) => ymd(new Date(e.startsAt)) === today).map((e) => ({ at: e.startsAt, all: e.allDay, title: e.title })),
+            ...gcal.events.filter((e) => ymd(new Date(e.start)) === today && e.owner === me.id).map((e) => ({ at: e.start, all: e.allDay, title: e.title })),
+          ].sort((a, b) => a.at.localeCompare(b.at)).slice(0, 4).map((e) => `${e.all ? 'Dia' : hhmm(e.at)}  ${e.title}`),
           tasks: state.db.tasks.filter((x) => !x.done && x.dueDate && x.dueDate <= today).slice(0, 4).map((x) => x.title),
         },
         water: { ml: h?.waterMl ?? 0, goal: WATER_GOAL, label: `${((h?.waterMl ?? 0) / 1000).toFixed(1)}L de 3L` },
@@ -276,7 +306,7 @@ export function NativeEffects() {
       });
     }, 1200);
     return () => window.clearTimeout(t);
-  }, [state, me, partner, couple, cycle, status]);
+  }, [state, me, partner, couple, cycle, status, gcal.events]);
 
   return null;
 }

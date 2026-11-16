@@ -9,6 +9,8 @@ import { AgendaScreen } from '@/components/screens/AgendaScreen';
 import { CoupleScreen } from '@/components/screens/CoupleScreen';
 import { FinanceScreen } from '@/components/screens/FinanceScreen';
 import { HealthScreen } from '@/components/screens/HealthScreen';
+import { BibleScreen } from '@/components/screens/BibleScreen';
+import { CheckinScreen } from '@/components/screens/CheckinScreen';
 import { LocationScreen } from '@/components/screens/LocationScreen';
 import { NativeEffects } from '@/components/providers/NativeEffects';
 import { SleepOverlay } from '@/components/screens/BodyBits';
@@ -35,6 +37,8 @@ const SCREENS: Record<View, () => JSX.Element | null> = {
   pet: PetScreen,
   settings: SettingsScreen,
   location: LocationScreen,
+  bible: BibleScreen,
+  checkin: CheckinScreen,
 };
 
 function Splash() {

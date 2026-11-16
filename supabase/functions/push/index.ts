@@ -42,7 +42,7 @@ async function accessToken(sa: Row) {
 
 /* ───────── Monta a mensagem a partir do evento ───────── */
 async function build(table: string, type: string, r: Row, old: Row | null) {
-  const actor: string | undefined = r.created_by ?? r.walked_by ?? r.from_profile ?? (table === 'profiles' ? r.id : undefined);
+  const actor: string | undefined = r.created_by ?? r.walked_by ?? r.from_profile ?? r.profile_id ?? (table === 'profiles' ? r.id : undefined);
   if (!actor) return null;
   const { data: who } = await sb.from('profiles').select('display_name, couple_id').eq('id', actor).single();
   if (!who?.couple_id) return null;
@@ -69,6 +69,8 @@ async function build(table: string, type: string, r: Row, old: Row | null) {
   else if (table === 'household_tasks') [title, body] = [`${name} ${HOUSE[r.task] ?? 'fez uma tarefa da casa'}`, 'Equilíbrio da semana atualizado'];
   else if (table === 'shopping_items') [title, body, link] = [`${name} adicionou à lista de compras`, r.name, 'app.myatlas://action/open/shopping'];
   else if (table === 'prayers') [title, body] = [`${name} pediu oração 🙏`, r.title];
+  else if (table === 'checkins') [title, body, link] = [`${name} fez o check-in da semana 💬`, 'Faça o seu para ver as respostas de vocês dois', 'app.myatlas://action/open/couple'];
+  else if (table === 'bible_reads') [title, body, link] = [`${name} leu a Bíblia de hoje 📖`, 'Leitura a dois', 'app.myatlas://action/open/bible'];
   else if (table === 'pet_walks') [title, body, link] = [`${name} levou o Atlas para passear 🐾`, 'Passeio do dia registrado', 'app.myatlas://action/open/pet'];
   else return null;
 

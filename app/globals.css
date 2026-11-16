@@ -17,6 +17,7 @@
 
 html,
 body {
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
   background: var(--bg);
   color: var(--fg);
   -webkit-tap-highlight-color: transparent;
@@ -55,6 +56,14 @@ body {
   }
   .dark .glass::before {
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.08));
+  }
+  .glass-strong {
+    @apply relative rounded-[26px] bg-white/85 backdrop-blur-3xl backdrop-saturate-150;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 24px 60px -20px rgba(0, 0, 0, 0.35);
+  }
+  .dark .glass-strong {
+    @apply bg-[#141416]/85;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 24px 60px -20px rgba(0, 0, 0, 0.9);
   }
   .glass-thin {
     @apply rounded-2xl bg-black/[0.035] ring-1 ring-inset ring-black/[0.05];
@@ -217,3 +226,10 @@ textarea {
 .leaflet-control-attribution a {
   color: #ccc !important;
 }
+
+.bar-blur {
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+}
+
+/* Leitura da Bíblia em foco: esconde a barra de abas */
+body[data-reading='1'] nav { display: none; }

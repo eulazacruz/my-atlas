@@ -10,7 +10,8 @@ import { Dot, MonthCalendar } from '@/components/ui/MonthCalendar';
 import { Avatar, CheckCircle, Chip, Empty, IconButton, PageHeader, Section, Segmented } from '@/components/ui/primitives';
 import { ACCENT, DATE_KINDS } from '@/lib/constants';
 import { dayKind } from '@/lib/cycle';
-import type { Task } from '@/lib/types';
+import type { ExternalEvent, Task } from '@/lib/types';
+import { demoExternal, useExternalEvents } from '@/lib/calendar';
 import { addDays, cn, firstName, fmtDay, hhmm, nextOccurrence, parseYmd, relDay, uid, ymd } from '@/lib/utils';
 
 export function AgendaScreen() {
@@ -35,8 +36,40 @@ export function AgendaScreen() {
   );
 }
 
+function GRow({ e, compact }: { e: ExternalEvent; compact?: boolean }) {
+  const { me, nameOf } = useAtlas();
+  const d = new Date(e.start);
+  return (
+    <div className="flex w-full items-center gap-3 border-b px-4 py-3 text-left last:border-0 hairline">
+      {compact ? (
+        <div className="w-12 shrink-0 text-center">
+          <p className="text-[11px] uppercase muted">{fmtDay(d, { weekday: 'short' })}</p>
+          <p className="text-[18px] font-bold leading-tight">{d.getDate()}</p>
+        </div>
+      ) : (
+        <div className="w-12 shrink-0 text-[13px] font-semibold tabular-nums">
+          {e.allDay ? 'Dia' : hhmm(e.start)}
+          {e.end && !e.allDay && <p className="text-[11px] font-normal muted">{hhmm(e.end)}</p>}
+        </div>
+      )}
+      <span className="h-9 w-[3px] shrink-0 rounded-full" style={{ background: e.owner === me?.id ? '#4285F4' : '#10B981' }} />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[15px] font-medium">{e.title}</p>
+        <p className="flex items-center gap-1 truncate text-[12px] muted">
+          <span className="rounded bg-black/[0.06] px-1 text-[10px] font-bold dark:bg-white/10">Google</span>
+          {compact && !e.allDay ? `${hhmm(e.start)} · ` : ''}
+          {e.location ? `${e.location} · ` : ''}
+          {e.owner === me?.id ? 'Sua agenda' : `Agenda de ${firstName(nameOf(e.owner))}`}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function AgendaView() {
-  const { rows, me } = useAtlas();
+  const { rows, me, partner, mode } = useAtlas();
+  const ext = useExternalEvents(mode !== 'demo');
+  const gEvents = useMemo(() => (mode === 'demo' && me && partner ? demoExternal(me.id, partner.id) : ext.events), [mode, me, partner, ext.events]);
   const { openSheet } = useUI();
   const cycle = useCycle();
   const [month, setMonth] = useState(new Date());
@@ -48,8 +81,11 @@ function AgendaView() {
   const byDay = useMemo(() => {
     const m = new Map<string, number>();
     events.forEach((e) => m.set(ymd(new Date(e.startsAt)), (m.get(ymd(new Date(e.startsAt))) ?? 0) + 1));
+    gEvents.forEach((e) => m.set(ymd(new Date(e.start)), (m.get(ymd(new Date(e.start))) ?? 0) + 1));
     return m;
-  }, [events]);
+  }, [events, gEvents]);
+  const dayG = gEvents.filter((e) => ymd(new Date(e.start)) === selected);
+  const upG = gEvents.filter((e) => { const d = new Date(e.start); return d > new Date() && d < addDays(new Date(), 7) && ymd(d) !== selected; }).slice(0, 8);
   const specialOn = (d: string) => special.filter((s) => (s.recurring ? s.date.slice(5) === d.slice(5) && d >= s.date : s.date === d));
 
   const dayEvents = events.filter((e) => ymd(new Date(e.startsAt)) === selected).sort((a, b) => a.startsAt.localeCompare(b.startsAt));
@@ -131,15 +167,22 @@ function AgendaView() {
               </div>
             </button>
           ))}
+          {dayG.map((e) => <GRow key={e.id} e={e} />)}
           {dayTasks.map((t) => (
             <TaskRow key={t.id} t={t} />
           ))}
-          {!dayEvents.length && !dayTasks.length && !daySpecial.length && !ck && <p className="px-4 py-5 text-[14px] muted">Nada marcado neste dia.</p>}
+          {!dayEvents.length && !dayG.length && !dayTasks.length && !daySpecial.length && !ck && <p className="px-4 py-5 text-[14px] muted">Nada marcado neste dia.</p>}
           <button onClick={() => openSheet('event', { date: selected })} className="flex w-full items-center gap-2 border-t px-4 py-3 text-[14px] font-medium muted hairline">
             <Plus size={16} /> Adicionar evento
           </button>
         </div>
       </Section>
+
+      {upG.length > 0 && (
+        <Section title="Google Agenda · próximos 7 dias" action={<button onClick={() => window.dispatchEvent(new CustomEvent('atlas:navigate', { detail: 'settings' }))} className="text-[13px] font-medium muted">Ajustar</button>}>
+          <div className="glass overflow-hidden">{upG.map((e) => <GRow key={e.id} e={e} compact />)}</div>
+        </Section>
+      )}
 
       {upcoming.length > 0 && (
         <Section title="Próximos 14 dias">

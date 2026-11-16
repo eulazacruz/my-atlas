@@ -19,6 +19,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(AtlasNativePlugin.class);
+        quietLocationChannel();
         super.onCreate(savedInstanceState);
         createChannels();
         applyImmersive();
@@ -50,6 +51,18 @@ public class MainActivity extends BridgeActivity {
         } else {
             c.show(WindowInsetsCompat.Type.systemBars());
         }
+    }
+
+    /** Canal do serviço de localização em segundo plano: mínimo (sem ícone na barra, recolhido). */
+    void quietLocationChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+        NotificationManager nm = getSystemService(NotificationManager.class);
+        if (nm == null) return;
+        NotificationChannel ch = new NotificationChannel("com.equimaps.capacitor_background_geolocation", "Localização em segundo plano", NotificationManager.IMPORTANCE_MIN);
+        ch.setShowBadge(false);
+        ch.enableVibration(false);
+        ch.setSound(null, null);
+        nm.createNotificationChannel(ch);
     }
 
     void createChannels() {

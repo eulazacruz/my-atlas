@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes';
 import { useEffect, useRef, useState } from 'react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { Avatar, Glass, PageHeader, Section, Switch } from '@/components/ui/primitives';
+import { LocationBackgroundSetting } from './SettingsExtras';
 import { ensureLocationPermission, isNative, openExternal } from '@/lib/native';
 import type { LocationRow, Profile } from '@/lib/types';
 import { firstName, initials, timeAgo } from '@/lib/utils';
@@ -248,10 +249,11 @@ export function LocationScreen() {
           <Shield size={18} />
           <div className="flex-1">
             <p className="text-[15px] font-medium">Compartilhar minha localização</p>
-            <p className="text-[12px] muted">Só seu par vê. No Android continua em segundo plano, com um aviso fixo na barra.</p>
+            <p className="text-[12px] muted">Só seu amor vê. Atualiza pelo GPS enquanto o app está aberto.</p>
           </div>
           <Switch checked={!!mine?.sharing} onChange={toggle} label="Compartilhar localização" />
         </Glass>
+        {mine?.sharing && <div className="mt-3"><LocationBackgroundSetting /></div>}
       </Section>
     </div>
   );

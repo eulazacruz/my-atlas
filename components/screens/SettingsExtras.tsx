@@ -1,11 +1,12 @@
 'use client';
 
-import { Bell, Crosshair, KeyRound, MapPin } from 'lucide-react';
+import { Bell, CalendarDays, Crosshair, KeyRound, MapPin } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useIsland } from '@/components/island/IslandProvider';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI } from '@/components/providers/UIProvider';
-import { Button, Chip, Glass, Section } from '@/components/ui/primitives';
+import { Button, Chip, Glass, Section, Switch } from '@/components/ui/primitives';
+import { getMyFeed, refreshCalendar, saveMyFeed, useExternalEvents } from '@/lib/calendar';
 import { CONTEXT_STATUS, DEFAULT_VAULT_PIN, NEEDS, PET_ACTIONS } from '@/lib/constants';
 import { haptic, isNative } from '@/lib/native';
 import { firstName } from '@/lib/utils';
@@ -105,5 +106,91 @@ export function PrivacyAndPermissions() {
         </div>
       </div>
     </Section>
+  );
+}
+
+/* ───────── Google Agenda (iCal secreto) ───────── */
+export function GoogleCalendarSettings() {
+  const { me, state, mode } = useAtlas();
+  const { push } = useIsland();
+  const [url, setUrl] = useState('');
+  const [saved, setSaved] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [help, setHelp] = useState(false);
+  const ext = useExternalEvents(mode !== 'demo');
+  useEffect(() => {
+    if (!me || mode === 'demo') return;
+    getMyFeed(me.id).then((u) => { setUrl(u); setSaved(u); });
+  }, [me, mode]);
+  if (!me || !state) return null;
+  const mine = ext.feeds.find((f) => f.owner === me.id);
+  const save = async () => {
+    if (url && !/^(https|webcal):\/\/.+/i.test(url.trim())) {
+      push({ kind: 'agenda', title: 'Endereço inválido', subtitle: 'Cole o "Endereço secreto no formato iCal"', duration: 3500 });
+      return;
+    }
+    setBusy(true);
+    try {
+      await saveMyFeed(me.id, state.couple.id, url);
+      setSaved(url.trim());
+      push({ kind: 'agenda', title: url ? 'Google Agenda conectada 📅' : 'Google Agenda desconectada', subtitle: url ? 'Seus compromissos aparecem na Agenda do casal' : undefined, duration: 3500 });
+    } catch (e) {
+      push({ kind: 'agenda', title: 'Não deu para salvar', subtitle: String((e as Error).message ?? e), duration: 4000 });
+    }
+    setBusy(false);
+  };
+  return (
+    <Section title="Google Agenda">
+      <Glass className="space-y-3 p-4">
+        <div className="flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-2xl text-white" style={{ background: '#4285F4' }}><CalendarDays size={18} /></span>
+          <div className="flex-1">
+            <p className="text-[15px] font-medium">Sua agenda do Google</p>
+            <p className="text-[12px] muted">
+              {mode === 'demo' ? 'Disponível com a conta conectada.' : saved ? (mine?.ok ? `${mine.count ?? 0} compromissos sincronizados` : mine?.error ? `Erro: ${mine.error}` : 'Conectada') : 'Não conectada'}
+            </p>
+          </div>
+          {saved && <button onClick={() => refreshCalendar(true)} className="text-[12px] font-semibold muted">{ext.loading ? '…' : 'Atualizar'}</button>}
+        </div>
+        <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Endereço secreto no formato iCal" className="input font-mono text-[12px]" disabled={mode === 'demo'} />
+        <div className="flex gap-2">
+          <Button className="flex-1" onClick={() => setHelp((h) => !h)}>{help ? 'Fechar ajuda' : 'Como pegar?'}</Button>
+          <Button variant="primary" className="flex-1" disabled={busy || mode === 'demo' || url.trim() === saved} onClick={save}>{busy ? 'Salvando…' : 'Salvar'}</Button>
+        </div>
+        {help && (
+          <ol className="list-decimal space-y-1.5 pl-5 text-[13px] leading-snug muted">
+            <li>No computador, abra <b>calendar.google.com</b> (no celular, use “Versão para computador” no Chrome).</li>
+            <li>Na lista “Minhas agendas”, passe o mouse na sua agenda → ⋮ → <b>Configurações e compartilhamento</b>.</li>
+            <li>Role até <b>Integrar agenda</b> e copie o <b>Endereço secreto no formato iCal</b>.</li>
+            <li>Cole aqui e salve. O endereço fica guardado só no servidor; seu amor vê os compromissos, nunca o link.</li>
+          </ol>
+        )}
+      </Glass>
+    </Section>
+  );
+}
+
+/* ───────── Localização com o app fechado ───────── */
+export const BG_LOC_KEY = 'my-atlas:bg-location';
+export function LocationBackgroundSetting() {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    try { setOn(localStorage.getItem(BG_LOC_KEY) === '1'); } catch { /* noop */ }
+  }, []);
+  const toggle = (v: boolean) => {
+    setOn(v);
+    try { localStorage.setItem(BG_LOC_KEY, v ? '1' : '0'); } catch { /* noop */ }
+    window.dispatchEvent(new Event('atlas:bg-location'));
+  };
+  if (!isNative()) return null;
+  return (
+    <Glass className="flex items-center gap-3 p-4">
+      <MapPin size={18} />
+      <div className="flex-1">
+        <p className="text-[15px] font-medium">Atualizar com o app fechado</p>
+        <p className="text-[12px] muted">{on ? 'Ligado: o Android mostra um aviso fixo enquanto atualiza.' : 'Desligado: sem aviso fixo. A posição atualiza sempre que você abre o app.'}</p>
+      </div>
+      <Switch checked={on} onChange={toggle} label="Localização em segundo plano" />
+    </Glass>
   );
 }

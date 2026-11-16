@@ -1,5 +1,6 @@
 'use client';
 
+import { bookOf } from '@/lib/bible';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useIsland } from '@/components/island/IslandProvider';
 import { CONTEXT_STATUS, HOUSE_TASKS, MOODS, NEEDS, PET_ACTIONS, statusOf, WATER_GOAL, WATER_STEP, type NeedKind, type PetActionKind } from '@/lib/constants';
@@ -12,7 +13,8 @@ import type { AtlasState, Couple, HabitKey, HabitLog, Profile, TableName, Tables
 void CONTEXT_STATUS;
 import { firstName, money, uid, ymd } from '@/lib/utils';
 
-const DEMO_KEY = 'my-atlas:demo:v3';
+const bookName = (id: number) => bookOf(id)?.name ?? '';
+const DEMO_KEY = 'my-atlas:demo:v4';
 export type NudgeKind = 'carinho' | 'cutucao' | NeedKind | PetActionKind;
 type Status = 'loading' | 'ready' | 'unauthenticated' | 'error';
 
@@ -144,7 +146,7 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
         return { ...s, db: { ...s.db, [t]: next } };
       });
       if (type === 'DELETE') return;
-      const author = row.createdBy ?? row.walkedBy;
+      const author = row.createdBy ?? row.walkedBy ?? row.profileId;
       const fromPartner = author && author !== myId;
       const who = nameOf(author);
       if (t === 'profiles' && row.id !== myId && existing && existing.mood !== row.mood) {
@@ -171,6 +173,9 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
       if (t === 'tasks' && (row.assignee === myId || !row.assignee)) pushRef.current({ kind: 'task', title: `Nova tarefa${row.assignee ? ' para você' : ' para vocês'}`, subtitle: row.title });
       if (t === 'shopping_items') pushRef.current({ kind: 'shopping', title: `${who} adicionou à lista`, subtitle: row.name, duration: 3000 });
       if (t === 'prayers') pushRef.current({ kind: 'prayer', title: `${who} pediu oração 🙏`, subtitle: row.title });
+      if (t === 'checkins') pushRef.current({ kind: 'checkin', title: `${who} fez o check-in da semana 💬`, subtitle: 'Faça o seu para ver as respostas de vocês dois', avatar: { name: who }, actions: [{ label: 'Fazer agora', primary: true, onClick: () => window.dispatchEvent(new CustomEvent('atlas:navigate', { detail: 'checkin' })) }, { label: 'Depois' }] });
+      if (t === 'bible_reads') pushRef.current({ kind: 'bible', title: `${who} leu ${bookName(row.book)} ${row.chapter} 📖`, subtitle: 'Leitura a dois', avatar: { name: who }, duration: 4000 });
+      if (t === 'bible_marks') pushRef.current({ kind: 'bible', title: `${who} marcou ${bookName(row.book)} ${row.chapter}:${row.verse}`, subtitle: row.note || 'Toque na Bíblia para ver', avatar: { name: who }, duration: 4000 });
       if (t === 'pet_walks') pushRef.current({ kind: 'pet', title: `${who} levou o Atlas para passear 🐾`, subtitle: 'Passeio do dia registrado' });
       if (t === 'notes' && !row.parentId) pushRef.current({ kind: 'sync', title: `${who} criou uma nota`, subtitle: row.title || 'Sem título', duration: 3000 });
     };

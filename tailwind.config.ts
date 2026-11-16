@@ -6,7 +6,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', 'Inter', '"Segoe UI"', 'Roboto', 'system-ui', 'sans-serif'],
+        sans: ['"Inter Variable"', '-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', 'Roboto', 'system-ui', 'sans-serif'],
+        serif: ['"Literata Variable"', '"New York"', 'Georgia', 'serif'],
       },
     },
   },

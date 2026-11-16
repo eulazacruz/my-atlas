@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 export type Tab = 'home' | 'agenda' | 'notes' | 'health' | 'more';
-export type SubView = 'couple' | 'finance' | 'shopping' | 'pet' | 'settings' | 'location';
+export type SubView = 'couple' | 'finance' | 'shopping' | 'pet' | 'settings' | 'location' | 'bible' | 'checkin';
 export type View = Tab | SubView;
 export type SheetKind = 'event' | 'task' | 'expense' | 'cycleDay' | 'intimacy' | 'specialDate' | 'goal' | 'prayer' | 'shopItem' | 'widgets' | 'permissions' | 'vaultItem' | 'editHome';
 
@@ -83,6 +83,11 @@ export function UIProvider({ children }: { children: ReactNode }) {
       return v;
     });
   }, []);
+  useEffect(() => {
+    const on = (e: Event) => navigate((e as CustomEvent).detail as View);
+    window.addEventListener('atlas:navigate', on);
+    return () => window.removeEventListener('atlas:navigate', on);
+  }, [navigate]);
 
   const dismiss = useCallback((k: 'sheet' | 'note' | 'breathing') => {
     const idx = overlays.current.lastIndexOf(k);

@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { Providers } from '@/components/providers/Providers';
+import '@fontsource-variable/inter';
+import '@fontsource-variable/literata';
 import './globals.css';
 
 export const metadata: Metadata = {

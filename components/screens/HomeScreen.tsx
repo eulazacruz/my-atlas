@@ -1,18 +1,21 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { BellRing, LayoutGrid, CalendarPlus, CheckSquare, ChevronRight, Droplets, FilePlus2, Heart, Moon, PawPrint, Plus, ShoppingBag, Sun, Wallet, Wind } from 'lucide-react';
+import { LayoutGrid, CalendarPlus, CheckSquare, ChevronRight, Droplets, FilePlus2, Heart, Moon, PawPrint, Plus, ShoppingBag, Sun, Wallet, Wind } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI } from '@/components/providers/UIProvider';
 import { useCycle } from '@/components/shell/useCycle';
-import { useTestIsland } from '@/components/shell/useTestIsland';
 import { Avatar, CheckCircle, Glass, IconButton, PageHeader, Progress, Section } from '@/components/ui/primitives';
 import { RingAvatar, StatusPicker } from './CoupleBits';
+import { BiblePlanMini, openBibleAt } from './BibleScreen';
+import { CheckinHomeCard } from './CheckinScreen';
+import { parseRef } from '@/lib/bible';
 import { CaffeineCard, SleepCard } from './BodyBits';
 import { VirtualAtlas } from './PetScreen';
 import { useHomeLayout } from '@/lib/homeLayout';
+import { useExternalEvents } from '@/lib/calendar';
 import type { HomeSectionId } from '@/lib/constants';
 import { ACCENT, DATE_KINDS, HABITS, MOODS, PHASES, statusOf, WATER_GOAL, wordOfTheDay } from '@/lib/constants';
 import type { Profile } from '@/lib/types';
@@ -51,8 +54,9 @@ export function HomeScreen() {
   const { navigate, openSheet, openNote, setBreathingOpen } = useUI();
   const { save, startSleep } = useAtlas();
   const { layout } = useHomeLayout();
+  const { mode } = useAtlas();
+  const gcal = useExternalEvents(mode !== 'demo');
   const cycle = useCycle();
-  const testIsland = useTestIsland();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -94,6 +98,7 @@ export function HomeScreen() {
       <>
       <Section title="Agora" action={<button onClick={() => navigate('couple')} className="text-[13px] font-medium muted">Preciso de…</button>}>
         <StatusPicker compact />
+        <div className="mt-3 empty:hidden"><CheckinHomeCard /></div>
       </Section>
       </>
     ),
@@ -135,7 +140,17 @@ export function HomeScreen() {
       <>
       <Section title="Hoje" action={<button onClick={() => navigate('agenda')} className="text-[13px] font-medium muted">Agenda</button>}>
         <div className="glass overflow-hidden">
-          {events.length === 0 && tasks.length === 0 && <p className="px-4 py-5 text-[14px] muted">Dia livre. Nenhum compromisso ou tarefa pendente. ✨</p>}
+          {events.length === 0 && tasks.length === 0 && !gcal.events.some((e) => ymd(new Date(e.start)) === today) && <p className="px-4 py-5 text-[14px] muted">Dia livre. Nenhum compromisso ou tarefa pendente. ✨</p>}
+          {gcal.events.filter((e) => ymd(new Date(e.start)) === today && new Date(e.end ?? e.start) > new Date(Date.now() - 3600_000)).slice(0, 4).map((e) => (
+            <div key={e.id} className="flex w-full items-center gap-3 border-b px-4 py-3 text-left last:border-0 hairline">
+              <span className="w-12 shrink-0 text-[13px] font-semibold tabular-nums">{e.allDay ? 'Dia' : hhmm(e.start)}</span>
+              <span className="h-8 w-[3px] shrink-0 rounded-full" style={{ background: e.owner === me.id ? '#4285F4' : '#10B981' }} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[15px] font-medium">{e.title}</p>
+                <p className="truncate text-[12px] muted">Google · {e.owner === me.id ? 'sua agenda' : firstName(partner.displayName)}</p>
+              </div>
+            </div>
+          ))}
           {events.map((e) => (
             <button key={e.id} onClick={() => openSheet('event', { event: e })} className="flex w-full items-center gap-3 border-b px-4 py-3 text-left last:border-0 hairline">
               <span className="w-12 shrink-0 text-[13px] font-semibold tabular-nums">{e.allDay ? 'Dia' : hhmm(e.startsAt)}</span>
@@ -244,11 +259,12 @@ export function HomeScreen() {
     ),
     word: (
       <>
-      <Section title={`${word.kind} do dia`}>
-        <Glass className="p-5">
-          <p className="text-[17px] font-medium leading-snug tracking-[-0.01em]">“{word.text}”</p>
+      <Section title={`${word.kind} do dia`} action={<button onClick={() => navigate('bible')} className="text-[13px] font-medium muted">Bíblia</button>}>
+        <Glass className="p-5" onClick={() => { const r = parseRef(word.ref); if (r) openBibleAt(r); }}>
+          <p className="font-serif text-[18px] leading-snug">“{word.text}”</p>
           <p className="mt-2 text-[13px] muted">— {word.ref}</p>
         </Glass>
+        <div className="mt-3"><BiblePlanMini /></div>
       </Section>
 
       </>
@@ -299,9 +315,6 @@ export function HomeScreen() {
           <>
             <IconButton label="Editar tela" onClick={() => openSheet('editHome')}>
               <LayoutGrid size={18} />
-            </IconButton>
-            <IconButton label="Testar notificação da câmera" onClick={testIsland}>
-              <BellRing size={18} />
             </IconButton>
             <IconButton label="Alternar tema" onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}>
               {mounted && resolvedTheme === 'light' ? <Moon size={18} /> : <Sun size={18} />}

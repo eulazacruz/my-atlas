@@ -5,6 +5,8 @@ import { addDays, addMonths, uid, ymd } from './utils';
 export const DEMO_A = 'demo-a';
 export const DEMO_B = 'demo-b';
 
+const ymdLocalD = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const ymdLocal = (days: number) => { const d = new Date(); d.setDate(d.getDate() + days); return ymdLocalD(d); };
 const at = (daysFromToday: number, h = 9, m = 0) => {
   const d = addDays(new Date(), daysFromToday);
   d.setHours(h, m, 0, 0);
@@ -194,6 +196,22 @@ export function createDemoData(): AtlasState {
     v('Wi-Fi de casa', 'senha-exemplo', 'Casa', 6),
     v('Medidas · Lázaro', 'Camisa M · Calça 40 · Tênis 41', 'Medidas', 7),
     v('Medidas · Vitória', 'Blusa P · Calça 36 · Tênis 36', 'Medidas', 8, DEMO_B),
+  ];
+  db.bible_plan = [{ id: 'demo-plan', plan: 'nt', startDate: ymdLocal(-4) }];
+  for (let i = 0; i < 4; i++) {
+    db.bible_reads.push({ id: uid(), profileId: DEMO_A, book: 40, chapter: i + 1, readAt: at(-4 + i, 22) });
+    db.bible_reads.push({ id: uid(), profileId: DEMO_B, book: 40, chapter: i + 1, readAt: at(-4 + i, 21) });
+  }
+  db.bible_reads.push({ id: uid(), profileId: DEMO_B, book: 40, chapter: 5, readAt: at(0, 7) });
+  db.bible_marks = [
+    { id: uid(), createdBy: DEMO_A, book: 40, chapter: 5, verse: 9, color: 'gold', note: 'Ser pacificador começa em casa.' },
+    { id: uid(), createdBy: DEMO_B, book: 40, chapter: 5, verse: 14, color: 'blue', note: null },
+    { id: uid(), createdBy: DEMO_B, book: 19, chapter: 23, verse: 1, color: 'green', note: null },
+  ];
+  const lastSunday = (() => { const d = new Date(); d.setDate(d.getDate() - d.getDay() - 7); return ymdLocalD(d); })();
+  db.checkins = [
+    { id: uid(), profileId: DEMO_A, week: lastSunday, score: 4, answers: { bom: 'O culto de domingo e o jantar juntos.', pesou: 'Semana corrida na AeC.', preciso: 'Mais tempo sem celular à noite.', gratidao: 'Pela paciência dela.' } },
+    { id: uid(), profileId: DEMO_B, week: lastSunday, score: 5, answers: { bom: 'Passeio com o Atlas na praia.', pesou: 'Cansaço.', preciso: 'Ajuda com a louça.', gratidao: 'Pelo carinho dele.' } },
   ];
   db.locations = [
     { id: DEMO_A, sharing: true, lat: -8.0476, lng: -34.877, accuracy: 18, speed: 0, battery: 64, updatedAt: at(0, new Date().getHours(), Math.max(0, new Date().getMinutes() - 4)) },

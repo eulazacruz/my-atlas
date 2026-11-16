@@ -9,6 +9,13 @@ import { AgendaScreen } from '@/components/screens/AgendaScreen';
 import { CoupleScreen } from '@/components/screens/CoupleScreen';
 import { FinanceScreen } from '@/components/screens/FinanceScreen';
 import { HealthScreen } from '@/components/screens/HealthScreen';
+import { FaithHub } from '@/components/hubs/FaithHub';
+import { FocusHub, FocusPill } from '@/components/hubs/FocusHub';
+import { ColScreen, LifeHub } from '@/components/hubs/LifeHub';
+import { InsightsScreen, MindView, SosOverlay } from '@/components/hubs/MindBody';
+import { WeeklyScreen } from '@/components/hubs/Weekly';
+import { PageHeader } from '@/components/ui/primitives';
+import { AutoNight } from '@/components/providers/AutoNight';
 import { BibleScreen } from '@/components/screens/BibleScreen';
 import { CheckinScreen } from '@/components/screens/CheckinScreen';
 import { LocationScreen } from '@/components/screens/LocationScreen';
@@ -39,7 +46,23 @@ const SCREENS: Record<View, () => JSX.Element | null> = {
   location: LocationScreen,
   bible: BibleScreen,
   checkin: CheckinScreen,
+  faith: FaithHub,
+  focus: FocusHub,
+  mind: MindPage,
+  life: LifeHub,
+  col: ColScreen,
+  insights: InsightsScreen,
+  weekly: WeeklyScreen,
 };
+
+function MindPage() {
+  return (
+    <div>
+      <PageHeader title="Mente" subtitle="Cuidar de dentro" back />
+      <MindView />
+    </div>
+  );
+}
 
 function Splash() {
   return (
@@ -85,6 +108,9 @@ export function AppShell() {
       <NoteEditor />
       <BoxBreathing />
       <SleepOverlay />
+      <SosOverlay />
+      <FocusPill />
+      <AutoNight />
       <NativeEffects />
     </>
   );

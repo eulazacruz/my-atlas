@@ -12,7 +12,9 @@ function read(): HomeLayout {
   try {
     const v = JSON.parse(localStorage.getItem(KEY) || 'null') as HomeLayout | null;
     if (!v) return DEFAULT;
-    const order = [...v.order.filter((x) => ALL.includes(x)), ...ALL.filter((x) => !v.order.includes(x))];
+    const order = v.order.filter((x) => ALL.includes(x));
+    // seções novas entram na posição padrão
+    ALL.forEach((id, i) => { if (!order.includes(id)) order.splice(Math.min(i, order.length), 0, id); });
     return { order, hidden: v.hidden.filter((x) => ALL.includes(x)) };
   } catch {
     return DEFAULT;

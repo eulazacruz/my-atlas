@@ -213,6 +213,39 @@ export function createDemoData(): AtlasState {
     { id: uid(), profileId: DEMO_A, week: lastSunday, score: 4, answers: { bom: 'O culto de domingo e o jantar juntos.', pesou: 'Semana corrida na AeC.', preciso: 'Mais tempo sem celular à noite.', gratidao: 'Pela paciência dela.' } },
     { id: uid(), profileId: DEMO_B, week: lastSunday, score: 5, answers: { bom: 'Passeio com o Atlas na praia.', pesou: 'Cansaço.', preciso: 'Ajuda com a louça.', gratidao: 'Pelo carinho dele.' } },
   ];
+  const E = (kind: string, title: string, o: Partial<{ body: string; date: string | null; done: boolean; private: boolean; data: Record<string, unknown>; by: string }> = {}) =>
+    db.entries.push({ id: uid(), createdBy: o.by ?? DEMO_A, kind, title, body: o.body ?? null, date: o.date ?? null, done: o.done ?? false, private: o.private ?? false, data: o.data ?? {}, sort: Date.now() + db.entries.length, createdAt: new Date(Date.now() - db.entries.length * 3600_000).toISOString() });
+  const today = ymdLocal(0);
+  E('priority', 'Fechar relatório de indicadores da AeC', { date: today, done: true });
+  E('priority', 'Gravar 2 Reels de liderança', { date: today });
+  E('priority', 'Orar com a Vitória antes de dormir', { date: today });
+  E('priority', 'Consulta às 14h', { date: today, by: DEMO_B, done: true });
+  E('priority', 'Separar roupas da semana', { date: today, by: DEMO_B });
+  E('focus', 'Relatório', { date: today, data: { minutes: 50 } });
+  E('idea', 'Série de Reels: liderança no dia a dia', { data: { tag: 'Conteúdo' }, body: '5 episódios curtos' });
+  E('idea', 'Horta vertical na varanda', { data: { tag: 'Casa' }, by: DEMO_B });
+  E('book', 'Liderança com propósito', { data: { author: 'Autor exemplo', status: 'Lendo', pages: 240, page: 96, rating: 4 } });
+  E('goal', 'Ler 12 livros', { date: `${new Date().getFullYear()}-12-31`, data: { area: 'Pessoal', target: 12, current: 9, unit: 'livros' } });
+  E('project', 'Organizar o quarto de visitas', { data: { owner: 'Nós dois', steps: [{ t: 'Doar roupas', done: true }, { t: 'Pintar parede', done: false }, { t: 'Comprar cortina', done: false }] } });
+  E('habit', 'Inglês 20 min', { data: { emoji: '🇺🇸', days: { [ymdLocal(0)]: true, [ymdLocal(-1)]: true, [ymdLocal(-2)]: true, [ymdLocal(-4)]: true } } });
+  E('devotional', 'Bem-aventurados os pacificadores', { date: today, by: DEMO_B, data: { ref: 'Mateus 5', s: 'Bem-aventurados os pacificadores, porque eles serão chamados filhos de Deus.', o: 'Paz é algo que se constrói, não só se espera.', a: 'Responder com calma quando estiver cansada.', p: 'Senhor, faz de mim um instrumento da tua paz em casa.' } });
+  E('memory', 'Filipenses 4:6', { body: 'Não andeis ansiosos de coisa alguma; em tudo, porém, sejam conhecidas, diante de Deus, as vossas petições, pela oração e pela súplica, com ações de graças.', data: { ref: 'Filipenses 4:6', box: 1, next: today } });
+  E('church', 'Culto de celebração', { date: ymdLocal((7 - new Date().getDay()) % 7 || 7), data: { time: '18:00', type: 'Culto', who: 'Nós dois', place: 'Igreja' } });
+  E('person', 'Pr. Marcos', { data: { relation: 'Igreja', every: 14, last: ymdLocal(-20), pray: 'Saúde da família' } });
+  E('person', 'Mãe da Vitória', { data: { relation: 'Família', every: 7, last: ymdLocal(-9) }, by: DEMO_B });
+  E('emotion', 'Gratidão', { date: today, private: true, data: { level: 4, cause: 'Semana produtiva', helped: 'Oração da manhã' } });
+  E('win', 'Bati a meta do mês na equipe', { date: ymdLocal(-2) });
+  E('limit', 'Sem celular depois das 22h', { data: { days: { [ymdLocal(-1)]: true, [ymdLocal(-2)]: true } } });
+  E('workout', 'Musculação', { date: ymdLocal(-1), data: { minutes: 60, feel: 4 }, body: 'Peito e tríceps' });
+  E('workout', 'Corrida', { date: ymdLocal(-3), data: { minutes: 30, feel: 5 } });
+  [82.4, 81.9, 81.6, 81.2].forEach((w, i) => E('measure', '', { date: ymdLocal(-21 + i * 7), private: true, data: { weight: w } }));
+  E('watch', 'A Escolha', { data: { type: 'Filme', where: 'Netflix', status: 'Quero ver' } });
+  E('watch', 'The Chosen', { data: { type: 'Série', where: 'Prime', status: 'Vendo', rating: 5 } });
+  E('place', 'Restaurante do Recife Antigo', { data: { type: 'Restaurante', rating: 5, again: true } });
+  E('recipe', 'Escondidinho de charque', { data: { minutes: 50, ingredients: ['Macaxeira', 'Charque', 'Queijo coalho', 'Cebola'] } });
+  E('document', 'Garantia da geladeira', { date: ymdLocal(25), data: { type: 'Garantia' } });
+  E('capsule', 'Para o nosso aniversário de casamento', { date: ymdLocal(120), by: DEMO_B, body: 'Abre só no dia 🤍' });
+  E('setting', 'couple_night', { data: { day: 5, time: '20:00' } });
   db.locations = [
     { id: DEMO_A, sharing: true, lat: -8.0476, lng: -34.877, accuracy: 18, speed: 0, battery: 64, updatedAt: at(0, new Date().getHours(), Math.max(0, new Date().getMinutes() - 4)) },
     { id: DEMO_B, sharing: true, lat: -7.9007, lng: -34.8984, accuracy: 12, speed: 0, battery: 81, updatedAt: at(0, new Date().getHours(), Math.max(0, new Date().getMinutes() - 1)) },

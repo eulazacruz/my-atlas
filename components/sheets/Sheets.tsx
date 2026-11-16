@@ -184,9 +184,11 @@ function ExpenseSheet() {
   useEffect(() => {
     if (open) {
       setAmount('');
-      setDesc('');
+      setDesc(sheet?.payload?.desc ?? '');
       setDate(ymd());
+      if (sheet?.payload?.category) { setCat(sheet.payload.category); setType('expense'); }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
   if (!me) return null;
   const value = parseMoney(amount);

@@ -1,6 +1,10 @@
 package app.myatlas.twa;
 
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
+import android.provider.Settings;
 import android.os.Build;
 import android.view.DisplayCutout;
 import android.view.View;
@@ -63,6 +67,25 @@ public class AtlasNativePlugin extends Plugin {
         int id = getContext().getResources().getIdentifier("google_app_id", "string", getContext().getPackageName());
         JSObject r = new JSObject();
         r.put("value", id != 0);
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void setDnd(PluginCall call) {
+        JSObject r = new JSObject();
+        boolean on = Boolean.TRUE.equals(call.getBoolean("enabled", true));
+        NotificationManager nm = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        if (nm == null) { r.put("value", "unsupported"); call.resolve(r); return; }
+        if (!nm.isNotificationPolicyAccessGranted()) {
+            Intent i = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(i);
+            r.put("value", "permission");
+            call.resolve(r);
+            return;
+        }
+        nm.setInterruptionFilter(on ? NotificationManager.INTERRUPTION_FILTER_PRIORITY : NotificationManager.INTERRUPTION_FILTER_ALL);
+        r.put("value", "ok");
         call.resolve(r);
     }
 

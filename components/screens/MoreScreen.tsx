@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpen, ChevronRight, Heart, MapPin, MessagesSquare, PawPrint, Settings, ShoppingBag, Sparkles, Target, Wallet } from 'lucide-react';
+import { BookOpen, ChevronRight, Heart, MapPin, MessagesSquare, NotebookPen, Rocket, Sofa, Brain, BarChart3, PawPrint, Settings, ShoppingBag, Sparkles, Target, Wallet } from 'lucide-react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI, type SubView } from '@/components/providers/UIProvider';
 import { Glass, PageHeader, Section } from '@/components/ui/primitives';
@@ -12,13 +12,18 @@ export function MoreScreen() {
   const month = ymd().slice(0, 7);
   const balance = rows('transactions').filter((t) => t.occurredOn.startsWith(month)).reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0);
   const tiles: { id: SubView; title: string; hint: string; icon: typeof Heart }[] = [
+    { id: 'focus', title: 'Produtividade', hint: 'Prioridades, foco, projetos e metas', icon: Rocket },
+    { id: 'notes', title: 'Notas', hint: 'Bloco de notas do casal', icon: NotebookPen },
     { id: 'couple', title: 'Nós dois', hint: 'Humor, datas, metas e oração', icon: Heart },
-    { id: 'bible', title: 'Bíblia', hint: 'Leitura a dois e marcações', icon: BookOpen },
     { id: 'checkin', title: 'Check-in', hint: 'Conversa da semana', icon: MessagesSquare },
+    { id: 'life', title: 'Casa & lazer', hint: 'Receitas, filmes, viagens, cápsula', icon: Sofa },
+    { id: 'weekly', title: 'Resumo da semana', hint: 'Vocês dois lado a lado', icon: BarChart3 },
     { id: 'finance', title: 'Finanças', hint: `Saldo do mês ${money(balance)}`, icon: Wallet },
     { id: 'shopping', title: 'Compras', hint: `${rows('shopping_items').filter((i) => !i.checked).length} itens na lista`, icon: ShoppingBag },
     { id: 'pet', title: 'Atlas', hint: 'Bichinho virtual e prontuário', icon: PawPrint },
     { id: 'location', title: 'Localização', hint: 'Onde cada um está agora', icon: MapPin },
+    { id: 'mind', title: 'Mente', hint: 'Ansiedade, emoções e descobertas', icon: Brain },
+    { id: 'bible', title: 'Bíblia', hint: 'Leitura a dois e marcações', icon: BookOpen },
   ];
   return (
     <div>

@@ -21,6 +21,11 @@ public class TodayWidget extends BaseWidget {
         JSONArray ev = arr(t, "events"), tk = arr(t, "tasks");
         int[] ids = {R.id.l1, R.id.l2, R.id.l3, R.id.l4, R.id.l5};
         int n = 0;
+        JSONArray pr = arr(d, "priorities");
+        for (int i = 0; i < pr.length() && n < 3; i++) {
+            JSONObject p = pr.optJSONObject(i);
+            if (p != null) text(v, ids[n++], (p.optBoolean("done") ? "✓  " : "★  ") + p.optString("title"));
+        }
         for (int i = 0; i < ev.length() && n < 5; i++) text(v, ids[n++], "▍ " + ev.optString(i));
         for (int i = 0; i < tk.length() && n < 5; i++) text(v, ids[n++], "○  " + tk.optString(i));
         if (n == 0) text(v, ids[n++], "Dia livre ✨ nada pendente.");

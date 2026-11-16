@@ -1,6 +1,7 @@
 'use client';
 
 import { bookOf } from '@/lib/bible';
+import { applyQueue, clearCache, enqueue, isNetworkError, readCache, readQueue, writeCache, writeQueue, type QueueOp } from '@/lib/offline';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useIsland } from '@/components/island/IslandProvider';
 import { CONTEXT_STATUS, HOUSE_TASKS, MOODS, NEEDS, PET_ACTIONS, statusOf, WATER_GOAL, WATER_STEP, type NeedKind, type PetActionKind } from '@/lib/constants';
@@ -89,21 +90,34 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
     let unsub = () => {};
     let cancelled = false;
     (async () => {
-      const { data: { session } } = await sb!.auth.getSession();
-      if (!session) return setStatus('unauthenticated');
+      const cached = readCache();
+      let session = null as Awaited<ReturnType<NonNullable<typeof sb>['auth']['getSession']>>['data']['session'];
+      try { session = (await sb!.auth.getSession()).data.session; } catch { /* offline */ }
+      const uid = session?.user.id ?? (cached && !navigator.onLine ? cached.meId : null);
+      if (!uid) return setStatus('unauthenticated');
+      // 1) abre na hora com a cópia local (funciona sem internet)
+      if (cached && cached.meId === uid) {
+        setState(applyQueue({ ...cached, db: { ...emptyDB(), ...cached.db } }, readQueue(uid)));
+        setStatus('ready');
+      }
+      if (!session) { island.setSync('offline'); return; }
+      // 2) atualiza do servidor
       try {
         island.setSync('syncing');
         const coupleId = await ensureCouple(sb!);
         const { couple, db } = await loadAll(sb!, coupleId);
         if (cancelled) return;
-        setState({ couple, db, meId: session.user.id });
+        setState(applyQueue({ couple, db, meId: uid }, readQueue(uid)));
         setStatus('ready');
-        unsub = subscribeAll(sb!, coupleId, onRemote(session.user.id), (ok) => island.setSync(ok ? 'synced' : 'offline'));
+        unsub = subscribeAll(sb!, coupleId, onRemote(uid), (ok) => { island.setSync(ok ? 'synced' : 'offline'); if (ok) flushRef.current(); });
+        flushRef.current();
       } catch (e) {
         console.error(e);
-        setError(e instanceof Error ? e.message : 'Falha ao carregar dados');
-        setStatus('error');
         island.setSync('offline');
+        if (!(cached && cached.meId === uid)) {
+          setError(e instanceof Error ? e.message : 'Falha ao carregar dados');
+          setStatus('error');
+        }
       }
     })();
     return () => {
@@ -112,6 +126,10 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (mode !== 'demo' && state && status === 'ready') writeCache(state);
+  }, [state, mode, status]);
 
   useEffect(() => {
     if (mode === 'demo' && state) {
@@ -205,20 +223,53 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
     };
   }
 
-  /* ───────── CRUD genérico ───────── */
-  const write = useCallback(
-    (fn: () => Promise<unknown>) => {
-      if (mode !== 'supabase' || !sb) return;
-      island.setSync('syncing');
-      fn()
-        .then(() => island.setSync('synced'))
-        .catch((e) => {
+  /* ───────── CRUD genérico (com fila offline) ───────── */
+  const flushing = useRef(false);
+  const flush = useCallback(async () => {
+    const s0 = ref.current;
+    if (mode !== 'supabase' || !sb || !s0 || flushing.current) return;
+    flushing.current = true;
+    const uid = s0.meId;
+    try {
+      let q = readQueue(uid);
+      if (q.length) island.setSync('syncing');
+      while (q.length) {
+        const o = q[0];
+        try {
+          if (o.op === 'save') await saveRow(sb, o.table, o.row, ref.current?.couple.id ?? s0.couple.id);
+          else if (o.op === 'delete') await deleteRow(sb, o.table, o.id);
+          else await saveCouple(sb, o.row);
+        } catch (e) {
+          if (isNetworkError(e)) { island.setSync('offline'); return; }
           console.error(e);
-          island.setSync('offline');
-          pushRef.current({ kind: 'sync', title: 'Não consegui salvar', subtitle: e?.message ?? 'Verifique sua conexão.', duration: 4000 });
-        });
-    },
+          pushRef.current({ kind: 'sync', title: 'Não consegui salvar um item', subtitle: (e as Error)?.message ?? '', duration: 4000 });
+        }
+        q = readQueue(uid).filter((x) => JSON.stringify(x) !== JSON.stringify(o));
+        writeQueue(uid, q);
+      }
+      island.setSync('synced');
+    } finally {
+      flushing.current = false;
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, sb]);
+  const flushRef = useRef(flush);
+  flushRef.current = flush;
+  useEffect(() => {
+    if (mode !== 'supabase') return;
+    const on = () => flushRef.current();
+    window.addEventListener('online', on);
+    document.addEventListener('visibilitychange', on);
+    const i = window.setInterval(() => { if (ref.current && readQueue(ref.current.meId).length) on(); }, 30_000);
+    return () => { window.removeEventListener('online', on); document.removeEventListener('visibilitychange', on); window.clearInterval(i); };
+  }, [mode]);
+  const write = useCallback(
+    (op: QueueOp) => {
+      const s0 = ref.current;
+      if (mode !== 'supabase' || !sb || !s0) return;
+      enqueue(s0.meId, op);
+      flushRef.current();
+    },
     [mode, sb],
   );
 
@@ -231,7 +282,7 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
     const ns = { ...s, db: { ...s.db, [t]: next } };
     ref.current = ns;
     setState(ns);
-    write(() => saveRow(sb!, t, row as any, s.couple.id));
+    write({ op: 'save', table: t, row, at: Date.now() });
   }, [write, sb]);
 
   const patch = useCallback(<K extends TableName>(t: K, id: string, partial: Partial<Tables[K]>) => {
@@ -245,7 +296,7 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
     const ns = { ...s, db: { ...s.db, [t]: (s.db[t] as any[]).filter((x) => x.id !== id) } };
     ref.current = ns;
     setState(ns);
-    write(() => deleteRow(sb!, t, id));
+    write({ op: 'delete', table: t, id, at: Date.now() });
   }, [write, sb]);
 
   const updateCouple = useCallback((partial: Partial<Couple>) => {
@@ -253,7 +304,7 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
     if (!s) return;
     const couple = { ...s.couple, ...partial };
     setState({ ...s, couple });
-    write(() => saveCouple(sb!, couple));
+    write({ op: 'couple', row: couple, at: Date.now() });
   }, [write, sb]);
 
   /* ───────── helpers de domínio ───────── */
@@ -310,7 +361,7 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
         subtitle: 'Vai aparecer ao redor da câmera dele(a).',
         duration: 2400,
       });
-    if (mode === 'supabase') write(() => insertNudge(sb!, s.couple.id, s.meId, p.id, kind));
+    if (mode === 'supabase' && sb) insertNudge(sb, s.couple.id, s.meId, p.id, kind).catch(() => pushRef.current({ kind: 'sync', title: 'Sem internet', subtitle: 'O aviso não foi enviado', duration: 3000 }));
     else
       window.setTimeout(() => {
         const reply = need ? (need.kind === 'silencio' ? null : 'carinho') : kind.startsWith('pet_') ? null : 'carinho';
@@ -414,6 +465,7 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
     window.location.reload();
   }, [sb]);
   const signOut = useCallback(async () => {
+    clearCache();
     if (sb) await sb.auth.signOut();
     window.location.href = '/login';
   }, [sb]);

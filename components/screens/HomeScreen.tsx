@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { LayoutGrid, CalendarPlus, CheckSquare, ChevronRight, Droplets, FilePlus2, Heart, Moon, PawPrint, Plus, ShoppingBag, Sun, Wallet, Wind } from 'lucide-react';
+import { LifeBuoy, LayoutGrid, CalendarPlus, CheckSquare, ChevronRight, Droplets, FilePlus2, Heart, Moon, PawPrint, Plus, ShoppingBag, Sun, Wallet, Wind } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
@@ -16,6 +16,11 @@ import { CaffeineCard, SleepCard } from './BodyBits';
 import { VirtualAtlas } from './PetScreen';
 import { useHomeLayout } from '@/lib/homeLayout';
 import { useExternalEvents } from '@/lib/calendar';
+import { DaySummaryCard, FocusStarter, PrioritiesCard } from '@/components/hubs/FocusHub';
+import { DevotionalCard, QuestionOfDay } from '@/components/hubs/FaithHub';
+import { FatigueThermometer, ListenFirst, openSos } from '@/components/hubs/MindBody';
+import { CoupleNightCard } from '@/components/hubs/LifeHub';
+import { AlertsCard, WeeklyTeaser } from '@/components/hubs/Weekly';
 import type { HomeSectionId } from '@/lib/constants';
 import { ACCENT, DATE_KINDS, HABITS, MOODS, PHASES, statusOf, WATER_GOAL, wordOfTheDay } from '@/lib/constants';
 import type { Profile } from '@/lib/types';
@@ -113,6 +118,7 @@ export function HomeScreen() {
         <QuickAction icon={Wind} label="Respirar" onClick={() => setBreathingOpen(true)} />
         <QuickAction icon={Heart} label="Carinho" onClick={() => sendNudge('carinho')} />
         <QuickAction icon={Moon} label="Dormir" onClick={startSleep} />
+        <QuickAction icon={LifeBuoy} label="Ansioso" onClick={openSos} />
       </div>
 
       </>
@@ -254,6 +260,46 @@ export function HomeScreen() {
       <>
       <Section title="Atlas virtual" action={<button onClick={() => navigate('pet')} className="text-[13px] font-medium muted">Prontuário</button>}>
         <VirtualAtlas compact />
+      </Section>
+      </>
+    ),
+    focus: (
+      <>
+      <Section title="Foco do dia" action={<button onClick={() => navigate('focus')} className="text-[13px] font-medium muted">Produtividade</button>}>
+        <div className="space-y-3">
+          <PrioritiesCard compact />
+          <FocusStarter />
+        </div>
+      </Section>
+      </>
+    ),
+    care: (
+      <>
+      <div className="mb-7 space-y-3 empty:hidden">
+        <AlertsCard />
+        <ListenFirst />
+        <FatigueThermometer />
+        <CoupleNightCard compact />
+      </div>
+      </>
+    ),
+    faith: (
+      <>
+      <Section title="Fé do dia" action={<button onClick={() => navigate('faith')} className="text-[13px] font-medium muted">Abrir</button>}>
+        <div className="space-y-3">
+          <DevotionalCard />
+          <QuestionOfDay />
+        </div>
+      </Section>
+      </>
+    ),
+    summary: (
+      <>
+      <Section title="Resumos">
+        <div className="space-y-3">
+          {new Date().getHours() >= 18 && <DaySummaryCard />}
+          <WeeklyTeaser />
+        </div>
       </Section>
       </>
     ),

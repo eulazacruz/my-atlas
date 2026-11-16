@@ -5,11 +5,12 @@ import { useAtlas, type NudgeKind } from '@/components/providers/AtlasProvider';
 import { useUI, type View } from '@/components/providers/UIProvider';
 import { useCycle } from '@/components/shell/useCycle';
 import { activeSleep, caffeineAt, fmtDuration, lastNight } from '@/lib/body';
-import { DATE_KINDS, HABITS, MOODS, PHASES, statusOf, WATER_GOAL, wordOfTheDay } from '@/lib/constants';
+import { DAILY_WORDS, DATE_KINDS, HABITS, MOODS, PHASES, statusOf, WATER_GOAL, wordOfTheDay } from '@/lib/constants';
 import { savePushToken } from '@/lib/db';
 import { getCutout, isNative, onDeepLink, pushWidgetData, registerPush, scheduleLocal, type Scheduled } from '@/lib/native';
 import { petStats } from '@/lib/pet';
 import { hasRead, readingFor, refLabel } from '@/lib/bible';
+import { readReminders } from '@/components/hubs/MindBody';
 import { useExternalEvents } from '@/lib/calendar';
 import { getSupabase } from '@/lib/supabase';
 import { addDays, daysBetween, firstName, hhmm, money, nextOccurrence, ymd } from '@/lib/utils';
@@ -48,6 +49,10 @@ export function NativeEffects() {
       if (a === 'status' && b) A.setContextStatus(b);
       if (a === 'sleep') A.startSleep();
       if (a === 'open' && b) U.navigate(b as View);
+      if (a === 'sos') window.dispatchEvent(new Event('atlas:sos'));
+      if (a === 'focus') U.navigate('focus');
+      if (a === 'mood') U.navigate('couple');
+      if (a === 'col' && b) U.navigate('col', b);
     };
     const q = new URLSearchParams(window.location.search).get('action');
     if (q) {
@@ -130,6 +135,12 @@ export function NativeEffects() {
   const myLoc = state ? state.db.locations.find((l) => l.id === state.meId) : undefined;
   const sharing = !!myLoc?.sharing;
   const [bgTick, setBgTick] = useState(0);
+  const [remTick, setRemTick] = useState(0);
+  useEffect(() => {
+    const on = () => setRemTick((t) => t + 1);
+    window.addEventListener('atlas:reminders', on);
+    return () => window.removeEventListener('atlas:reminders', on);
+  }, []);
   useEffect(() => {
     const on = () => setBgTick((t) => t + 1);
     window.addEventListener('atlas:bg-location', on);
@@ -248,11 +259,41 @@ export function NativeEffects() {
       const at = new Date(); at.setHours(21, 0, 0, 0);
       if (pending && t.chapters.length) list.push({ id: hashId('bible' + ymd()), title: 'Leitura de hoje 📖', body: t.chapters.map((c) => refLabel(c.book, c.chapter)).join(' · '), at });
     }
+    /* ───── lembretes de cuidado e da vida a dois ───── */
+    const rem = readReminders();
+    const at = (h: number, m = 0, dayOffset = 0) => { const d = addDays(new Date(), dayOffset); d.setHours(h, m, 0, 0); return d; };
+    for (const off of [0, 1]) {
+      if (rem.breaks) [[10, 30], [15, 0], [17, 30]].forEach(([h, m], i) => list.push({ id: hashId(`br${i}${off}`), title: 'Pausa de respiro 🌿', body: '1 minuto: ombros soltos, respire fundo 4 vezes e beba água.', at: at(h, m, off) }));
+      if (rem.sun) list.push({ id: hashId(`sun${off}`), title: 'Sol e movimento ☀️', body: 'Que tal 15 minutos lá fora? O Atlas agradece o passeio.', at: at(16, 30, off) });
+      if (rem.unwind) { const [h, m] = rem.unwindAt.split(':').map(Number); list.push({ id: hashId(`unw${off}`), title: 'Hora de desligar 🌙', body: 'Celular longe, uma gratidão e oração juntos.', at: at(h, m, off) }); }
+      list.push({ id: hashId(`sum${off}`), title: 'Resumo do seu dia', body: 'Veja o que você conquistou hoje e o que vem amanhã.', at: at(21, 15, off) });
+      const pr = state.db.entries.filter((e) => e.kind === 'priority' && e.createdBy === me.id && e.date === ymd(addDays(new Date(), off)));
+      if (!pr.length) list.push({ id: hashId(`pri${off}`), title: 'Suas 3 prioridades de hoje', body: 'Quais são as 3 coisas que importam hoje?', at: at(7, 40, off) });
+    }
+    const cn = state.db.entries.find((e) => e.kind === 'setting' && e.title === 'couple_night');
+    if (cn) {
+      for (let off = 0; off < 8; off++) {
+        const d = addDays(new Date(), off);
+        if (d.getDay() === cn.data.day) {
+          const [h, m] = String(cn.data.time ?? '20:00').split(':').map(Number);
+          list.push({ id: hashId(`cnd${ymd(d)}`), title: 'Hoje é a noite do casal 🤍', body: `Às ${cn.data.time}. Sem celular, só vocês dois.`, at: at(h - 2 < 0 ? 0 : h - 2, m, off) });
+          list.push({ id: hashId(`cnv${ymd(d)}`), title: 'Amanhã é a noite do casal', body: 'Já pensaram no que vão fazer?', at: at(20, 0, off - 1) });
+        }
+      }
+    }
+    state.db.entries.forEach((e) => {
+      if (e.kind === 'document' && e.date) { const d = new Date(`${e.date}T09:00:00`); [30, 7, 0].forEach((k) => list.push({ id: hashId(`doc${e.id}${k}`), title: k ? `Vence em ${k} dias: ${e.title}` : `Vence hoje: ${e.title}`, body: 'Documentos e garantias', at: addDays(d, -k) })); }
+      if (e.kind === 'capsule' && e.date && e.createdBy !== me.id) list.push({ id: hashId(`cap${e.id}`), title: 'Uma cápsula do tempo abriu 💌', body: e.title, at: new Date(`${e.date}T09:00:00`) });
+      if (e.kind === 'church' && e.date && e.data?.time) { const d = new Date(`${e.date}T${e.data.time}:00`); list.push({ id: hashId(`ch${e.id}`), title: `Em 1 hora: ${e.title}`, body: e.data.place ?? 'Agenda da igreja', at: new Date(d.getTime() - 3600_000) }); }
+      if (e.kind === 'serve' && e.date && e.createdBy === me.id) list.push({ id: hashId(`sv${e.id}`), title: `Amanhã você serve: ${e.title}`, body: e.data?.role ?? 'Escala', at: new Date(`${ymd(addDays(new Date(`${e.date}T12:00:00`), -1))}T19:00:00`) });
+      if (e.kind === 'fast' && e.date && e.createdBy === me.id) { const st = new Date(`${e.date}T${e.data?.start || '00:00'}:00`); list.push({ id: hashId(`fa${e.id}`), title: 'Jejum concluído 🕊️', body: `${e.title}. Glória a Deus!`, at: new Date(st.getTime() + (Number(e.data?.hours) || 12) * 3600_000) }); }
+      if (e.kind === 'memory' && e.createdBy === me.id && e.data?.next) list.push({ id: hashId(`mem${e.data.next}`), title: 'Versículos para revisar 🧷', body: 'Alguns cartões estão esperando você.', at: new Date(`${e.data.next}T12:30:00`) });
+    });
     const night = new Date();
     night.setHours(22, 30, 0, 0);
     list.push({ id: hashId('sleep'), title: 'Hora de desacelerar 🌙', body: 'Toque em "Iniciar sono" quando for deitar.', at: night });
     return list;
-  }, [state, me, rows, cycle, gcal.events]);
+  }, [state, me, rows, cycle, gcal.events, remTick]);
 
   useEffect(() => {
     if (status !== 'ready') return;
@@ -301,6 +342,8 @@ export function NativeEffects() {
         finance: { balance: money(balance), spentPct: Math.round((spent / couple.monthlyBudget) * 100), spent: money(spent) },
         date: nd ? { title: nd.d.title, days: daysBetween(new Date(), nd.n), emoji: DATE_KINDS.find((k) => k.value === nd.d.kind)?.emoji ?? '⭐' } : null,
         word: { text: word.text, ref: word.ref },
+        words: [0, 1, 2].map((p) => { const w = DAILY_WORDS.filter((x) => x.kind === 'Versículo'); const d = Math.floor(Date.now() / 86_400_000); const x = w[(d * 3 + p) % w.length]; return { text: x.text, ref: x.ref }; }),
+        priorities: state.db.entries.filter((e) => e.kind === 'priority' && e.createdBy === me.id && e.date === today).map((e) => ({ title: e.title, done: e.done })),
         shopping: { count: state.db.shopping_items.filter((i) => !i.checked).length, items: state.db.shopping_items.filter((i) => !i.checked).slice(0, 4).map((i) => i.name) },
         sleep: { last: ln?.durationMin ? fmtDuration(ln.durationMin) : '—', sleeping: !!activeSleep(state.db.sleep_logs, me.id), caffeine22: caf },
       });

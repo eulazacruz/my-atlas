@@ -8,19 +8,21 @@ import { useUI } from '@/components/providers/UIProvider';
 import { useCycle } from '@/components/shell/useCycle';
 import { MonthCalendar } from '@/components/ui/MonthCalendar';
 import { CaffeineCard, SleepCard } from './BodyBits';
+import { BodyView, MindView } from '@/components/hubs/MindBody';
+import { CustomHabits } from '@/components/hubs/FocusHub';
 import { Avatar, Button, CheckCircle, Empty, Field, Glass, IconButton, PageHeader, Progress, Section, Segmented, Switch } from '@/components/ui/primitives';
 import { ACCENT, HABITS, PHASES, PROTECTION, WATER_GOAL, wordOfTheDay } from '@/lib/constants';
 import { dayKind } from '@/lib/cycle';
 import { addDays, cn, daysBetween, firstName, fmtDay, parseYmd, uid, WEEK_LETTERS, ymd } from '@/lib/utils';
 
 export function HealthScreen() {
-  const [seg, setSeg] = useState<'cycle' | 'habits'>('cycle');
+  const [seg, setSeg] = useState<'cycle' | 'habits' | 'mind' | 'body'>('cycle');
   const { openSheet } = useUI();
   const cycle = useCycle();
   return (
     <div>
       <PageHeader
-        title={seg === 'cycle' ? 'Ciclo' : 'Hábitos'}
+        title={seg === 'cycle' ? 'Ciclo' : seg === 'habits' ? 'Hábitos' : seg === 'mind' ? 'Mente' : 'Corpo'}
         subtitle="Saúde"
         actions={
           seg === 'cycle' && cycle.isOwner ? (
@@ -31,9 +33,9 @@ export function HealthScreen() {
         }
       />
       <div className="mb-6">
-        <Segmented id="health-seg" value={seg} onChange={setSeg} options={[{ value: 'cycle', label: 'Ciclo & intimidade' }, { value: 'habits', label: 'Hábitos & mente' }]} />
+        <Segmented id="health-seg" value={seg} onChange={setSeg} options={[{ value: 'cycle', label: 'Ciclo' }, { value: 'habits', label: 'Hábitos' }, { value: 'mind', label: 'Mente' }, { value: 'body', label: 'Corpo' }]} />
       </div>
-      {seg === 'cycle' ? <CycleView /> : <HabitsView />}
+      {seg === 'cycle' ? <CycleView /> : seg === 'habits' ? <HabitsView /> : seg === 'mind' ? <MindView /> : <BodyView />}
     </div>
   );
 }
@@ -431,6 +433,10 @@ function HabitsView() {
             </div>
           ))}
         </div>
+      </Section>
+
+      <Section title="Hábitos pessoais">
+        <CustomHabits />
       </Section>
 
       <Section title="Água">

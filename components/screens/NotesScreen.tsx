@@ -63,6 +63,7 @@ export function NotesScreen() {
   return (
     <div>
       <PageHeader
+        back
         title="Notas"
         subtitle={`${rows('notes').length} páginas`}
         actions={

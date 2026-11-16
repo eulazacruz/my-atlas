@@ -2,8 +2,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
-export type Tab = 'home' | 'agenda' | 'notes' | 'health' | 'more';
-export type SubView = 'couple' | 'finance' | 'shopping' | 'pet' | 'settings' | 'location' | 'bible' | 'checkin';
+export type Tab = 'home' | 'agenda' | 'faith' | 'health' | 'more';
+export type SubView = 'couple' | 'finance' | 'shopping' | 'pet' | 'settings' | 'location' | 'bible' | 'checkin' | 'notes' | 'focus' | 'mind' | 'life' | 'col' | 'insights' | 'weekly';
 export type View = Tab | SubView;
 export type SheetKind = 'event' | 'task' | 'expense' | 'cycleDay' | 'intimacy' | 'specialDate' | 'goal' | 'prayer' | 'shopItem' | 'widgets' | 'permissions' | 'vaultItem' | 'editHome';
 
@@ -13,7 +13,8 @@ interface SheetState { kind: SheetKind; payload?: any }
 interface UICtx {
   view: View;
   tab: Tab;
-  navigate: (v: View) => void;
+  navigate: (v: View, param?: string) => void;
+  param: string | null;
   back: () => void;
   sheet: SheetState | null;
   openSheet: (kind: SheetKind, payload?: any) => void;
@@ -26,8 +27,12 @@ interface UICtx {
 }
 
 const Ctx = createContext<UICtx | null>(null);
-const TABS: Tab[] = ['home', 'agenda', 'notes', 'health', 'more'];
-export const tabOf = (v: View): Tab => (TABS.includes(v as Tab) ? (v as Tab) : 'more');
+const TABS: Tab[] = ['home', 'agenda', 'faith', 'health', 'more'];
+const FAITH_VIEWS = ['bible'];
+const HEALTH_VIEWS = ['mind', 'insights'];
+let lastParam: string | null = null;
+export const tabOf = (v: View): Tab =>
+  TABS.includes(v as Tab) ? (v as Tab) : FAITH_VIEWS.includes(v) || (v === 'col' && lastParam?.startsWith('f:')) ? 'faith' : HEALTH_VIEWS.includes(v) ? 'health' : 'more';
 
 /**
  * Navegação com histórico do navegador: o botão "voltar" do Android
@@ -38,9 +43,12 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const [sheet, setSheet] = useState<SheetState | null>(null);
   const [noteId, setNoteId] = useState<string | null>(null);
   const [breathingOpen, setBreathing] = useState(false);
+  const [param, setParam] = useState<string | null>(null);
+  const setParamRef = useRef(setParam);
   const overlays = useRef<Array<'sheet' | 'note' | 'breathing'>>([]);
   // Pilha própria de telas (o Next reescreve history.state, então não dependemos dele)
   const stack = useRef<View[]>(['home']);
+  const params = useRef<(string | null)[]>([null]);
 
   const pushOverlay = (k: 'sheet' | 'note' | 'breathing') => {
     overlays.current.push(k);
@@ -59,16 +67,21 @@ export function UIProvider({ children }: { children: ReactNode }) {
         closeTop(top);
         return;
       }
-      if (stack.current.length > 1) stack.current.pop();
+      if (stack.current.length > 1) { stack.current.pop(); params.current.pop(); }
+      const pp = params.current[params.current.length - 1] ?? null;
+      lastParam = pp;
+      setParamRef.current(pp);
       setView(stack.current[stack.current.length - 1] ?? 'home');
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
-  const navigate = useCallback((v: View) => {
+  const navigate = useCallback((v: View, p?: string) => {
+    if (p !== undefined) { lastParam = p; setParam(p); }
+    const np = p !== undefined ? p : params.current[params.current.length - 1] ?? null;
     setView((cur) => {
-      if (cur === v) {
+      if (cur === v && p === undefined) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return cur;
       }
@@ -77,6 +90,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
         stack.current[stack.current.length - 1] = v;
       } else {
         stack.current.push(v);
+        params.current.push(np);
         window.history.pushState({ v }, '');
       }
       window.scrollTo({ top: 0 });
@@ -103,6 +117,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
       view,
       tab: tabOf(view),
       navigate,
+      param,
       back: () => window.history.back(),
       sheet,
       openSheet: (kind, payload) => {
@@ -124,7 +139,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
         } else dismiss('breathing');
       },
     }),
-    [view, sheet, noteId, breathingOpen, navigate, dismiss],
+    [view, param, sheet, noteId, breathingOpen, navigate, dismiss],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

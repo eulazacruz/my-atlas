@@ -71,6 +71,16 @@ async function build(table: string, type: string, r: Row, old: Row | null) {
   else if (table === 'prayers') [title, body] = [`${name} pediu oração 🙏`, r.title];
   else if (table === 'checkins') [title, body, link] = [`${name} fez o check-in da semana 💬`, 'Faça o seu para ver as respostas de vocês dois', 'app.myatlas://action/open/couple'];
   else if (table === 'bible_reads') [title, body, link] = [`${name} leu a Bíblia de hoje 📖`, 'Leitura a dois', 'app.myatlas://action/open/bible'];
+  else if (table === 'entries') {
+    const d = r.data ?? {};
+    if (r.kind === 'prayed') { [title, body] = [`${name} orou pelo seu pedido 🙏`, r.title || 'Estou orando por você']; to = d.to ?? null; }
+    else if (r.kind === 'sos') [title, body] = [`${name} precisa de você agora 🫂`, 'Momento de ansiedade — liga ou manda um carinho'];
+    else if (r.kind === 'devotional') [title, body, link] = [`${name} escreveu o devocional de hoje ✍️`, r.title || 'Leitura a dois', 'app.myatlas://action/open/faith'];
+    else if (r.kind === 'testimony') [title, body] = [`${name}: oração respondida 🙌`, r.title];
+    else if (r.kind === 'capsule') [title, body] = [`${name} deixou uma cápsula do tempo 💌`, r.date ? `Abre em ${String(r.date).split('-').reverse().join('/')}` : 'Para abrir no futuro'];
+    else if (r.kind === 'focus') [title, body] = [`${name} entrou em modo foco 🎯`, `${d.minutes ?? 25} min sem distrações`];
+    else return null;
+  }
   else if (table === 'pet_walks') [title, body, link] = [`${name} levou o Atlas para passear 🐾`, 'Passeio do dia registrado', 'app.myatlas://action/open/pet'];
   else return null;
 

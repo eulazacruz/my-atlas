@@ -28,7 +28,7 @@ export const HABITS: { key: HabitKey; label: string; emoji: string }[] = [
 export const WATER_GOAL = 3000;
 export const WATER_STEP = 500;
 
-export const TX_CATEGORIES = ['Mercado', 'Casa', 'Contas', 'Lazer', 'Pet', 'Transporte', 'Saúde', 'Igreja', 'Outros'];
+export const TX_CATEGORIES = ['Mercado', 'Casa', 'Contas', 'Lazer', 'Pet', 'Transporte', 'Saúde', 'Dízimo', 'Oferta', 'Igreja', 'Outros'];
 export const SHOP_CATEGORIES = ['Mercado', 'Hortifruti', 'Limpeza', 'Higiene', 'Farmácia', 'Pet', 'Casa', 'Outros'];
 
 /* ───────── Ciclo ───────── */
@@ -170,13 +170,17 @@ export const DEFAULT_VAULT_PIN = '1234';
 
 export const HOME_SECTIONS = [
   { id: 'status', label: 'Status & Preciso de…' },
+  { id: 'focus', label: '3 prioridades & modo foco' },
   { id: 'quick', label: 'Ações rápidas' },
+  { id: 'care', label: 'Cuidado do casal (alertas, noite do casal)' },
   { id: 'couple', label: 'Nós dois' },
   { id: 'today', label: 'Hoje (agenda e tarefas)' },
   { id: 'body', label: 'Corpo & mente' },
   { id: 'sleep', label: 'Sono & cafeína' },
   { id: 'pet', label: 'Atlas virtual' },
   { id: 'word', label: 'Palavra do dia' },
+  { id: 'faith', label: 'Fé do dia (devocional, pergunta)' },
   { id: 'house', label: 'Casa (finanças, compras, datas)' },
+  { id: 'summary', label: 'Resumo do dia e da semana' },
 ] as const;
 export type HomeSectionId = (typeof HOME_SECTIONS)[number]['id'];

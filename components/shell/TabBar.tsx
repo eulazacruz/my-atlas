@@ -1,14 +1,14 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CalendarDays, HeartPulse, House, LayoutGrid, NotebookPen } from 'lucide-react';
+import { BookOpen, CalendarDays, HeartPulse, House, LayoutGrid } from 'lucide-react';
 import { useUI, type Tab } from '@/components/providers/UIProvider';
 import { cn, vibrate } from '@/lib/utils';
 
 const ITEMS: { id: Tab; label: string; icon: typeof House }[] = [
   { id: 'home', label: 'Hoje', icon: House },
   { id: 'agenda', label: 'Agenda', icon: CalendarDays },
-  { id: 'notes', label: 'Notas', icon: NotebookPen },
+  { id: 'faith', label: 'Fé', icon: BookOpen },
   { id: 'health', label: 'Saúde', icon: HeartPulse },
   { id: 'more', label: 'Mais', icon: LayoutGrid },
 ];

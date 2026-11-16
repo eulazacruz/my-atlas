@@ -10,7 +10,7 @@ export const TABLES: TableName[] = [
   'cycle_settings', 'cycle_days', 'intimacy_logs', 'events', 'tasks', 'notes',
   'shopping_items', 'special_dates', 'goals', 'prayers',
   'household_tasks', 'pet_virtual_state', 'sleep_logs', 'caffeine_logs', 'vault_items', 'locations',
-  'bible_marks', 'bible_reads', 'bible_plan', 'checkins',
+  'bible_marks', 'bible_reads', 'bible_plan', 'checkins', 'entries',
 ];
 
 const NUMERIC = new Set(['amount', 'target', 'current', 'monthlyBudget', 'temperature', 'lat', 'lng', 'accuracy', 'speed']);

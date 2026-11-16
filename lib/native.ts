@@ -24,6 +24,7 @@ interface AtlasNativePlugin {
   updateWidgets(opts: { data: string }): Promise<void>;
   hasFirebase(): Promise<{ value: boolean }>;
   setImmersive(opts: { enabled: boolean }): Promise<void>;
+  setDnd(opts: { enabled: boolean }): Promise<{ value: string }>;
 }
 export const AtlasNative = registerPlugin<AtlasNativePlugin>('AtlasNative');
 
@@ -97,7 +98,7 @@ export async function scheduleLocal(list: Scheduled[]) {
   const pending = await LocalNotifications.getPending();
   const ours = pending.notifications.filter((n) => n.id < 900000);
   if (ours.length) await LocalNotifications.cancel({ notifications: ours.map((n) => ({ id: n.id })) });
-  const future = list.filter((n) => n.at.getTime() > Date.now() + 5000).slice(0, 60);
+  const future = list.filter((n) => n.at.getTime() > Date.now() + 5000).sort((a, b) => a.at.getTime() - b.at.getTime()).slice(0, 60);
   if (future.length)
     await LocalNotifications.schedule({
       notifications: future.map((n) => ({ id: n.id, title: n.title, body: n.body, schedule: { at: n.at, allowWhileIdle: true }, smallIcon: 'ic_stat_atlas' })),
@@ -198,5 +199,28 @@ export async function permissionState(): Promise<{ notif: string; geo: string }>
     return { notif: n.display, geo: g.location };
   } catch {
     return { notif: '?', geo: '?' };
+  }
+}
+
+/** Notificação avulsa (ids >= 900000 não são apagados pelo reagendamento geral). */
+export async function notifyAt(id: number, title: string, body: string, at: Date) {
+  if (!isNative()) return;
+  const { LocalNotifications } = await import('@capacitor/local-notifications');
+  await LocalNotifications.schedule({ notifications: [{ id, title, body, schedule: { at, allowWhileIdle: true }, smallIcon: 'ic_stat_atlas' }] });
+}
+export async function cancelNotif(id: number) {
+  if (!isNative()) return;
+  const { LocalNotifications } = await import('@capacitor/local-notifications');
+  await LocalNotifications.cancel({ notifications: [{ id }] }).catch(() => {});
+}
+
+/* ───────── Não perturbe (modo culto) ───────── */
+export async function setDoNotDisturb(on: boolean): Promise<'ok' | 'permission' | 'unsupported'> {
+  if (!isNative()) return 'unsupported';
+  try {
+    const r = await AtlasNative.setDnd({ enabled: on });
+    return r.value as 'ok' | 'permission';
+  } catch {
+    return 'unsupported';
   }
 }

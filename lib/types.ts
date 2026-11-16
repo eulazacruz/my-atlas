@@ -175,6 +175,12 @@ export interface BiblePlan { id: string; plan: string; startDate: string; create
 export interface Checkin { id: string; profileId: string; week: string; score: number | null; answers: Record<string, string>; createdAt?: string }
 export interface ExternalEvent { id: string; title: string; start: string; end: string | null; allDay: boolean; location: string | null; owner: string }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export interface Entry {
+  id: string; createdBy: string; kind: string; title: string; body?: string | null; date?: string | null;
+  done: boolean; private: boolean; data: Record<string, any>; sort: number; createdAt?: string; updatedAt?: string;
+}
+
 export interface Tables {
   profiles: Profile;
   mood_logs: MoodLog;
@@ -202,6 +208,7 @@ export interface Tables {
   bible_reads: BibleRead;
   bible_plan: BiblePlan;
   checkins: Checkin;
+  entries: Entry;
   locations: LocationRow;
 }
 export type TableName = keyof Tables;

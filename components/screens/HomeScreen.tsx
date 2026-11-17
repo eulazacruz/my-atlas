@@ -1,4 +1,5 @@
 'use client';
+import { InstantsStrip } from '@/components/v6/Social';
 
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, LifeBuoy, LayoutGrid, Search, CalendarPlus, CheckSquare, ChevronRight, Droplets, FilePlus2, Heart, Moon, PawPrint, Plus, ShoppingBag, Sun, Wallet, Wind } from 'lucide-react';
@@ -102,6 +103,7 @@ export function HomeScreen() {
   };
 
   const blocks: Record<HomeSectionId, JSX.Element | null> = {
+    social: <Section><InstantsStrip /></Section>,
     status: (
       <>
       <Section title="Agora" action={<button onClick={() => navigate('couple')} className="text-[13px] font-medium muted">Preciso de…</button>}>

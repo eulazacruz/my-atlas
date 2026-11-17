@@ -1,60 +1,83 @@
 'use client';
 
-import { BookOpen, ChevronRight, Heart, MapPin, MessagesSquare, NotebookPen, Rocket, Sofa, Brain, BarChart3, PawPrint, Settings, ShoppingBag, Sparkles, Target, Wallet } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { BarChart3, BookOpen, Brain, Heart, MapPin, MessagesSquare, NotebookPen, PawPrint, Rocket, Settings, ShoppingBag, Sofa, Wallet } from 'lucide-react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI, type SubView } from '@/components/providers/UIProvider';
-import { Glass, PageHeader, Section } from '@/components/ui/primitives';
+import { IconButton, PageHeader, Section } from '@/components/ui/primitives';
+import { TOOL_META } from '@/lib/tools';
 import { money, ymd } from '@/lib/utils';
+
+type Item = { view?: SubView; tool?: string; title: string; icon?: typeof Heart; emoji?: string; badge?: string };
+
+function Grid({ items }: { items: Item[] }) {
+  const { navigate } = useUI();
+  return (
+    <div className="grid grid-cols-3 gap-2.5">
+      {items.map((it, i) => {
+        const Icon = it.icon;
+        const emoji = it.emoji ?? (it.tool ? TOOL_META[it.tool]?.emoji : undefined);
+        return (
+          <motion.button
+            key={it.title}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: Math.min(i * 0.025, 0.25), type: 'spring', stiffness: 500, damping: 34 }}
+            whileTap={{ scale: 0.94 }}
+            onClick={() => (it.tool ? navigate('tool', it.tool) : it.view && navigate(it.view))}
+            className="glass flex flex-col items-start gap-2 !rounded-[22px] p-3 text-left"
+          >
+            <span className="grid h-10 w-10 place-items-center rounded-[14px] bg-black/[0.05] text-[20px] dark:bg-white/[0.07]">{Icon ? <Icon size={19} /> : emoji}</span>
+            <span className="text-[13px] font-semibold leading-tight">{it.title}</span>
+            {it.badge && <span className="-mt-1.5 text-[11px] leading-tight muted">{it.badge}</span>}
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
 
 export function MoreScreen() {
   const { rows, couple } = useAtlas();
   const { navigate } = useUI();
   const month = ymd().slice(0, 7);
   const balance = rows('transactions').filter((t) => t.occurredOn.startsWith(month)).reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0);
-  const tiles: { id: SubView; title: string; hint: string; icon: typeof Heart }[] = [
-    { id: 'focus', title: 'Produtividade', hint: 'Prioridades, foco, projetos e metas', icon: Rocket },
-    { id: 'notes', title: 'Notas', hint: 'Bloco de notas do casal', icon: NotebookPen },
-    { id: 'couple', title: 'Nós dois', hint: 'Humor, datas, metas e oração', icon: Heart },
-    { id: 'checkin', title: 'Check-in', hint: 'Conversa da semana', icon: MessagesSquare },
-    { id: 'life', title: 'Casa & lazer', hint: 'Receitas, filmes, viagens, cápsula', icon: Sofa },
-    { id: 'weekly', title: 'Resumo da semana', hint: 'Vocês dois lado a lado', icon: BarChart3 },
-    { id: 'finance', title: 'Finanças', hint: `Saldo do mês ${money(balance)}`, icon: Wallet },
-    { id: 'shopping', title: 'Compras', hint: `${rows('shopping_items').filter((i) => !i.checked).length} itens na lista`, icon: ShoppingBag },
-    { id: 'pet', title: 'Atlas', hint: 'Bichinho virtual e prontuário', icon: PawPrint },
-    { id: 'location', title: 'Localização', hint: 'Onde cada um está agora', icon: MapPin },
-    { id: 'mind', title: 'Mente', hint: 'Ansiedade, emoções e descobertas', icon: Brain },
-    { id: 'bible', title: 'Bíblia', hint: 'Leitura a dois e marcações', icon: BookOpen },
-  ];
+  const shop = rows('shopping_items').filter((i) => !i.checked).length;
   return (
     <div>
-      <PageHeader title="Mais" subtitle={couple?.name ?? 'Nós dois'} />
-      <Section title="Áreas">
-        <div className="grid grid-cols-2 gap-3">
-          {tiles.map(({ id, title, hint, icon: Icon }, i) => (
-            <Glass key={id} className={i === tiles.length - 1 && tiles.length % 2 ? 'col-span-2 p-4' : 'p-4'} onClick={() => navigate(id)}>
-              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-black text-white dark:bg-white dark:text-black">
-                <Icon size={20} />
-              </span>
-              <p className="mt-4 text-[16px] font-semibold">{title}</p>
-              <p className="mt-0.5 text-[12px] leading-snug muted">{hint}</p>
-            </Glass>
-          ))}
-        </div>
+      <PageHeader title="Mais" subtitle={couple?.name ?? 'Nós dois'} actions={<IconButton label="Ajustes" onClick={() => navigate('settings')}><Settings size={18} /></IconButton>} />
+      <Section title="Nós dois">
+        <Grid items={[
+          { tool: 'social', title: 'Cantinho' },
+          { view: 'couple', title: 'Nós dois', icon: Heart },
+          { tool: 'journey', title: 'Jornada a Dois' },
+          { view: 'checkin', title: 'Check-in', icon: MessagesSquare },
+          { tool: 'games', title: 'Jogos' },
+          { tool: 'challenges', title: 'Desafios' },
+          { tool: 'wishlist', title: 'Desejos' },
+          { tool: 'trilha', title: 'Nossa trilha' },
+          { view: 'weekly', title: 'Semana', icon: BarChart3 },
+        ]} />
       </Section>
-      <Section title="Atalhos">
-        <div className="glass overflow-hidden">
-          {[
-            { label: 'Metas do casal', icon: Target, to: 'couple' as SubView },
-            { label: 'Pedidos de oração', icon: Sparkles, to: 'couple' as SubView },
-            { label: 'Ajustes', icon: Settings, to: 'settings' as SubView },
-          ].map(({ label, icon: Icon, to }) => (
-            <button key={label} onClick={() => navigate(to)} className="flex w-full items-center gap-3 border-b px-4 py-3.5 text-left last:border-0 hairline">
-              <Icon size={18} />
-              <span className="flex-1 text-[15px]">{label}</span>
-              <ChevronRight size={18} className="muted" />
-            </button>
-          ))}
-        </div>
+      <Section title="Organizar">
+        <Grid items={[
+          { view: 'focus', title: 'Produtividade', icon: Rocket },
+          { view: 'notes', title: 'Notas', icon: NotebookPen },
+          { view: 'finance', title: 'Finanças', icon: Wallet, badge: money(balance) },
+          { tool: 'piggy', title: 'Cofrinhos' },
+          { view: 'shopping', title: 'Compras', icon: ShoppingBag, badge: shop ? `${shop} itens` : undefined },
+          { view: 'life', title: 'Casa & lazer', icon: Sofa },
+        ]} />
+      </Section>
+      <Section title="Cuidar">
+        <Grid items={[
+          { view: 'mind', title: 'Mente', icon: Brain },
+          { view: 'location', title: 'Localização', icon: MapPin },
+          { tool: 'nutrition', title: 'Alimentação' },
+          { tool: 'alarm', title: 'Despertador' },
+          { view: 'pet', title: 'Atlas', icon: PawPrint },
+          { view: 'bible', title: 'Bíblia', icon: BookOpen },
+        ]} />
       </Section>
     </div>
   );

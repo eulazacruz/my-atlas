@@ -79,6 +79,18 @@
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_habits_info" />
         </receiver>
 
+        <receiver android:name=".widgets.InstantWidget" android:exported="false" android:label="Instante do seu amor">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_instant_info" />
+        </receiver>
+        <receiver android:name=".alarm.AlarmReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="app.myatlas.ALARM" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
         <service android:name=".tiles.WaterTile" android:exported="true" android:label="Água +500ml" android:icon="@drawable/ic_tile_water" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
         </service>
@@ -116,4 +128,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>

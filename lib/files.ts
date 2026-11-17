@@ -49,3 +49,14 @@ export function usePhotoUrl(path?: string | null) {
   }, [path]);
   return url;
 }
+
+/** URL assinada (ou dataURL) para uso fora de componentes. */
+export async function photoUrl(path: string): Promise<string | null> {
+  if (path.startsWith('data:') || path.startsWith('http')) return path;
+  const c = urlCache.get(path);
+  if (c && c.exp > Date.now()) return c.url;
+  const { data } = (await getSupabase()?.storage.from('atlas').createSignedUrl(path, 3600)) ?? { data: null };
+  if (!data?.signedUrl) return null;
+  urlCache.set(path, { url: data.signedUrl, exp: Date.now() + 3500_000 });
+  return data.signedUrl;
+}

@@ -79,6 +79,13 @@ async function build(table: string, type: string, r: Row, old: Row | null) {
     else if (r.kind === 'testimony') [title, body] = [`${name}: oração respondida 🙌`, r.title];
     else if (r.kind === 'capsule') [title, body] = [`${name} deixou uma cápsula do tempo 💌`, r.date ? `Abre em ${String(r.date).split('-').reverse().join('/')}` : 'Para abrir no futuro'];
     else if (r.kind === 'focus') [title, body] = [`${name} entrou em modo foco 🎯`, `${d.minutes ?? 25} min sem distrações`];
+    else if (r.kind === 'instant') [title, body, link] = [`${name} mandou um instante 📸`, r.title || 'Veja antes que suma 👀', 'app.myatlas://action/tool/social'];
+    else if (r.kind === 'post') [title, body, link] = [d.replyTo ? `${name} respondeu 💬` : d.indireta ? `${name} postou uma indireta 👀` : `${name} postou na timeline`, String(r.body ?? r.title ?? '').slice(0, 140), 'app.myatlas://action/tool/social'];
+    else if (r.kind === 'mural') [title, body, link] = [`${name} postou no mural 🖼️`, r.title || 'Uma foto nova de vocês', 'app.myatlas://action/tool/social'];
+    else if (r.kind === 'journey_hard') [title, body, link] = [`${name} escreveu a parte dele(a) 🧱`, 'Escreva a sua para revelar a conversa', 'app.myatlas://action/tool/journey'];
+    else if (r.kind === 'alarm_snooze') [title, body] = [`${name} apertou soneca 😴`, 'Vai lá acordar! ⏰'];
+    else if (r.kind === 'wish') [title, body, link] = [`${name} adicionou um desejo 🎁`, r.title, 'app.myatlas://action/tool/wishlist'];
+    else if (r.kind === 'challenge') [title, body, link] = [`${name} começou um desafio 🏁`, r.title, 'app.myatlas://action/tool/challenges'];
     else return null;
   }
   else if (table === 'pet_walks') [title, body, link] = [`${name} levou o Atlas para passear 🐾`, 'Passeio do dia registrado', 'app.myatlas://action/open/pet'];

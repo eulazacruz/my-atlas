@@ -1,7 +1,8 @@
 'use client';
+import { speak, stopSpeak } from '@/lib/tts';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { BookOpen, Check, Image as ImageIcon, ChevronDown, ChevronLeft, ChevronRight, Copy, Minus, PenLine, Plus, Search, Share2, Trash2, X } from 'lucide-react';
+import { BookOpen, Check, Headphones, Pause, Image as ImageIcon, ChevronDown, ChevronLeft, ChevronRight, Copy, Minus, PenLine, Plus, Search, Share2, Trash2, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useIsland } from '@/components/island/IslandProvider';
 import { useAtlas } from '@/components/providers/AtlasProvider';
@@ -202,7 +203,11 @@ function Reader({ pos, setPos, onClose }: { pos: Pos; setPos: (p: Pos) => void; 
   const [noteFor, setNoteFor] = useState<number | null>(null);
   const [note, setNote] = useState('');
   const [size, setSize] = useState(18);
+  const [speaking, setSpeaking] = useState(-2);
   const top = useRef<HTMLDivElement | null>(null);
+  useEffect(() => () => { stopSpeak(); }, []);
+  useEffect(() => { stopSpeak(); setSpeaking(-2); }, [pos.book, pos.chapter]);
+  useEffect(() => { if (speaking >= 0) document.getElementById(`v-${speaking + 1}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, [speaking]);
   const book = bookOf(pos.book);
 
   useEffect(() => {
@@ -312,6 +317,7 @@ function Reader({ pos, setPos, onClose }: { pos: Pos; setPos: (p: Pos) => void; 
           <button onClick={() => setPicker(true)} className="glass flex h-10 flex-1 items-center justify-center gap-1.5 !rounded-full px-4 text-[15px] font-semibold">
             {book.name} {pos.chapter} <ChevronDown size={15} className="muted" />
           </button>
+          <button onClick={() => { if (speaking > -2) { stopSpeak(); setSpeaking(-2); return; } if (!verses) return; setSpeaking(-1); speak([`${book.name}, capítulo ${pos.chapter}.`, ...verses.map((t) => t.replace(/[[\]]/g, ''))], (i) => setSpeaking(i - 1), () => setSpeaking(-2)); }} aria-label="Ouvir capítulo" className={`glass grid h-10 w-10 place-items-center !rounded-full ${speaking > -2 ? '!bg-emerald-500 text-white' : ''}`}>{speaking > -2 ? <Pause size={16} /> : <Headphones size={16} />}</button>
           <button onClick={() => setFont(size - 1)} aria-label="Diminuir letra" className="glass grid h-10 w-10 place-items-center !rounded-full"><Minus size={16} /></button>
           <button onClick={() => setFont(size + 1)} aria-label="Aumentar letra" className="glass grid h-10 w-10 place-items-center !rounded-full"><Plus size={16} /></button>
         </div>
@@ -332,7 +338,7 @@ function Reader({ pos, setPos, onClose }: { pos: Pos; setPos: (p: Pos) => void; 
                 <span
                   role="button"
                   onClick={() => setSel((s) => (s.includes(v) ? s.filter((x) => x !== v) : [...s, v]))}
-                  className={cn('cursor-pointer rounded-[4px] transition-colors', isSel && 'underline decoration-2 underline-offset-4', pos.verse === v && !m && 'bg-black/[0.05] dark:bg-white/[0.07]')}
+                  className={cn('cursor-pointer rounded-[4px] transition-colors', isSel && 'underline decoration-2 underline-offset-4', pos.verse === v && !m && 'bg-black/[0.05] dark:bg-white/[0.07]', speaking === i && 'bg-emerald-500/20')}
                   style={{
                     background: m ? MARK_COLORS[m.color]?.bg : undefined,
                     textDecorationLine: !isSel && o ? 'underline' : undefined,

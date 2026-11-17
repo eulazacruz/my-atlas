@@ -53,6 +53,7 @@ export function NativeEffects() {
       if (a === 'focus') U.navigate('focus');
       if (a === 'mood') U.navigate('couple');
       if (a === 'col' && b) U.navigate('col', b);
+      if (a === 'tool' && b) U.navigate('tool', b);
     };
     const q = new URLSearchParams(window.location.search).get('action');
     if (q) {

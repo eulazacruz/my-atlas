@@ -35,6 +35,9 @@ import { ShoppingScreen } from '@/components/screens/ShoppingScreen';
 import { Sheets } from '@/components/sheets/Sheets';
 import { BoxBreathing } from './BoxBreathing';
 import { TabBar } from './TabBar';
+import { ToolScreen } from '@/components/v6/ToolScreen';
+import { AlarmHost } from '@/components/v6/Alarm';
+import { InstantWidgetSync } from '@/components/v6/Social';
 
 const SCREENS: Record<View, () => JSX.Element | null> = {
   home: HomeScreen,
@@ -58,6 +61,7 @@ const SCREENS: Record<View, () => JSX.Element | null> = {
   insights: InsightsScreen,
   weekly: WeeklyScreen,
   wrapped: WrappedScreen,
+  tool: ToolScreen,
 };
 
 function MindPage() {
@@ -106,7 +110,7 @@ export function AppShell() {
     <>
       <main className="mx-auto max-w-2xl px-4 pb-36">
         <motion.div
-          key={view + (view === 'col' ? param ?? '' : '')}
+          key={view + (view === 'col' || view === 'tool' ? param ?? '' : '')}
           initial={TAB_VIEWS.includes(view) ? { opacity: 0, scale: 0.985 } : { opacity: 0, x: 42, scale: 0.99 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={TAB_VIEWS.includes(view) ? { duration: 0.2, ease: 'easeOut' } : { type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
@@ -129,6 +133,8 @@ export function AppShell() {
       <DiscreetMode />
       <TextScale />
       <NativeEffects />
+      <AlarmHost />
+      <InstantWidgetSync />
     </>
   );
 }

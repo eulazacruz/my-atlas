@@ -1,9 +1,10 @@
 'use client';
 
+import { toolTab } from '@/lib/tools';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 export type Tab = 'home' | 'agenda' | 'faith' | 'health' | 'more';
-export type SubView = 'couple' | 'finance' | 'shopping' | 'pet' | 'settings' | 'location' | 'bible' | 'checkin' | 'notes' | 'focus' | 'mind' | 'life' | 'col' | 'insights' | 'weekly' | 'wrapped';
+export type SubView = 'couple' | 'finance' | 'shopping' | 'pet' | 'settings' | 'location' | 'bible' | 'checkin' | 'notes' | 'focus' | 'mind' | 'life' | 'col' | 'insights' | 'weekly' | 'wrapped' | 'tool';
 export type View = Tab | SubView;
 export type SheetKind = 'event' | 'task' | 'expense' | 'cycleDay' | 'intimacy' | 'specialDate' | 'goal' | 'prayer' | 'shopItem' | 'widgets' | 'permissions' | 'vaultItem' | 'editHome';
 
@@ -32,7 +33,7 @@ const FAITH_VIEWS = ['bible'];
 const HEALTH_VIEWS = ['mind', 'insights'];
 let lastParam: string | null = null;
 export const tabOf = (v: View): Tab =>
-  TABS.includes(v as Tab) ? (v as Tab) : FAITH_VIEWS.includes(v) || (v === 'col' && lastParam?.startsWith('f:')) ? 'faith' : HEALTH_VIEWS.includes(v) ? 'health' : 'more';
+  v === 'tool' ? toolTab(lastParam) : TABS.includes(v as Tab) ? (v as Tab) : FAITH_VIEWS.includes(v) || (v === 'col' && lastParam?.startsWith('f:')) ? 'faith' : HEALTH_VIEWS.includes(v) ? 'health' : 'more';
 
 /**
  * Navegação com histórico do navegador: o botão "voltar" do Android
@@ -98,7 +99,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
     });
   }, []);
   useEffect(() => {
-    const on = (e: Event) => navigate((e as CustomEvent).detail as View);
+    const on = (e: Event) => { const d = String((e as CustomEvent).detail ?? ''); const [v, p] = d.split(':'); navigate(v as View, p); };
     window.addEventListener('atlas:navigate', on);
     return () => window.removeEventListener('atlas:navigate', on);
   }, [navigate]);

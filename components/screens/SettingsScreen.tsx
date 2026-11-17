@@ -150,7 +150,7 @@ export function SettingsScreen() {
           </Button>
         </Section>
       )}
-      <p className="pb-4 text-center text-[11px] muted">My Atlas · Life & Couple OS · v5.0</p>
+      <p className="pb-4 text-center text-[11px] muted">My Atlas · Life & Couple OS · v6.0</p>
     </div>
   );
 }

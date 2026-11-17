@@ -25,6 +25,16 @@ interface AtlasNativePlugin {
   hasFirebase(): Promise<{ value: boolean }>;
   setImmersive(opts: { enabled: boolean }): Promise<void>;
   setDnd(opts: { enabled: boolean }): Promise<{ value: string }>;
+  speak(opts: { parts: string[]; rate: number }): Promise<void>;
+  stopSpeak(): Promise<void>;
+  setAlarms(opts: { data: string }): Promise<{ exact: boolean; fullScreen: boolean }>;
+  stopAlarm(): Promise<void>;
+  alarmState(): Promise<{ ringing: boolean; id?: string }>;
+  openAlarmSettings(opts: { which: 'exact' | 'fullscreen' }): Promise<void>;
+  setInstantWidget(opts: { image: string; caption: string; from: string }): Promise<void>;
+  addListener(event: 'ttsProgress', cb: (e: { index: number }) => void): Promise<{ remove: () => void }>;
+  addListener(event: 'ttsEnd', cb: () => void): Promise<{ remove: () => void }>;
+  addListener(event: 'alarm', cb: (e: { id: string }) => void): Promise<{ remove: () => void }>;
 }
 export const AtlasNative = registerPlugin<AtlasNativePlugin>('AtlasNative');
 

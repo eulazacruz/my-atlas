@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { HOME_SECTIONS, type HomeSectionId } from './constants';
+import { HOME_HIDDEN_DEFAULT, HOME_SECTIONS, type HomeSectionId } from './constants';
 
 const KEY = 'my-atlas:home-layout';
 export interface HomeLayout { order: HomeSectionId[]; hidden: HomeSectionId[] }
 const ALL = HOME_SECTIONS.map((s) => s.id) as HomeSectionId[];
-const DEFAULT: HomeLayout = { order: ALL, hidden: [] };
+const DEFAULT: HomeLayout = { order: ALL, hidden: HOME_HIDDEN_DEFAULT };
 
 function read(): HomeLayout {
   try {

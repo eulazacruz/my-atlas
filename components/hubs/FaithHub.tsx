@@ -1,4 +1,5 @@
 'use client';
+import { ToolGrid, ToolRow } from '@/components/v6/kit';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { BellOff, BookOpen, Share2, Check, ChevronRight, Eye, HandHeart, MessageCircle, Phone, Plus, RotateCcw, Sparkles } from 'lucide-react';
@@ -444,13 +445,13 @@ export function FaithHub() {
               <Section><BiblePlanMini /></Section>
               <Section><DevotionalCard /></Section>
               <Section><ActiveFast /></Section>
+              <Section title="Para agora"><ToolGrid ids={['psalm', 'narrated', 'acts']} /></Section>
               <Section title="Estou orando por você"><PrayingFor /></Section>
-              <Section><QuestionOfDay /></Section>
-              <Section><ChurchMode /></Section>
             </>
           )}
           {tab === 'grow' && (
             <>
+              <Section title="Práticas"><ToolGrid ids={['lectio', 'examen', 'prayertimes', 'fruit', 'gifts', 'grace']} /></Section>
               <Section><MemoryReview /></Section>
               <Section title="Testemunhos"><Testimonies /></Section>
               <Section><ReadingMap /></Section>
@@ -479,6 +480,7 @@ export function FaithHub() {
                   </div>
                 ) : <p className="px-1 text-[13px] muted">Nada marcado. Adicione cultos, células e escalas.</p>}
               </Section>
+              <Section><ToolRow id="churchday" /></Section>
               <Section title="Pessoas para cuidar"><PeopleDue /></Section>
               <Section><TitheCard /></Section>
               <Section title="Organizar"><HubTiles kinds={['church', 'serve', 'person', 'sermon']} /></Section>

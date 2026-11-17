@@ -169,6 +169,7 @@ export const VAULT_CATEGORIES = ['Documentos', 'Pix', 'Veículo', 'Casa', 'Medid
 export const DEFAULT_VAULT_PIN = '1234';
 
 export const HOME_SECTIONS = [
+  { id: 'social', label: 'Nosso cantinho (instantes e timeline)' },
   { id: 'status', label: 'Status & Preciso de…' },
   { id: 'focus', label: '3 prioridades & modo foco' },
   { id: 'quick', label: 'Ações rápidas' },
@@ -183,4 +184,6 @@ export const HOME_SECTIONS = [
   { id: 'house', label: 'Casa (finanças, compras, datas)' },
   { id: 'summary', label: 'Resumo do dia e da semana' },
 ] as const;
+/** Seções escondidas por padrão para a tela inicial ficar leve (dá para ligar em Editar tela). */
+export const HOME_HIDDEN_DEFAULT: HomeSectionId[] = ['body', 'sleep', 'pet', 'house', 'summary'];
 export type HomeSectionId = (typeof HOME_SECTIONS)[number]['id'];

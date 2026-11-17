@@ -23,6 +23,26 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         createChannels();
         applyImmersive();
+        handleAlarm(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(android.content.Intent intent) {
+        super.onNewIntent(intent);
+        handleAlarm(intent);
+    }
+
+    /** Alarme tocando: acende a tela por cima do bloqueio e avisa o app. */
+    void handleAlarm(android.content.Intent intent) {
+        if (intent == null || intent.getStringExtra("atlas_alarm") == null) return;
+        String id = intent.getStringExtra("atlas_alarm");
+        if (Build.VERSION.SDK_INT >= 27) { setShowWhenLocked(true); setTurnScreenOn(true); }
+        else getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        try {
+            com.getcapacitor.PluginHandle h = getBridge() != null ? getBridge().getPlugin("AtlasNative") : null;
+            if (h != null) ((AtlasNativePlugin) h.getInstance()).emitAlarm(id);
+        } catch (Exception ignored) { }
     }
 
     @Override

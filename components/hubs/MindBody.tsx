@@ -1,4 +1,5 @@
 'use client';
+import { ToolGrid, ToolRow } from '@/components/v6/kit';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Activity, AlertCircle, ChevronRight, HeartHandshake, LifeBuoy, Moon, Sun, Wind, X } from 'lucide-react';
@@ -301,13 +302,13 @@ export function MindView() {
       <Section title="Como você está?" action={<button onClick={() => navigate('col', 'emotion')} className="text-[13px] font-medium muted">Diário</button>}>
         <EmotionQuick />
       </Section>
+      <Section title="Acalmar agora"><ToolGrid ids={['breaths', 'mindgames', 'worry']} /></Section>
+      <Section title="Entender e mudar"><ToolGrid ids={['thoughts', 'activate', 'tests']} /></Section>
+      <Section title="Cuidar sempre"><ToolGrid ids={['care', 'safety', 'psalm']} /></Section>
       <Section title="Descobertas" action={<button onClick={() => navigate('insights')} className="text-[13px] font-medium muted">Ver todas</button>}>
         <Glass className="flex gap-3 p-4" onClick={() => navigate('insights')}><span className="text-[22px]">{ins[0]?.icon}</span><p className="flex-1 text-[14px] leading-snug">{ins[0]?.text}</p></Glass>
       </Section>
-      <Section title="Limites da semana"><LimitsCard /></Section>
-      <Section><UnwindRoutine /></Section>
       <Section title="Para os dias difíceis"><HubTiles kinds={['win', 'emotion']} /></Section>
-      <Section title="Lembretes de cuidado"><ReminderSettings /></Section>
     </>
   );
 }
@@ -345,6 +346,7 @@ export function BodyView() {
   const chart = measures.map((m) => ({ d: m.date ? fmtDay(parseYmd(m.date), { day: '2-digit', month: '2-digit' }) : '', kg: m.data?.weight }));
   return (
     <>
+      <Section><div className="space-y-2"><ToolRow id="nutrition" /><ToolRow id="alarm" /></div></Section>
       <Section title="Treinos">
         <Glass className="p-4">
           <div className="flex items-end justify-between">

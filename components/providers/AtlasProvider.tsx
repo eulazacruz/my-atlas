@@ -203,6 +203,12 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
         if (k === 'prayed' && (!row.data?.to || row.data.to === myId)) pushRef.current({ kind: 'bible', title: `${who} orou pelo seu pedido 🙏`, subtitle: row.title, avatar: { name: who } });
         if (k === 'devotional') pushRef.current({ kind: 'bible', title: `${who} escreveu o devocional de hoje ✍️`, subtitle: row.title, avatar: { name: who } });
         if (k === 'focus') pushRef.current({ kind: 'status', title: `${who} entrou em modo foco 🎯`, subtitle: `${row.data?.minutes ?? 25} min`, avatar: { name: who }, duration: 3500 });
+        const toSocial = () => window.dispatchEvent(new CustomEvent('atlas:navigate', { detail: 'tool:social' }));
+        if (k === 'instant') pushRef.current({ kind: 'nudge', title: `${who} mandou um instante 📸`, subtitle: row.title || 'Some depois de visto', avatar: { name: who }, duration: 6000, actions: [{ label: 'Ver agora', primary: true, onClick: toSocial }, { label: 'Depois' }] });
+        if (k === 'post') pushRef.current({ kind: 'nudge', title: row.data?.replyTo ? `${who} respondeu 💬` : row.data?.indireta ? `${who} postou uma indireta 👀` : `${who} postou`, subtitle: String(row.body ?? '').slice(0, 80), avatar: { name: who }, duration: 5000, actions: [{ label: 'Abrir', primary: true, onClick: toSocial }] });
+        if (k === 'mural') pushRef.current({ kind: 'success', title: `${who} postou no mural 🖼️`, subtitle: row.title || 'Foto nova', avatar: { name: who } });
+        if (k === 'alarm_snooze') pushRef.current({ kind: 'need', title: `${who} apertou soneca 😴`, subtitle: 'Vai lá acordar! ⏰', avatar: { name: who }, duration: 8000 });
+        if (k === 'journey_hard') pushRef.current({ kind: 'checkin', title: `${who} escreveu a parte dele(a) 🧱`, subtitle: 'Conversa difícil · escreva a sua', avatar: { name: who } });
         if (k === 'capsule') pushRef.current({ kind: 'success', title: `${who} deixou uma cápsula do tempo 💌`, subtitle: 'Abre no futuro', avatar: { name: who } });
       }
       if (t === 'checkins') pushRef.current({ kind: 'checkin', title: `${who} fez o check-in da semana 💬`, subtitle: 'Faça o seu para ver as respostas de vocês dois', avatar: { name: who }, actions: [{ label: 'Fazer agora', primary: true, onClick: () => window.dispatchEvent(new CustomEvent('atlas:navigate', { detail: 'checkin' })) }, { label: 'Depois' }] });

@@ -1,4 +1,6 @@
 'use client';
+import { TOOL_META } from '@/lib/tools';
+import { Camera, MessageCircle, Puzzle, Utensils } from 'lucide-react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { BookOpen, CalendarPlus, CheckSquare, Droplet, Dumbbell, HandHeart, Lightbulb, NotebookPen, Plus, Receipt, Search, ShoppingBag, Smile, Star, X } from 'lucide-react';
@@ -51,8 +53,10 @@ export function Spotlight() {
     rows('entries').forEach((e) => {
       const k = KINDS[e.kind];
       if (!k) return;
-      if (has(e.title, e.body, ...Object.values(e.data ?? {}).filter((v) => typeof v === 'string'))) out.push({ id: e.id, icon: k.emoji, title: e.title || k.singular, sub: k.title, go: close(() => navigate('col', e.kind)) });
+      const tool = ({ wish: 'wishlist', song: 'trilha', piggy: 'piggy', grace: 'grace' } as Record<string, string>)[e.kind];
+      if (has(e.title, e.body, ...Object.values(e.data ?? {}).filter((v) => typeof v === 'string'))) out.push({ id: e.id, icon: k.emoji, title: e.title || k.singular, sub: k.title, go: close(() => (tool ? navigate('tool', tool) : navigate('col', e.kind))) });
     });
+    Object.entries(TOOL_META).forEach(([id, t]) => { if (has(t.title, t.hint)) out.unshift({ id: `tool-${id}`, icon: t.emoji, title: t.title, sub: t.hint, go: close(() => navigate('tool', id)) }); });
     return out.slice(0, 40);
   }, [q, rows, navigate, openSheet, openNote, nameOf]);
   const ref = q.trim() ? parseRef(q) : null;
@@ -119,8 +123,12 @@ export function QuickAdd() {
     { icon: ShoppingBag, label: 'Compras', run: () => openSheet('shopItem') },
     { icon: BookOpen, label: 'Versículo', run: () => setKind('memory') },
     { icon: Droplet, label: '+500 ml', run: () => { addWater(500); playSound('pop'); } },
+    { icon: Camera, label: 'Instante', run: () => navigate('tool', 'social') },
+    { icon: MessageCircle, label: 'Post', run: () => navigate('tool', 'social') },
+    { icon: Utensils, label: 'Refeição', run: () => navigate('tool', 'nutrition') },
+    { icon: Puzzle, label: 'Pensamento', run: () => navigate('tool', 'thoughts') },
   ];
-  const hideOn = ['bible'];
+  const hideOn = ['bible', 'tool'];
   if (!me) return null;
   return (
     <>

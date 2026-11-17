@@ -33,12 +33,14 @@ export const viewport: Viewport = {
   ],
 };
 
+const LITE = `try{var g=localStorage.getItem('my-atlas:glass');if(g==='0'||(g!=='1'&&/Android/i.test(navigator.userAgent)))document.documentElement.classList.add('lite')}catch(e){}`;
 const NATIVE_RETURN = `(function(){try{var s=location.search;if(location.pathname.indexOf('/voltar')===0)return;var p=new URLSearchParams(s);if(!p.get('code')&&!p.get('error_description'))return;if(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())return;var mine=false;try{mine=!!localStorage.getItem('my-atlas-auth-code-verifier')}catch(e){}if(p.get('app')==='1'||!mine){location.replace('/voltar/'+s);}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: LITE }} />
         <script dangerouslySetInnerHTML={{ __html: NATIVE_RETURN }} />
       </head>
       <body className="min-h-dvh font-sans">

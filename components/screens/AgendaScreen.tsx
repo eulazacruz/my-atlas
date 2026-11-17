@@ -1,4 +1,5 @@
 'use client';
+import { useSticky } from '@/lib/sticky';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { CalendarDays, CheckSquare, ChevronDown, MapPin, Plus } from 'lucide-react';
@@ -15,7 +16,7 @@ import { demoExternal, useExternalEvents } from '@/lib/calendar';
 import { addDays, cn, firstName, fmtDay, hhmm, nextOccurrence, parseYmd, relDay, uid, ymd } from '@/lib/utils';
 
 export function AgendaScreen() {
-  const [seg, setSeg] = useState<'agenda' | 'tasks'>('agenda');
+  const [seg, setSeg] = useSticky<'agenda' | 'tasks'>('agenda-seg', 'agenda');
   const { openSheet } = useUI();
   return (
     <div>

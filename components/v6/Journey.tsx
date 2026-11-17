@@ -1,4 +1,5 @@
 'use client';
+import { useSubNav } from '@/components/providers/UIProvider';
 /* Jornada a Dois: um "coaching" do casal em modos curtos e guiados. */
 import { motion } from 'framer-motion';
 import { Check, ChevronRight, Lock, RotateCcw } from 'lucide-react';
@@ -42,7 +43,7 @@ function useFinish() {
 }
 
 export function JourneyTool() {
-  const [mode, setMode] = useState<Mode>('home');
+  const [mode, setMode] = useSubNav<Mode>('home');
   const st = useJourneyStats();
   const [rules, setRules] = useState(false);
   if (mode !== 'home')

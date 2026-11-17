@@ -10,6 +10,7 @@ export const TOOL_META: Record<string, ToolMeta> = {
   wishlist: { title: 'Lista de desejos', hint: 'Reserve presentes em segredo', emoji: '🎁', tab: 'more' },
   challenges: { title: 'Desafios de 30 dias', hint: 'Pequenos hábitos a dois', emoji: '🏁', tab: 'more' },
   trilha: { title: 'Nossa trilha', hint: 'As músicas do casal', emoji: '🎵', tab: 'more' },
+  idiomas: { title: 'Idiomas', hint: 'Inglês e espanhol com professor zoeiro', emoji: '🗣️', tab: 'more' },
   piggy: { title: 'Cofrinhos', hint: 'Sonhos com meta e progresso', emoji: '🐷', tab: 'more' },
   /* Saúde */
   nutrition: { title: 'Alimentação', hint: 'Refeições, prato e tabela TACO', emoji: '🥗', tab: 'health' },

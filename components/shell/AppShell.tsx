@@ -6,40 +6,47 @@ import { useEffect } from 'react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI, type View } from '@/components/providers/UIProvider';
 import { AgendaScreen } from '@/components/screens/AgendaScreen';
-import { CoupleScreen } from '@/components/screens/CoupleScreen';
-import { FinanceScreen } from '@/components/screens/FinanceScreen';
 import { HealthScreen } from '@/components/screens/HealthScreen';
 import { FaithHub } from '@/components/hubs/FaithHub';
-import { FocusHub, FocusPill } from '@/components/hubs/FocusHub';
-import { ColScreen, LifeHub } from '@/components/hubs/LifeHub';
-import { InsightsScreen, MindView, SosOverlay } from '@/components/hubs/MindBody';
-import { WeeklyScreen } from '@/components/hubs/Weekly';
+import { FocusPill } from '@/components/hubs/FocusHub';
+
+import { MindView, SosOverlay } from '@/components/hubs/MindBody';
 import { PageHeader } from '@/components/ui/primitives';
 import { AutoNight } from '@/components/providers/AutoNight';
 import { Confetti, Onboarding } from '@/components/fx/Intro';
 import { DiscreetMode, TextScale } from '@/components/fx/Guard';
 import { QuickAdd, Spotlight } from '@/components/fx/Spotlight';
-import { WrappedScreen } from '@/components/fx/Wrapped';
-import { BibleScreen } from '@/components/screens/BibleScreen';
-import { CheckinScreen } from '@/components/screens/CheckinScreen';
-import { LocationScreen } from '@/components/screens/LocationScreen';
 import { NativeEffects } from '@/components/providers/NativeEffects';
 import { SleepOverlay } from '@/components/screens/BodyBits';
 import { HomeScreen } from '@/components/screens/HomeScreen';
 import { MoreScreen } from '@/components/screens/MoreScreen';
 import { NoteEditor } from '@/components/screens/NoteEditor';
-import { NotesScreen } from '@/components/screens/NotesScreen';
-import { PetScreen } from '@/components/screens/PetScreen';
-import { SettingsScreen } from '@/components/screens/SettingsScreen';
-import { ShoppingScreen } from '@/components/screens/ShoppingScreen';
 import { Sheets } from '@/components/sheets/Sheets';
 import { BoxBreathing } from './BoxBreathing';
 import { TabBar } from './TabBar';
-import { ToolScreen } from '@/components/v6/ToolScreen';
 import { AlarmHost } from '@/components/v6/Alarm';
-import { InstantWidgetSync } from '@/components/v6/Social';
+import { InstantWidgetSync } from '@/components/v6/Instants';
 
-const SCREENS: Record<View, () => JSX.Element | null> = {
+import dynamic from 'next/dynamic';
+const Loading = () => <div className="grid h-[50vh] place-items-center"><span className="h-6 w-6 animate-spin rounded-full border-2 border-current border-t-transparent opacity-30" /></div>;
+const CoupleScreen = dynamic(() => import('@/components/screens/CoupleScreen').then((m) => m.CoupleScreen), { ssr: false, loading: Loading });
+const FinanceScreen = dynamic(() => import('@/components/screens/FinanceScreen').then((m) => m.FinanceScreen), { ssr: false, loading: Loading });
+const WeeklyScreen = dynamic(() => import('@/components/hubs/Weekly').then((m) => m.WeeklyScreen), { ssr: false, loading: Loading });
+const WrappedScreen = dynamic(() => import('@/components/fx/Wrapped').then((m) => m.WrappedScreen), { ssr: false, loading: Loading });
+const BibleScreen = dynamic(() => import('@/components/screens/BibleScreen').then((m) => m.BibleScreen), { ssr: false, loading: Loading });
+const CheckinScreen = dynamic(() => import('@/components/screens/CheckinScreen').then((m) => m.CheckinScreen), { ssr: false, loading: Loading });
+const LocationScreen = dynamic(() => import('@/components/screens/LocationScreen').then((m) => m.LocationScreen), { ssr: false, loading: Loading });
+const NotesScreen = dynamic(() => import('@/components/screens/NotesScreen').then((m) => m.NotesScreen), { ssr: false, loading: Loading });
+const PetScreen = dynamic(() => import('@/components/screens/PetScreen').then((m) => m.PetScreen), { ssr: false, loading: Loading });
+const SettingsScreen = dynamic(() => import('@/components/screens/SettingsScreen').then((m) => m.SettingsScreen), { ssr: false, loading: Loading });
+const ShoppingScreen = dynamic(() => import('@/components/screens/ShoppingScreen').then((m) => m.ShoppingScreen), { ssr: false, loading: Loading });
+const ToolScreen = dynamic(() => import('@/components/v6/ToolScreen').then((m) => m.ToolScreen), { ssr: false, loading: Loading });
+const FocusHub = dynamic(() => import('@/components/hubs/FocusHub').then((m) => m.FocusHub), { ssr: false, loading: Loading });
+const ColScreen = dynamic(() => import('@/components/hubs/LifeHub').then((m) => m.ColScreen), { ssr: false, loading: Loading });
+const LifeHub = dynamic(() => import('@/components/hubs/LifeHub').then((m) => m.LifeHub), { ssr: false, loading: Loading });
+const InsightsScreen = dynamic(() => import('@/components/hubs/MindBody').then((m) => m.InsightsScreen), { ssr: false, loading: Loading });
+
+const SCREENS: Record<View, React.ComponentType> = {
   home: HomeScreen,
   agenda: AgendaScreen,
   notes: NotesScreen,
@@ -90,6 +97,17 @@ export function AppShell() {
   useEffect(() => {
     if (status === 'unauthenticated') router.replace('/login');
   }, [status, router]);
+  // Depois que o app abre, carrega as outras telas em segundo plano (navegação instantânea depois)
+  useEffect(() => {
+    if (status !== 'ready') return;
+    const t = window.setTimeout(() => {
+      const list = [() => import('@/components/v6/ToolScreen'), () => import('@/components/screens/BibleScreen'), () => import('@/components/screens/CoupleScreen'), () => import('@/components/screens/FinanceScreen'), () => import('@/components/hubs/FocusHub'), () => import('@/components/hubs/LifeHub'), () => import('@/components/v6/Social'), () => import('@/components/v6/MindPlus'), () => import('@/components/v6/FaithPlus')];
+      let i = 0;
+      const next = () => { if (i < list.length) list[i++]().finally(() => window.setTimeout(next, 120)); };
+      next();
+    }, 2500);
+    return () => window.clearTimeout(t);
+  }, [status]);
 
   if (status === 'loading' || status === 'unauthenticated') return <Splash />;
   if (status === 'error')

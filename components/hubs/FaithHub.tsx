@@ -1,4 +1,5 @@
 'use client';
+import { useSticky } from '@/lib/sticky';
 import { ToolGrid, ToolRow } from '@/components/v6/kit';
 
 import { AnimatePresence, motion } from 'framer-motion';
@@ -427,7 +428,7 @@ export function PeopleDue() {
 /* ───────── Tela Fé ───────── */
 export function FaithHub() {
   const { navigate } = useUI();
-  const [tab, setTab] = useState<'today' | 'grow' | 'church'>('today');
+  const [tab, setTab] = useSticky<'today' | 'grow' | 'church'>('faith-tab', 'today');
   const upcoming = useEntries('church').filter((e) => (e.date ?? '') >= ymd()).sort((a, b) => (a.date ?? '').localeCompare(b.date ?? '')).slice(0, 3);
   const serve = useEntries('serve').filter((e) => (e.date ?? '') >= ymd()).sort((a, b) => (a.date ?? '').localeCompare(b.date ?? '')).slice(0, 3);
   return (

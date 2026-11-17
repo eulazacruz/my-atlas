@@ -4,7 +4,8 @@ import { ToolGrid, ToolRow } from '@/components/v6/kit';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Activity, AlertCircle, ChevronRight, HeartHandshake, LifeBuoy, Moon, Sun, Wind, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import dynamic from 'next/dynamic';
+const AreaMini = dynamic(() => import('@/components/ui/charts'), { ssr: false });
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI } from '@/components/providers/UIProvider';
 import { CollectionList, EntrySheet, useEntries, useEntryActions } from '@/components/ui/Collection';
@@ -363,14 +364,7 @@ export function BodyView() {
         {chart.length >= 2 && (
           <Glass className="mb-3 p-4">
             <div className="h-32">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chart} margin={{ top: 6, right: 4, left: -28, bottom: 0 }}>
-                  <XAxis dataKey="d" tickLine={false} axisLine={false} tick={{ fill: '#888', fontSize: 10 }} />
-                  <YAxis tickLine={false} axisLine={false} tick={{ fill: '#888', fontSize: 10 }} domain={['dataMin - 1', 'dataMax + 1']} />
-                  <Tooltip contentStyle={{ background: resolvedTheme === 'light' ? '#fff' : '#111', border: 'none', borderRadius: 12, fontSize: 12 }} />
-                  <Area type="monotone" dataKey="kg" stroke="#10B981" strokeWidth={2} fill="#10B98122" />
-                </AreaChart>
-              </ResponsiveContainer>
+              <AreaMini data={chart} x="d" y="kg" stroke="#10B981" fill="#10B98122" light={resolvedTheme === 'light'} domain={['dataMin - 1', 'dataMax + 1']} />
             </div>
           </Glass>
         )}

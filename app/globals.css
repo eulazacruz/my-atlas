@@ -233,3 +233,18 @@ textarea {
 
 /* Leitura da Bíblia em foco: esconde a barra de abas */
 body[data-reading='1'] nav { display: none; }
+
+/* ───────── Modo leve (Android): sem desfoque em tempo real ─────────
+   O backdrop-filter em dezenas de cartões + o fundo animado travavam a rolagem na WebView.
+   Mantém o visual (cores, bordas, sombras) e tira só o custo de GPU. */
+.lite *, .lite *::before, .lite *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.lite .ambient { animation: none; }
+.lite .glass { background: rgba(255, 255, 255, 0.92); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 10px 24px -18px rgba(0, 0, 0, 0.3); }
+.lite.dark .glass { background: #121214; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.075), inset 0 1px 0 rgba(255, 255, 255, 0.05); }
+.lite .glass::before { display: none; }
+.lite .glass-strong { background: rgba(255, 255, 255, 0.97); }
+.lite.dark .glass-strong { background: rgba(22, 22, 24, 0.97); }
+.lite .bar-blur { background: color-mix(in srgb, var(--bg) 96%, transparent); }

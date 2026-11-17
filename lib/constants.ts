@@ -170,6 +170,7 @@ export const DEFAULT_VAULT_PIN = '1234';
 
 export const HOME_SECTIONS = [
   { id: 'social', label: 'Nosso cantinho (instantes e timeline)' },
+  { id: 'lang', label: 'Lição de idiomas do dia' },
   { id: 'status', label: 'Status & Preciso de…' },
   { id: 'focus', label: '3 prioridades & modo foco' },
   { id: 'quick', label: 'Ações rápidas' },

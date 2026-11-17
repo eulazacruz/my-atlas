@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useTestIsland } from '@/components/shell/useTestIsland';
 import { DataSettings, ExperienceSettings, SecuritySettings } from '@/components/fx/MoreSettings';
-import { GoogleCalendarSettings, IslandCalibration, IslandSimulator, PrivacyAndPermissions } from './SettingsExtras';
+import { GoogleCalendarSettings, IslandCalibration, IslandOutside, IslandSimulator, PrivacyAndPermissions } from './SettingsExtras';
 import { Button, Chip, Field, Glass, PageHeader, Section } from '@/components/ui/primitives';
 import { firstName, money, parseMoney } from '@/lib/utils';
 
@@ -114,6 +114,7 @@ export function SettingsScreen() {
         </Glass>
       </Section>
       <IslandSimulator />
+      <IslandOutside />
       <IslandCalibration />
       <ExperienceSettings />
       <SecuritySettings />
@@ -150,7 +151,7 @@ export function SettingsScreen() {
           </Button>
         </Section>
       )}
-      <p className="pb-4 text-center text-[11px] muted">My Atlas · Life & Couple OS · v6.0</p>
+      <p className="pb-4 text-center text-[11px] muted">My Atlas · Life & Couple OS · v6.1</p>
     </div>
   );
 }

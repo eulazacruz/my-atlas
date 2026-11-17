@@ -32,6 +32,11 @@ interface AtlasNativePlugin {
   alarmState(): Promise<{ ringing: boolean; id?: string }>;
   openAlarmSettings(opts: { which: 'exact' | 'fullscreen' }): Promise<void>;
   setInstantWidget(opts: { image: string; caption: string; from: string }): Promise<void>;
+  islandOverlayState(): Promise<{ permission: boolean; enabled: boolean }>;
+  setIslandOverlay(opts: { enabled: boolean; dx: number; dy: number; scale: number }): Promise<void>;
+  openOverlaySettings(): Promise<void>;
+  testIsland(opts: { title: string; body: string }): Promise<void>;
+  listen(opts: { lang: string; prompt?: string }): Promise<{ results: string[] }>;
   addListener(event: 'ttsProgress', cb: (e: { index: number }) => void): Promise<{ remove: () => void }>;
   addListener(event: 'ttsEnd', cb: () => void): Promise<{ remove: () => void }>;
   addListener(event: 'alarm', cb: (e: { id: string }) => void): Promise<{ remove: () => void }>;

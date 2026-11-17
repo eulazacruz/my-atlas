@@ -1,4 +1,5 @@
 'use client';
+import { useSubNav } from '@/components/providers/UIProvider';
 /* Jogos: Quanto você me conhece?, Quiz bíblico, Memória com fotos e Atlas Run. */
 import { motion } from 'framer-motion';
 import { RotateCcw } from 'lucide-react';
@@ -34,7 +35,7 @@ function Scoreboard({ game, label = 'Recorde' }: { game: string; label?: string 
 }
 
 export function GamesTool() {
-  const [g, setG] = useState<G>('menu');
+  const [g, setG] = useSubNav<G>('menu');
   if (g !== 'menu')
     return (
       <div>

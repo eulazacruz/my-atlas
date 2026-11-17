@@ -1,14 +1,15 @@
 'use client';
 
 import { Bell, CalendarDays, Crosshair, KeyRound, MapPin } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useIsland } from '@/components/island/IslandProvider';
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI } from '@/components/providers/UIProvider';
 import { Button, Chip, Glass, Section, Switch } from '@/components/ui/primitives';
 import { getMyFeed, refreshCalendar, saveMyFeed, useExternalEvents } from '@/lib/calendar';
 import { CONTEXT_STATUS, DEFAULT_VAULT_PIN, NEEDS, PET_ACTIONS } from '@/lib/constants';
-import { haptic, isNative } from '@/lib/native';
+import { AtlasNative, haptic, isNative } from '@/lib/native';
+import { getSupabase } from '@/lib/supabase';
 import { firstName } from '@/lib/utils';
 
 /** Barra que dispara os eventos da Atlas Island como se viessem do seu par. */
@@ -53,8 +54,44 @@ function Slider({ label, value, min, max, step, onChange, fmt }: { label: string
   );
 }
 
+/** Ilha fora do app: o cartão em volta da câmera quando chega notificação com o app fechado. */
+export function IslandOutside() {
+  const { calib, push } = useIsland();
+  const { state, me } = useAtlas();
+  const [st, setSt] = useState<{ permission: boolean; enabled: boolean } | null>(null);
+  const refresh = useCallback(() => { if (isNative()) AtlasNative.islandOverlayState().then(setSt).catch(() => setSt(null)); }, []);
+  useEffect(() => {
+    refresh();
+    const on = () => document.visibilityState === 'visible' && refresh();
+    document.addEventListener('visibilitychange', on);
+    return () => document.removeEventListener('visibilitychange', on);
+  }, [refresh]);
+  const set = async (enabled: boolean) => {
+    if (enabled && st && !st.permission) { await AtlasNative.openOverlaySettings(); return; }
+    await AtlasNative.setIslandOverlay({ enabled, ...calib });
+    const sb = getSupabase();
+    if (sb && me && state) await sb.from('push_tokens').update({ island: enabled }).eq('profile_id', me.id);
+    refresh();
+    if (enabled) push({ kind: 'success', title: 'Ilha fora do app ativada ✨', subtitle: 'Feche o app e peça um cutucão para testar', duration: 3500 });
+  };
+  if (!isNative()) return null;
+  return (
+    <Section title="Ilha fora do app">
+      <Glass className="space-y-3 p-4">
+        <div className="flex items-center gap-3">
+          <p className="flex-1 text-[13.5px] leading-snug">Quando chegar uma notificação com o app fechado, ela aparece num cartão que nasce em volta da câmera.</p>
+          <Switch checked={!!st?.enabled && !!st?.permission} onChange={set} label="Ilha fora do app" />
+        </div>
+        {st && !st.permission && <p className="text-[12.5px] muted">Precisa da permissão “Sobrepor a outros apps”. Ao ativar, o app abre essa tela: ligue para o My Atlas e volte. No Xiaomi, libere também “Mostrar janelas pop-up em segundo plano” e “Início automático”.</p>}
+        {st?.enabled && st.permission && <Button className="w-full" onClick={() => AtlasNative.testIsland({ title: 'Vitória te mandou um carinho 🤍', body: 'Assim que fica a ilha fora do app' })}>Testar agora</Button>}
+      </Glass>
+    </Section>
+  );
+}
+
 export function IslandCalibration() {
   const { calib, setCalib, push } = useIsland();
+  useEffect(() => { if (isNative()) AtlasNative.islandOverlayState().then((st) => AtlasNative.setIslandOverlay({ enabled: st.enabled, ...calib })).catch(() => {}); }, [calib]);
   const preview = () => push({ kind: 'success', title: 'Posição da ilha', subtitle: 'Ajuste até ficar ao redor da câmera', duration: 3000 });
   return (
     <Section title="Posição da ilha na câmera">

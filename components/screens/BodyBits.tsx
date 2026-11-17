@@ -4,7 +4,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Coffee, Moon, Sunrise } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { Area, AreaChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import dynamic from 'next/dynamic';
+const AreaMini = dynamic(() => import('@/components/ui/charts'), { ssr: false });
 import { useAtlas } from '@/components/providers/AtlasProvider';
 import { Button, Glass } from '@/components/ui/primitives';
 import { activeSleep, caffeineAt, caffeineCurve, fmtDuration, lastNight } from '@/lib/body';
@@ -122,22 +123,7 @@ export function CaffeineCard() {
         </div>
       </div>
       <div className="mt-3 h-28">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={curve} margin={{ top: 6, right: 0, left: -32, bottom: 0 }}>
-            <defs>
-              <linearGradient id="caf" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={fg} stopOpacity={0.25} />
-                <stop offset="100%" stopColor={fg} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <XAxis dataKey="t" tickLine={false} axisLine={false} interval={5} tick={{ fill: '#888', fontSize: 10 }} />
-            <YAxis tickLine={false} axisLine={false} tick={{ fill: '#888', fontSize: 10 }} />
-            <Tooltip contentStyle={{ background: resolvedTheme === 'light' ? '#fff' : '#111', border: 'none', borderRadius: 12, fontSize: 12 }} formatter={(v) => [`${v} mg`, 'Ativa']} />
-            <ReferenceLine y={CAFFEINE_SLEEP_LIMIT} stroke="#f59e0b" strokeDasharray="4 4" />
-            <ReferenceLine x="22:00" stroke="#888" strokeDasharray="2 4" />
-            <Area type="monotone" dataKey="mg" stroke={fg} strokeWidth={2} fill="url(#caf)" dot={false} />
-          </AreaChart>
-        </ResponsiveContainer>
+        <AreaMini data={curve} x="t" y="mg" stroke={fg} gradient light={resolvedTheme === 'light'} interval={5} left={-32} refY={CAFFEINE_SLEEP_LIMIT} refX="22:00" unit={['mg', 'Ativa']} />
       </div>
       <p className={cn('mt-1 text-[12px]', bad ? 'text-amber-500' : 'muted')}>
         {bad ? `⚠️ ${at22} mg às 22h podem atrapalhar seu sono. Evite mais cafeína hoje.` : 'Na hora de dormir a cafeína já estará baixa. 👌'}

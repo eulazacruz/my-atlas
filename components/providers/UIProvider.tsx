@@ -25,6 +25,9 @@ interface UICtx {
   closeNote: () => void;
   breathingOpen: boolean;
   setBreathingOpen: (v: boolean) => void;
+  /** Registra um passo interno (ex.: um jogo dentro de Jogos) para o voltar do celular desfazer só ele. */
+  pushBack: (undo: () => void) => void;
+  popBack: () => void;
 }
 
 const Ctx = createContext<UICtx | null>(null);
@@ -46,7 +49,9 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const [breathingOpen, setBreathing] = useState(false);
   const [param, setParam] = useState<string | null>(null);
   const setParamRef = useRef(setParam);
-  const overlays = useRef<Array<'sheet' | 'note' | 'breathing'>>([]);
+  type Ov = 'sheet' | 'note' | 'breathing' | (() => void);
+  const overlays = useRef<Ov[]>([]);
+  const scrolls = useRef<number[]>([0]);
   // Pilha própria de telas (o Next reescreve history.state, então não dependemos dele)
   const stack = useRef<View[]>(['home']);
   const params = useRef<(string | null)[]>([null]);
@@ -65,10 +70,14 @@ export function UIProvider({ children }: { children: ReactNode }) {
     const onPop = (e: PopStateEvent) => {
       const top = overlays.current.pop();
       if (top) {
-        closeTop(top);
+        if (typeof top === 'function') { top(); window.scrollTo({ top: 0 }); }
+        else closeTop(top);
         return;
       }
       if (stack.current.length > 1) { stack.current.pop(); params.current.pop(); }
+      const y = scrolls.current.length > 1 ? scrolls.current.pop() ?? 0 : 0;
+      // volta para a mesma altura da tela anterior
+      requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo({ top: y })));
       const pp = params.current[params.current.length - 1] ?? null;
       lastParam = pp;
       setParamRef.current(pp);
@@ -92,6 +101,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
       } else {
         stack.current.push(v);
         params.current.push(np);
+        scrolls.current.push(window.scrollY);
         window.history.pushState({ v }, '');
       }
       window.scrollTo({ top: 0 });
@@ -132,6 +142,8 @@ export function UIProvider({ children }: { children: ReactNode }) {
         setNoteId(id);
       },
       closeNote: () => dismiss('note'),
+      pushBack: (undo) => { overlays.current.push(undo); window.history.pushState({ overlay: 'sub' }, ''); },
+      popBack: () => { if (typeof overlays.current[overlays.current.length - 1] === 'function') window.history.back(); },
       breathingOpen,
       setBreathingOpen: (v) => {
         if (v) {
@@ -149,4 +161,20 @@ export function useUI() {
   const c = useContext(Ctx);
   if (!c) throw new Error('useUI fora do UIProvider');
   return c;
+}
+
+/** Estado de sub-tela: entrar empilha no histórico; o voltar do celular volta só um passo. */
+export function useSubNav<T>(def: T): [T, (v: T) => void] {
+  const { pushBack, popBack } = useUI();
+  const [v, setV] = useState<T>(def);
+  const cur = useRef(v);
+  cur.current = v;
+  const set = useCallback((x: T) => {
+    const atRoot = cur.current === def;
+    const toRoot = x === def;
+    if (atRoot && !toRoot) { pushBack(() => setV(def)); setV(x); }
+    else if (!atRoot && toRoot) popBack();
+    else setV(x);
+  }, [def, pushBack, popBack]);
+  return [v, set];
 }

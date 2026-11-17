@@ -1,4 +1,5 @@
 'use client';
+import { useSticky } from '@/lib/sticky';
 
 import { motion } from 'framer-motion';
 import { Droplets, EyeOff, Flower2, Heart, Plus, Shield, Wind } from 'lucide-react';
@@ -17,7 +18,7 @@ import { dayKind } from '@/lib/cycle';
 import { addDays, cn, daysBetween, firstName, fmtDay, parseYmd, uid, WEEK_LETTERS, ymd } from '@/lib/utils';
 
 export function HealthScreen() {
-  const [seg, setSeg] = useState<'cycle' | 'habits' | 'mind' | 'body'>('cycle');
+  const [seg, setSeg] = useSticky<'cycle' | 'habits' | 'mind' | 'body'>('health-seg', 'cycle');
   const { prefs: { discreet } } = usePrefs();
   const { openSheet } = useUI();
   const cycle = useCycle();

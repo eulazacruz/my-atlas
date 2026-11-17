@@ -6,6 +6,7 @@ import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI, type SubView } from '@/components/providers/UIProvider';
 import { IconButton, PageHeader, Section } from '@/components/ui/primitives';
 import { TOOL_META } from '@/lib/tools';
+import { ToolRow } from '@/components/v6/kit';
 import { money, ymd } from '@/lib/utils';
 
 type Item = { view?: SubView; tool?: string; title: string; icon?: typeof Heart; emoji?: string; badge?: string };
@@ -46,6 +47,7 @@ export function MoreScreen() {
   return (
     <div>
       <PageHeader title="Mais" subtitle={couple?.name ?? 'Nós dois'} actions={<IconButton label="Ajustes" onClick={() => navigate('settings')}><Settings size={18} /></IconButton>} />
+      <Section><ToolRow id="idiomas" sub="Inglês e espanhol · lição do dia" /></Section>
       <Section title="Nós dois">
         <Grid items={[
           { tool: 'social', title: 'Cantinho' },

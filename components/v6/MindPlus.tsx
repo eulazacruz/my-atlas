@@ -1,4 +1,5 @@
 'use client';
+import { useSubNav } from '@/components/providers/UIProvider';
 /* Saúde mental v6: autotestes, TCC, preocupação, ativação, respirações, jogos e plano de segurança. */
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, ChevronRight, Phone, Plus, Trash2 } from 'lucide-react';
@@ -35,7 +36,7 @@ export function TestsTool() {
   return <PrivateGate><TestsInner /></PrivateGate>;
 }
 function TestsInner() {
-  const [t, setT] = useState<Test | null>(null);
+  const [t, setT] = useSubNav<Test | null>(null);
   const hist = useEntries('selftest');
   if (t) return <TestRun t={t} onClose={() => setT(null)} />;
   return (
@@ -117,8 +118,8 @@ export function ThoughtsTool() {
 }
 function ThoughtsInner() {
   const list = useEntries('thought').sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
-  const [open, setOpen] = useState(false);
-  const [view, setView] = useState<Entry | null>(null);
+  const [open, setOpen] = useSubNav(false);
+  const [view, setView] = useSubNav<Entry | null>(null);
   if (open) return <ThoughtForm onDone={() => setOpen(false)} />;
   if (view)
     return (
@@ -297,7 +298,7 @@ function RateSheet({ e, onClose, onSave }: { e: Entry | null; onClose: () => voi
 
 /* ───────── Respirações ───────── */
 export function BreathsTool() {
-  const [b, setB] = useState<Breath | null>(null);
+  const [b, setB] = useSubNav<Breath | null>(null);
   if (b) return <BreathPlayer b={b} onClose={() => setB(null)} />;
   return (
     <div className="space-y-2">
@@ -341,7 +342,7 @@ function BreathPlayer({ b, onClose }: { b: Breath; onClose: () => void }) {
 
 /* ───────── Jogos da mente ───────── */
 export function MindGamesTool() {
-  const [g, setG] = useState<'menu' | 'detective' | 'reframe' | 'bubbles' | 'focus'>('menu');
+  const [g, setG] = useSubNav<'menu' | 'detective' | 'reframe' | 'bubbles' | 'focus'>('menu');
   const games = [
     { id: 'detective', emoji: '🕵️', t: 'Detetive de pensamentos', h: 'Identifique a armadilha mental' },
     { id: 'reframe', emoji: '🔄', t: 'Reenquadrar', h: 'Escolha o pensamento mais justo' },

@@ -1,4 +1,5 @@
 'use client';
+import { useSticky } from '@/lib/sticky';
 
 import { Hand, Heart, Plus } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -36,7 +37,7 @@ function PersonCard({ p, isMe }: { p: Profile; isMe: boolean }) {
 }
 
 export function CoupleScreen() {
-  const [seg, setSeg] = useState<'now' | 'home' | 'dates' | 'goals' | 'prayer'>('now');
+  const [seg, setSeg] = useSticky<'now' | 'home' | 'dates' | 'goals' | 'prayer'>('couple-seg', 'now');
   return (
     <div>
       <PageHeader title="Nós dois" back />

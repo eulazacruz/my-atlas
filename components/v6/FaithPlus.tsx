@@ -1,4 +1,5 @@
 'use client';
+import { useSubNav } from '@/components/providers/UIProvider';
 /* Espiritualidade v6. */
 import { motion } from 'framer-motion';
 import { BookOpen, Pause, Play } from 'lucide-react';
@@ -89,7 +90,7 @@ export function LectioTool() {
   const hist = useEntries('lectio');
   const r = LECTIO_TEXTS[(hist.length + new Date().getDate()) % LECTIO_TEXTS.length];
   const [v, setV] = useState<Record<string, string>>({});
-  const [go, setGo] = useState(false);
+  const [go, setGo] = useSubNav(false);
   if (!go)
     return (
       <>
@@ -233,7 +234,7 @@ export function GiftsTool() {
   const all = useEntries('gifts');
   const mine = all.find((e) => e.createdBy === me?.id);
   const theirs = all.find((e) => e.createdBy !== me?.id);
-  const [run, setRun] = useState(false);
+  const [run, setRun] = useSubNav(false);
   const [ans, setAns] = useState<number[]>([]);
   if (run) {
     const i = ans.length;

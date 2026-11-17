@@ -1,4 +1,5 @@
 'use client';
+import { useSticky } from '@/lib/sticky';
 
 import { ArrowDownLeft, ArrowUpRight, Plus, Trash2 } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -17,7 +18,7 @@ export function FinanceScreen() {
   const { resolvedTheme } = useTheme();
   const [tab, setTab] = useState<'all' | 'shared' | 'individual'>('all');
   const [showAll, setShowAll] = useState(false);
-  const [area, setArea] = useState<'wallet' | 'vault'>('wallet');
+  const [area, setArea] = useSticky<'wallet' | 'vault'>('fin-area', 'wallet');
   if (!me || !couple) return null;
 
   const now = new Date();

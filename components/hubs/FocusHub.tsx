@@ -1,4 +1,5 @@
 'use client';
+import { useSticky } from '@/lib/sticky';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, ChevronRight, Flame, Pause, Play, Plus, Square, Target, Timer, X } from 'lucide-react';
@@ -419,7 +420,7 @@ export function HubTiles({ kinds }: { kinds: string[] }) {
 }
 
 export function FocusHub() {
-  const [tab, setTab] = useState<'today' | 'time' | 'habits'>('today');
+  const [tab, setTab] = useSticky<'today' | 'time' | 'habits'>('focus-tab', 'today');
   const late = new Date().getHours() >= 18;
   return (
     <div>

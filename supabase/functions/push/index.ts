@@ -116,21 +116,22 @@ Deno.serve(async (req) => {
     const sa = JSON.parse(raw);
     const token = await accessToken(sa);
 
-    const { data: tokens } = await sb.from('push_tokens').select('token').in('profile_id', msg.recipients);
+    const { data: tokens } = await sb.from('push_tokens').select('token, island').in('profile_id', msg.recipients);
+    const send = (message: Row) => fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    });
     const results = await Promise.all(
-      (tokens ?? []).map(async ({ token: t }) => {
-        const res = await fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: {
-              token: t,
-              notification: { title: msg.title, body: msg.body },
-              data: { link: msg.link, table },
-              android: { priority: 'high', notification: { channel_id: 'atlas', icon: 'ic_stat_atlas', color: '#000000', sound: 'default' } },
-            },
-          }),
+      (tokens ?? []).map(async ({ token: t, island }) => {
+        const res = await send({
+          token: t,
+          notification: { title: msg.title, body: msg.body },
+          data: { link: msg.link, table },
+          android: { priority: 'high', notification: { channel_id: island ? 'atlas_island' : 'atlas', icon: 'ic_stat_atlas', color: '#000000', sound: 'default' } },
         });
+        // Ilha fora do app: mensagem só de dados, que o app transforma no cartão em volta da câmera
+        if (island) await send({ token: t, data: { type: 'island', title: msg.title, body: msg.body ?? '', link: msg.link }, android: { priority: 'high', ttl: '60s' } }).catch(() => null);
         if (res.status === 404 || res.status === 400) {
           const j = await res.json().catch(() => ({}));
           if (JSON.stringify(j).includes('UNREGISTERED') || JSON.stringify(j).includes('INVALID_ARGUMENT')) await sb.from('push_tokens').delete().eq('token', t);

@@ -15,6 +15,7 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     static boolean immersive = true;
+    public static volatile boolean visible = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,7 +55,28 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onResume() {
         super.onResume();
+        visible = true;
         applyImmersive();
+        getWindow().getDecorView().post(this::saveCutout);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        visible = false;
+    }
+
+    /** Mede a câmera para a ilha que aparece fora do app. */
+    void saveCutout() {
+        try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return;
+            android.view.WindowInsets wi = getWindow().getDecorView().getRootWindowInsets();
+            android.view.DisplayCutout dc = wi != null ? wi.getDisplayCutout() : null;
+            if (dc == null || dc.getBoundingRects().isEmpty()) return;
+            android.graphics.Rect best = null;
+            for (android.graphics.Rect rc : dc.getBoundingRects()) if (best == null || rc.top < best.top) best = rc;
+            app.myatlas.twa.island.IslandOverlay.saveCutout(this, best.left, best.top, best.right, best.bottom);
+        } catch (Exception ignored) { }
     }
 
     void applyImmersive() {
@@ -97,5 +119,10 @@ public class MainActivity extends BridgeActivity {
         NotificationChannel r = new NotificationChannel("lembretes", "Lembretes", NotificationManager.IMPORTANCE_DEFAULT);
         r.setDescription("Água, agenda, datas e sono");
         nm.createNotificationChannel(r);
+        NotificationChannel il = new NotificationChannel("atlas_island", "Atlas — com ilha", NotificationManager.IMPORTANCE_DEFAULT);
+        il.setDescription("Avisos do seu amor quando a ilha em volta da câmera está ativa");
+        il.enableVibration(true);
+        il.setVibrationPattern(new long[]{0, 60, 40, 90});
+        nm.createNotificationChannel(il);
     }
 }

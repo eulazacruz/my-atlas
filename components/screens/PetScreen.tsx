@@ -1,4 +1,5 @@
 'use client';
+import { useSticky } from '@/lib/sticky';
 
 import { motion } from 'framer-motion';
 import { AlertTriangle, Bath, Bone, Footprints, Syringe } from 'lucide-react';
@@ -67,7 +68,7 @@ export function VirtualAtlas({ compact = false }: { compact?: boolean }) {
 }
 
 export function PetScreen() {
-  const [tab, setTab] = useState<'virtual' | 'real'>('virtual');
+  const [tab, setTab] = useSticky<'virtual' | 'real'>('pet-tab', 'virtual');
   const { rows } = useAtlas();
   const pet = rows('pets')[0];
   return (

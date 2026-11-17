@@ -11,6 +11,12 @@ import { makePdf, shareFile, toCSV } from '@/lib/share';
 import { firstName, fmtDay, parseYmd, ymd } from '@/lib/utils';
 import { authenticate, biometricAvailable, unlockPrivate } from './Guard';
 
+function GlassToggle() {
+  const [on, setOn] = useState(false);
+  useEffect(() => { setOn(!document.documentElement.classList.contains('lite')); }, []);
+  return <Switch checked={on} onChange={(v) => { setOn(v); try { localStorage.setItem('my-atlas:glass', v ? '1' : '0'); } catch { /* noop */ } document.documentElement.classList.toggle('lite', !v); }} label="Vidro" />;
+}
+
 export function ExperienceSettings() {
   const { prefs, set } = usePrefs();
   const Row = ({ t, d, children }: { t: string; d: string; children: ReactNode }) => (
@@ -24,6 +30,7 @@ export function ExperienceSettings() {
       <div className="glass overflow-hidden">
         <Row t="Intro ao abrir" d="Animação curta com o símbolo do Atlas"><Switch checked={prefs.intro} onChange={(v) => set({ intro: v })} label="Intro" /></Row>
         <Row t="Sons" d="Plim ao concluir, carinho, comemorações"><Switch checked={prefs.sounds} onChange={(v) => set({ sounds: v })} label="Sons" /></Row>
+        <Row t="Vidro com desfoque" d="Mais bonito, porém mais pesado no Android"><GlassToggle /></Row>
         <Row t="Modo discreto" d="Esconde valores em R$ e o ciclo"><Switch checked={prefs.discreet} onChange={(v) => set({ discreet: v })} label="Modo discreto" /></Row>
         <div className="px-4 py-3">
           <p className="text-[15px]">Tamanho do texto</p>

@@ -232,6 +232,66 @@ public class AtlasNativePlugin extends Plugin {
         call.resolve();
     }
 
+
+
+    /* ───────── Reconhecimento de fala (exercício "fale a frase") ───────── */
+    @PluginMethod
+    public void listen(PluginCall call) {
+        Intent i = new Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, call.getString("lang", "en-US"));
+        i.putExtra(android.speech.RecognizerIntent.EXTRA_PROMPT, call.getString("prompt", "Fale agora"));
+        i.putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 5);
+        try { startActivityForResult(call, i, "onSpeech"); }
+        catch (Exception e) { call.reject("Reconhecimento de voz indisponível"); }
+    }
+
+    @com.getcapacitor.annotation.ActivityCallback
+    private void onSpeech(PluginCall call, androidx.activity.result.ActivityResult result) {
+        if (call == null) return;
+        JSObject r = new JSObject();
+        com.getcapacitor.JSArray arr = new com.getcapacitor.JSArray();
+        if (result.getResultCode() == android.app.Activity.RESULT_OK && result.getData() != null) {
+            java.util.ArrayList<String> list = result.getData().getStringArrayListExtra(android.speech.RecognizerIntent.EXTRA_RESULTS);
+            if (list != null) for (String x : list) arr.put(x);
+        }
+        r.put("results", arr);
+        call.resolve(r);
+    }
+
+    /* ───────── Ilha fora do app ───────── */
+    @PluginMethod
+    public void islandOverlayState(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("permission", Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(getContext()));
+        r.put("enabled", getContext().getSharedPreferences(app.myatlas.twa.island.IslandOverlay.PREFS, Context.MODE_PRIVATE).getBoolean("enabled", false));
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void setIslandOverlay(PluginCall call) {
+        getContext().getSharedPreferences(app.myatlas.twa.island.IslandOverlay.PREFS, Context.MODE_PRIVATE).edit()
+            .putBoolean("enabled", call.getBoolean("enabled", false))
+            .putFloat("dx", call.getFloat("dx", 0f)).putFloat("dy", call.getFloat("dy", 0f)).putFloat("scale", call.getFloat("scale", 1f)).apply();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void openOverlaySettings(PluginCall call) {
+        try {
+            Intent i = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getContext().getPackageName()));
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(i);
+        } catch (Exception e) { }
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void testIsland(PluginCall call) {
+        app.myatlas.twa.island.IslandOverlay.show(getContext(), call.getString("title", "Teste da ilha"), call.getString("body", ""), "");
+        call.resolve();
+    }
+
     @Override
     protected void handleOnDestroy() {
         if (tts != null) tts.shutdown();

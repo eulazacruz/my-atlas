@@ -91,7 +91,7 @@ export function createDemoData(): AtlasState {
     { id: uid(), createdBy: DEMO_B, owner: DEMO_B, title: 'Consulta ginecologista', startsAt: at(2, 14), endsAt: at(2, 15), allDay: false, location: 'Clínica Vida' },
     { id: uid(), createdBy: DEMO_A, owner: null, title: 'Jantar a dois 🍝', startsAt: at(3, 20), allDay: false, location: 'Recife Antigo' },
     { id: uid(), createdBy: DEMO_A, owner: DEMO_A, title: 'Reunião de equipe', startsAt: at(0, 15), endsAt: at(0, 16), allDay: false },
-    { id: uid(), createdBy: DEMO_B, owner: null, title: 'Banho e tosa do Atlas', startsAt: at(5, 10), allDay: false },
+    { id: uid(), createdBy: DEMO_B, owner: null, title: 'Banho e tosa do Bolinha', startsAt: at(5, 10), allDay: false },
     { id: uid(), createdBy: DEMO_A, owner: null, title: 'Reunião do condomínio', startsAt: at(8, 19), allDay: false, location: 'Salão de festas' },
   ];
 
@@ -144,7 +144,7 @@ export function createDemoData(): AtlasState {
   item('Banana', 'Hortifruti', '1 dz');
   item('Tomate', 'Hortifruti', '1 kg', true);
   item('Detergente', 'Limpeza', '3');
-  item('Ração do Atlas', 'Pet', '15 kg', false, DEMO_B);
+  item('Ração do Bolinha', 'Pet', '15 kg', false, DEMO_B);
   item('Pasta de dente', 'Higiene', '2', true);
 
   /* ───── Datas especiais ───── */
@@ -210,8 +210,8 @@ export function createDemoData(): AtlasState {
   ];
   const lastSunday = (() => { const d = new Date(); d.setDate(d.getDate() - d.getDay() - 7); return ymdLocalD(d); })();
   db.checkins = [
-    { id: uid(), profileId: DEMO_A, week: lastSunday, score: 4, answers: { bom: 'O culto de domingo e o jantar juntos.', pesou: 'Semana corrida na AeC.', preciso: 'Mais tempo sem celular à noite.', gratidao: 'Pela paciência dela.' } },
-    { id: uid(), profileId: DEMO_B, week: lastSunday, score: 5, answers: { bom: 'Passeio com o Atlas na praia.', pesou: 'Cansaço.', preciso: 'Ajuda com a louça.', gratidao: 'Pelo carinho dele.' } },
+    { id: uid(), profileId: DEMO_A, week: lastSunday, score: 4, answers: { bom: 'O culto de domingo e o jantar juntos.', pesou: 'Semana corrida na no trabalho.', preciso: 'Mais tempo sem celular à noite.', gratidao: 'Pela paciência dela.' } },
+    { id: uid(), profileId: DEMO_B, week: lastSunday, score: 5, answers: { bom: 'Passeio com o Bolinha na praia.', pesou: 'Cansaço.', preciso: 'Ajuda com a louça.', gratidao: 'Pelo carinho dele.' } },
   ];
   const E = (kind: string, title: string, o: Partial<{ body: string; date: string | null; done: boolean; private: boolean; data: Record<string, unknown>; by: string }> = {}) =>
     db.entries.push({ id: uid(), createdBy: o.by ?? DEMO_A, kind, title, body: o.body ?? null, date: o.date ?? null, done: o.done ?? false, private: o.private ?? false, data: o.data ?? {}, sort: Date.now() + db.entries.length, createdAt: new Date(Date.now() - db.entries.length * 3600_000).toISOString() });

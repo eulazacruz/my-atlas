@@ -22,7 +22,7 @@ const DATE_IDEAS = [
   'Cozinhar juntos uma receita nova',
   'Piquenique na praia de Maria Farinha ou no parque',
   'Cinema em casa com pipoca e o filme sorteado',
-  'Caminhada ao pôr do sol com o Atlas',
+  'Caminhada ao pôr do sol',
   'Noite de jogos de tabuleiro ou cartas',
   'Ler um capítulo de um livro em voz alta, um para o outro',
   'Café da manhã especial no fim de semana',

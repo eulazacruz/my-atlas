@@ -99,12 +99,12 @@ export function WeeklyScreen() {
     w.devs > 0 && `escreveram ${w.devs} devocional(is)`,
     w.answered > 0 && `viram ${w.answered} oração(ões) respondida(s) 🙌`,
     w.house > 0 && `fizeram ${w.house} tarefas da casa`,
-    w.walks > 0 && `levaram o Atlas para passear ${w.walks}x`,
+    w.walks > 0 && `levaram o pet para passear ${w.walks}x`,
     `gastaram ${money(w.spent)}`,
   ].filter(Boolean) as string[];
   return (
     <div>
-      <PageHeader title="Resumo da semana" subtitle="Últimos 7 dias" back actions={<IconButton label="Compartilhar" onClick={() => shareStory({ kicker: 'Nossa semana', title: `${firstName(w.a.p.displayName)} & ${firstName(w.b.p.displayName)}`, body: '', stats: [{ v: String(w.a.reads + w.b.reads), l: 'capítulos lidos' }, { v: String(w.devs), l: 'devocionais' }, { v: String(w.house), l: 'tarefas da casa' }, { v: String(w.walks), l: 'passeios com o Atlas' }], foot: w.answered ? `${w.answered} oração(ões) respondida(s) 🙌` : 'Um passo de cada vez, juntos.', theme: 'emerald' })}><Share2 size={18} /></IconButton>} />
+      <PageHeader title="Resumo da semana" subtitle="Últimos 7 dias" back actions={<IconButton label="Compartilhar" onClick={() => shareStory({ kicker: 'Nossa semana', title: `${firstName(w.a.p.displayName)} & ${firstName(w.b.p.displayName)}`, body: '', stats: [{ v: String(w.a.reads + w.b.reads), l: 'capítulos lidos' }, { v: String(w.devs), l: 'devocionais' }, { v: String(w.house), l: 'tarefas da casa' }, { v: String(w.walks), l: 'passeios com o pet' }], foot: w.answered ? `${w.answered} oração(ões) respondida(s) 🙌` : 'Um passo de cada vez, juntos.', theme: 'emerald' })}><Share2 size={18} /></IconButton>} />
       <Section>
         <Glass className="p-5">
           <Sparkles size={18} />

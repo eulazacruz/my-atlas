@@ -17,7 +17,7 @@ import { Big, EMERALD, Fade, shuffle, useAtlasXp } from './kit';
 type G = 'menu' | 'know' | 'quiz' | 'memory' | 'run';
 const GAMES = [
   { id: 'know', emoji: '💞', t: 'Quanto você me conhece?', h: 'Acerte as respostas do seu amor' },
-  { id: 'quiz', emoji: '📖', t: 'Quiz bíblico', h: 'Ganhe XP para o Atlas' },
+  { id: 'quiz', emoji: '📖', t: 'Quiz bíblico', h: 'Ganhe XP para o seu pet' },
   { id: 'memory', emoji: '🧠', t: 'Memória', h: 'Com as fotos de vocês' },
   { id: 'run', emoji: '🐕', t: 'Pet Run', h: 'Corra, pule e pegue ossinhos' },
 ] as const;
@@ -115,7 +115,7 @@ function BibleQuiz() {
   if (k >= deck.length)
     return (
       <div className="text-center">
-        <Big emoji={score >= 8 ? '👑' : score >= 5 ? '📖' : '🌱'} title={`${score} de ${deck.length}`} hint={`+${score * 5} XP para o Atlas 🐾`} />
+        <Big emoji={score >= 8 ? '👑' : score >= 5 ? '📖' : '🌱'} title={`${score} de ${deck.length}`} hint={`+${score * 5} XP para o pet 🐾`} />
         <Scoreboard game="quiz" />
         <Button variant="primary" className="mt-4" onClick={() => { setRound(round + 1); setK(0); setScore(0); setStreak(0); }}><RotateCcw size={14} /> Jogar de novo</Button>
       </div>
@@ -270,7 +270,7 @@ function AtlasRun() {
         )}
       </div>
       <div className="mt-4"><Scoreboard game="run" /></div>
-      <Section className="mt-5"><p className="px-1 text-center text-[12px] muted">Cada corrida dá XP para o Atlas virtual 🐾 · Ossinho = 10 pontos</p></Section>
+      <Section className="mt-5"><p className="px-1 text-center text-[12px] muted">Cada corrida dá XP para o pet virtual 🐾 · Ossinho = 10 pontos</p></Section>
     </div>
   );
 }

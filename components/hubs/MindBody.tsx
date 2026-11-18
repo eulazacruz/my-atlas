@@ -210,7 +210,7 @@ export function ReminderSettings() {
   return (
     <div className="glass overflow-hidden">
       <Row k="breaks" t="Pausas de respiro" d="10h30, 15h e 17h30: 1 minuto para respirar e beber água" />
-      <Row k="sun" t="Sol e movimento" d="16h30: sair, caminhar com o Atlas e pegar sol" />
+      <Row k="sun" t="Sol e movimento" d="16h30: sair, caminhar e pegar sol" />
       <Row k="unwind" t="Rotina para desligar" d={`${r.unwindAt}: hora de desacelerar`} />
       <Row k="autoNight" t="Modo noturno automático" d="Tema escuro depois das 18h e claro de dia" />
       <div className="flex items-center gap-3 px-4 py-3">
@@ -371,7 +371,7 @@ export function BodyView() {
         <CollectionList kind="measure" limit={4} />
       </Section>
       <Section title="Sol e movimento">
-        <Glass className="flex items-center gap-3 p-4"><Sun size={20} /><p className="flex-1 text-[13.5px]">Lembrete diário às 16h30 para sair, caminhar com o Atlas e pegar sol. Ajuste em Mente → Lembretes de cuidado.</p></Glass>
+        <Glass className="flex items-center gap-3 p-4"><Sun size={20} /><p className="flex-1 text-[13.5px]">Lembrete diário às 16h30 para sair, caminhar e pegar sol. Ajuste em Mente → Lembretes de cuidado.</p></Glass>
       </Section>
     </>
   );

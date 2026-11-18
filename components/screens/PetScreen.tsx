@@ -28,7 +28,7 @@ export function VirtualAtlas({ compact = false }: { compact?: boolean }) {
     <Glass className={compact ? 'p-4' : 'p-5'}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="label">Atlas virtual · nível {st.level}</p>
+          <p className="label">Pet virtual · nível {st.level}</p>
           <p className="text-[19px] font-bold tracking-tight">{st.label}</p>
         </div>
         <span className="rounded-full bg-black/[0.06] px-3 py-1 text-[12px] font-semibold tabular-nums dark:bg-white/[0.08]">{st.xp} XP</span>
@@ -75,7 +75,7 @@ export function PetScreen() {
     <div>
       <PageHeader title={pet?.name ?? 'Pet'} subtitle={tab === 'virtual' ? 'Pet virtual · co-op' : pet?.breed ?? 'Prontuário'} back />
       <div className="mb-6">
-        <Segmented id="pet-tab" value={tab} onChange={setTab} options={[{ value: 'virtual', label: 'Atlas virtual' }, { value: 'real', label: 'Prontuário & saúde' }]} />
+        <Segmented id="pet-tab" value={tab} onChange={setTab} options={[{ value: 'virtual', label: 'Pet virtual' }, { value: 'real', label: 'Prontuário & saúde' }]} />
       </div>
       {tab === 'virtual' ? (
         <Section>

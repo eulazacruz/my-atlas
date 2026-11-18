@@ -50,7 +50,7 @@ export function demoExternal(meId: string, partnerId: string): ExternalEvent[] {
     if (wd >= 1 && wd <= 5) {
       const s = new Date(d); s.setHours(8, 0, 0, 0);
       const e = new Date(d); e.setHours(14, 20, 0, 0);
-      out.push({ id: `demo-aec-${i}`, title: 'Turno AeC', start: s.toISOString(), end: e.toISOString(), allDay: false, location: 'AeC · Recife', owner: meId });
+      out.push({ id: `demo-aec-${i}`, title: 'Turno de trabalho', start: s.toISOString(), end: e.toISOString(), allDay: false, location: 'AeC · Recife', owner: meId });
     }
     if (wd === 2 || wd === 4) {
       const s = new Date(d); s.setHours(18, 30, 0, 0);

@@ -19,11 +19,11 @@ export async function biometricAvailable(): Promise<boolean> {
     return r.isAvailable || r.deviceIsSecure;
   } catch { return false; }
 }
-export async function authenticate(reason = 'Desbloquear o My Atlas'): Promise<boolean> {
+export async function authenticate(reason = 'Desbloquear o Vivalo'): Promise<boolean> {
   if (!isNative()) return true;
   try {
     const { BiometricAuth } = await import('@aparajita/capacitor-biometric-auth');
-    await BiometricAuth.authenticate({ reason, androidTitle: 'My Atlas', androidSubtitle: reason, allowDeviceCredential: true, cancelTitle: 'Cancelar' });
+    await BiometricAuth.authenticate({ reason, androidTitle: 'Vivalo', androidSubtitle: reason, allowDeviceCredential: true, cancelTitle: 'Cancelar' });
     return true;
   } catch { return false; }
 }
@@ -70,7 +70,7 @@ export function LockGate() {
       {locked && (
         <motion.div className="fixed inset-0 z-[300] flex flex-col items-center justify-center bg-[#030303] text-white" initial={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.04 }}>
           <AtlasGlyph size={92} />
-          <p className="mt-6 text-[20px] font-bold">My Atlas está bloqueado</p>
+          <p className="mt-6 text-[20px] font-bold">Vivalo está bloqueado</p>
           <p className="mt-1 text-[14px] text-white/50">Use a digital ou o PIN do celular</p>
           <Button className="mt-8 h-12 !bg-white px-6 !text-black" onClick={tryUnlock}><Fingerprint size={18} /> Desbloquear</Button>
         </motion.div>

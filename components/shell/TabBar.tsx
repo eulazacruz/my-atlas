@@ -1,4 +1,5 @@
 'use client';
+import { useModules } from '@/lib/modules';
 
 import { motion } from 'framer-motion';
 import { BookOpen, CalendarDays, HeartPulse, House, LayoutGrid } from 'lucide-react';
@@ -15,10 +16,11 @@ const ITEMS: { id: Tab; label: string; icon: typeof House }[] = [
 
 export function TabBar() {
   const { tab, navigate } = useUI();
+  const mods = useModules();
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-[max(0.9rem,env(safe-area-inset-bottom))]">
       <div className="glass flex w-full max-w-md items-center justify-between !rounded-[30px] !bg-white/80 p-1.5 dark:!bg-[#0c0c0c]/75">
-        {ITEMS.map(({ id, label, icon: Icon }) => {
+        {ITEMS.filter((it) => it.id !== 'faith' || mods.faith).map(({ id, label, icon: Icon }) => {
           const active = tab === id;
           return (
             <button

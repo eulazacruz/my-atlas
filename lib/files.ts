@@ -1,6 +1,7 @@
 'use client';
 /* Fotos do casal no Storage (bucket "atlas", pasta = id do casal). No modo demo vira dataURL. */
 import { useEffect, useState } from 'react';
+import { driveEnabled, driveUrl, isDrivePath, uploadToDrive } from './drive';
 import { getSupabase } from './supabase';
 import { uid } from './utils';
 
@@ -23,6 +24,10 @@ export async function uploadPhoto(file: File, coupleId: string, demo: boolean): 
       r.readAsDataURL(blob);
     });
   }
+  if (driveEnabled()) {
+    try { return await uploadToDrive(blob, `vivalo-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.jpg`); }
+    catch { /* sem Drive (permissão negada ou offline): cai para o armazenamento do app */ }
+  }
   const sb = getSupabase();
   if (!sb) throw new Error('sem conexão');
   const path = `${coupleId}/${uid()}.jpg`;
@@ -37,6 +42,7 @@ export function usePhotoUrl(path?: string | null) {
   useEffect(() => {
     if (!path) return setUrl(null);
     if (path.startsWith('data:') || path.startsWith('http')) return setUrl(path);
+    if (isDrivePath(path)) return setUrl(driveUrl(path));
     const c = urlCache.get(path);
     if (c && c.exp > Date.now()) return setUrl(c.url);
     let on = true;
@@ -53,6 +59,7 @@ export function usePhotoUrl(path?: string | null) {
 /** URL assinada (ou dataURL) para uso fora de componentes. */
 export async function photoUrl(path: string): Promise<string | null> {
   if (path.startsWith('data:') || path.startsWith('http')) return path;
+  if (isDrivePath(path)) return driveUrl(path);
   const c = urlCache.get(path);
   if (c && c.exp > Date.now()) return c.url;
   const { data } = (await getSupabase()?.storage.from('atlas').createSignedUrl(path, 3600)) ?? { data: null };

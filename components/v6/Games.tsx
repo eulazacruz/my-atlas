@@ -1,6 +1,6 @@
 'use client';
 import { useSubNav } from '@/components/providers/UIProvider';
-/* Jogos: Quanto você me conhece?, Quiz bíblico, Memória com fotos e Atlas Run. */
+/* Jogos: Quanto você me conhece?, Quiz bíblico, Memória com fotos e Pet Run. */
 import { motion } from 'framer-motion';
 import { RotateCcw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -19,7 +19,7 @@ const GAMES = [
   { id: 'know', emoji: '💞', t: 'Quanto você me conhece?', h: 'Acerte as respostas do seu amor' },
   { id: 'quiz', emoji: '📖', t: 'Quiz bíblico', h: 'Ganhe XP para o Atlas' },
   { id: 'memory', emoji: '🧠', t: 'Memória', h: 'Com as fotos de vocês' },
-  { id: 'run', emoji: '🐕', t: 'Atlas Run', h: 'Corra, pule e pegue ossinhos' },
+  { id: 'run', emoji: '🐕', t: 'Pet Run', h: 'Corra, pule e pegue ossinhos' },
 ] as const;
 
 function useScores(game: string) {
@@ -263,7 +263,7 @@ function AtlasRun() {
           <div className="absolute inset-0 grid place-items-center text-center">
             <div>
               <p className="text-[44px]">{state === 'over' ? '💥' : '🐕'}</p>
-              <p className="text-[20px] font-bold">{state === 'over' ? `${score} pontos` : 'Atlas Run'}</p>
+              <p className="text-[20px] font-bold">{state === 'over' ? `${score} pontos` : 'Pet Run'}</p>
               <p className="text-[13px] muted">{state === 'over' ? 'Toque para correr de novo' : 'Toque para pular · toque duas vezes no ar para pulo duplo'}</p>
             </div>
           </div>

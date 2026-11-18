@@ -73,7 +73,7 @@ export function PetScreen() {
   const pet = rows('pets')[0];
   return (
     <div>
-      <PageHeader title={pet?.name ?? 'Atlas'} subtitle={tab === 'virtual' ? 'Nosso pitbull · co-op' : pet?.breed ?? 'Prontuário'} back />
+      <PageHeader title={pet?.name ?? 'Pet'} subtitle={tab === 'virtual' ? 'Pet virtual · co-op' : pet?.breed ?? 'Prontuário'} back />
       <div className="mb-6">
         <Segmented id="pet-tab" value={tab} onChange={setTab} options={[{ value: 'virtual', label: 'Atlas virtual' }, { value: 'real', label: 'Prontuário & saúde' }]} />
       </div>

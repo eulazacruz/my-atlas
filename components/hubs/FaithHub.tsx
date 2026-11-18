@@ -167,7 +167,7 @@ export function ChurchMode() {
     const next = !on;
     const r = await setDoNotDisturb(next);
     if (r === 'permission') {
-      alert({ kind: 'sync', title: 'Permita o “Não perturbe”', subtitle: 'Ative o My Atlas na tela que abriu e toque de novo', duration: 6000 });
+      alert({ kind: 'sync', title: 'Permita o “Não perturbe”', subtitle: 'Ative o Vivalo na tela que abriu e toque de novo', duration: 6000 });
       return;
     }
     setOn(next);

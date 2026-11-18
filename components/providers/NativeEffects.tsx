@@ -194,7 +194,7 @@ export function NativeEffects() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const BG = registerPlugin<any>('BackgroundGeolocation');
         const id = !bgOn ? null : await BG.addWatcher(
-          { backgroundTitle: 'My Atlas', backgroundMessage: 'Compartilhando sua localização com seu amor', requestPermissions: true, stale: false, distanceFilter: 10 },
+          { backgroundTitle: 'Vivalo', backgroundMessage: 'Compartilhando sua localização com seu amor', requestPermissions: true, stale: false, distanceFilter: 10 },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (loc: any, err: any) => {
             if (err || !loc) return;

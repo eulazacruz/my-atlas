@@ -83,7 +83,7 @@ export function DataSettings() {
   };
   const backup = () => run('json', async () => {
     const db = { ...state.db, entries: state.db.entries.filter((e) => !e.private || e.createdBy === me.id) };
-    await shareFile(`my-atlas-backup-${ymd()}.json`, JSON.stringify({ app: 'My Atlas', exportedAt: new Date().toISOString(), couple: state.couple, db }, null, 2), 'application/json', 'Backup do My Atlas');
+    await shareFile(`my-atlas-backup-${ymd()}.json`, JSON.stringify({ app: 'Vivalo', exportedAt: new Date().toISOString(), couple: state.couple, db }, null, 2), 'application/json', 'Backup do Vivalo');
   });
   const finance = () => run('csv', async () => {
     const tx = rows('transactions').sort((a, b) => b.occurredOn.localeCompare(a.occurredOn)).map((t) => ({ data: t.occurredOn, tipo: t.type === 'expense' ? 'Saída' : 'Entrada', descricao: t.description, categoria: t.category, valor: t.amount.toFixed(2).replace('.', ','), quem: firstName(nameOf(t.createdBy)) }));

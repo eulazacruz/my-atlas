@@ -24,8 +24,8 @@ const KIND: Record<IslandKind, { icon: typeof Smile; label: string; color?: stri
   water: { icon: Droplets, label: 'Hidratação', color: ACCENT.water },
   breathing: { icon: Wind, label: 'Respiração' },
   nudge: { icon: Heart, label: 'Nós dois' },
-  pet: { icon: PawPrint, label: 'Atlas' },
-  sync: { icon: RefreshCw, label: 'My Atlas' },
+  pet: { icon: PawPrint, label: 'Pet' },
+  sync: { icon: RefreshCw, label: 'Vivalo' },
   success: { icon: Check, label: 'Pronto' },
   agenda: { icon: CalendarDays, label: 'Agenda' },
   task: { icon: CheckSquare, label: 'Tarefas' },
@@ -207,7 +207,7 @@ export function AtlasIsland() {
                         <Icon size={14} strokeWidth={2.4} />
                       </span>
                     )}
-                    <span className="truncate text-[11px] font-medium uppercase tracking-[0.14em] text-white/45">{meta?.label ?? 'Atlas Island'}</span>
+                    <span className="truncate text-[11px] font-medium uppercase tracking-[0.14em] text-white/45">{meta?.label ?? 'Vivalo'}</span>
                   </div>
                   <Lens />
                   <div className="flex w-[40%] items-center justify-end gap-2">

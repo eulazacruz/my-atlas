@@ -21,8 +21,16 @@ export interface Profile {
   updatedAt: string;
   contextStatus?: string | null;
   contextUpdatedAt?: string | null;
+  sex?: 'm' | 'f' | 'x' | null;
+  christian?: boolean | null;
+  coupleMode?: boolean | null;
+  hasPet?: boolean | null;
+  modules?: Partial<Record<ModuleKey, boolean>>;
+  setupDone?: boolean;
+  email?: string | null;
   pending?: boolean;
 }
+export type ModuleKey = 'cycle' | 'faith' | 'couple' | 'pet' | 'finance' | 'lang' | 'nutrition';
 
 export interface MoodLog { id: string; profileId: string; mood: Mood; mentalBattery: number; createdAt: string }
 

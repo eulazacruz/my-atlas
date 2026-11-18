@@ -6,13 +6,17 @@ import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI, type SubView } from '@/components/providers/UIProvider';
 import { IconButton, PageHeader, Section } from '@/components/ui/primitives';
 import { TOOL_META } from '@/lib/tools';
+import { toolAllowed, useModules } from '@/lib/modules';
 import { ToolRow } from '@/components/v6/kit';
 import { money, ymd } from '@/lib/utils';
 
-type Item = { view?: SubView; tool?: string; title: string; icon?: typeof Heart; emoji?: string; badge?: string };
+type Item = { view?: SubView; tool?: string; title: string; icon?: typeof Heart; emoji?: string; badge?: string; need?: 'duo' | 'faith' | 'pet' | 'finance' };
 
-function Grid({ items }: { items: Item[] }) {
+function Grid({ items: all }: { items: Item[] }) {
   const { navigate } = useUI();
+  const mods = useModules();
+  const items = all.filter((it) => (it.tool ? toolAllowed(it.tool, mods) : true) && (it.need === 'duo' ? mods.couple && mods.hasPartner : it.need === 'faith' ? mods.faith : it.need === 'pet' ? mods.pet : it.need === 'finance' ? mods.finance : true));
+  if (!items.length) return null;
   return (
     <div className="grid grid-cols-3 gap-2.5">
       {items.map((it, i) => {
@@ -44,16 +48,21 @@ export function MoreScreen() {
   const month = ymd().slice(0, 7);
   const balance = rows('transactions').filter((t) => t.occurredOn.startsWith(month)).reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0);
   const shop = rows('shopping_items').filter((i) => !i.checked).length;
+  const petName = rows('pets')[0]?.name || 'Pet';
+  const mods = useModules();
   return (
     <div>
       <PageHeader title="Mais" subtitle={couple?.name ?? 'Nós dois'} actions={<IconButton label="Ajustes" onClick={() => navigate('settings')}><Settings size={18} /></IconButton>} />
       <Section><ToolRow id="idiomas" sub="Inglês e espanhol · lição do dia" /></Section>
-      <Section title="Nós dois">
+      {mods.couple && !mods.hasPartner && (
+        <Section><button onClick={() => navigate('settings')} className="glass flex w-full items-center gap-3 p-4 text-left"><span className="text-[28px]">💌</span><span className="flex-1"><span className="block text-[15px] font-semibold">Convide seu amor</span><span className="text-[12.5px] muted">Libera instantes, timeline, jogos e a Jornada a Dois</span></span></button></Section>
+      )}
+      <Section title={mods.couple && mods.hasPartner ? 'Nós dois' : 'Para você'}>
         <Grid items={[
           { tool: 'social', title: 'Cantinho' },
-          { view: 'couple', title: 'Nós dois', icon: Heart },
+          { view: 'couple', title: 'Nós dois', icon: Heart, need: 'duo' },
           { tool: 'journey', title: 'Jornada a Dois' },
-          { view: 'checkin', title: 'Check-in', icon: MessagesSquare },
+          { view: 'checkin', title: 'Check-in', icon: MessagesSquare, need: 'duo' },
           { tool: 'games', title: 'Jogos' },
           { tool: 'challenges', title: 'Desafios' },
           { tool: 'wishlist', title: 'Desejos' },
@@ -65,7 +74,7 @@ export function MoreScreen() {
         <Grid items={[
           { view: 'focus', title: 'Produtividade', icon: Rocket },
           { view: 'notes', title: 'Notas', icon: NotebookPen },
-          { view: 'finance', title: 'Finanças', icon: Wallet, badge: money(balance) },
+          { view: 'finance', title: 'Finanças', icon: Wallet, badge: money(balance), need: 'finance' },
           { tool: 'piggy', title: 'Cofrinhos' },
           { view: 'shopping', title: 'Compras', icon: ShoppingBag, badge: shop ? `${shop} itens` : undefined },
           { view: 'life', title: 'Casa & lazer', icon: Sofa },
@@ -74,11 +83,11 @@ export function MoreScreen() {
       <Section title="Cuidar">
         <Grid items={[
           { view: 'mind', title: 'Mente', icon: Brain },
-          { view: 'location', title: 'Localização', icon: MapPin },
+          { view: 'location', title: 'Localização', icon: MapPin, need: 'duo' },
           { tool: 'nutrition', title: 'Alimentação' },
           { tool: 'alarm', title: 'Despertador' },
-          { view: 'pet', title: 'Atlas', icon: PawPrint },
-          { view: 'bible', title: 'Bíblia', icon: BookOpen },
+          { view: 'pet', title: petName, icon: PawPrint, need: 'pet' },
+          { view: 'bible', title: 'Bíblia', icon: BookOpen, need: 'faith' },
         ]} />
       </Section>
     </div>

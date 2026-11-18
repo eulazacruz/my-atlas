@@ -1,4 +1,5 @@
 'use client';
+import { homeAllowed, useModules } from '@/lib/modules';
 import { InstantsStrip } from '@/components/v6/Instants';
 import dynamic from 'next/dynamic';
 const LangHomeCard = dynamic(() => import('@/components/v6/Lang').then((m) => m.LangHomeCard), { ssr: false });
@@ -104,6 +105,7 @@ export function HomeScreen() {
     openNote(id);
   };
 
+  const mods = useModules();
   const blocks: Record<HomeSectionId, JSX.Element | null> = {
     social: <Section><InstantsStrip /></Section>,
     lang: <Section><LangHomeCard /></Section>,
@@ -381,7 +383,7 @@ export function HomeScreen() {
       />
       <SeasonBanner />
 
-      {layout.order.filter((id) => !layout.hidden.includes(id)).map((id) => (
+      {layout.order.filter((id) => !layout.hidden.includes(id) && homeAllowed(id, mods)).map((id) => (
         <div key={id}>{blocks[id]}</div>
       ))}
       <button onClick={() => openSheet('editHome')} className="mx-auto mt-2 flex h-10 items-center gap-2 rounded-full px-5 text-[13px] font-medium muted">

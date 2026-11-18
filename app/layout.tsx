@@ -6,11 +6,11 @@ import '@fontsource-variable/literata';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'My Atlas',
+  title: 'Vivalo',
   description: 'Life & Couple OS — produtividade, fé, saúde mental, finanças e pet care do casal.',
   manifest: '/manifest.json',
-  applicationName: 'My Atlas',
-  appleWebApp: { capable: true, title: 'My Atlas', statusBarStyle: 'black-translucent' },
+  applicationName: 'Vivalo',
+  appleWebApp: { capable: true, title: 'Vivalo', statusBarStyle: 'black-translucent' },
   icons: {
     icon: [
       { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },

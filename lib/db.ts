@@ -64,8 +64,23 @@ export async function saveRow(sb: SupabaseClient, table: TableName, row: Row, co
     if (error) throw error;
     return;
   }
-  const { error } = await sb.from(table).upsert(toRow({ ...row, coupleId }));
-  if (error) throw error;
+  const data = toRow({ ...row, coupleId });
+  // Atualiza primeiro: o "upsert" exige a regra de INSERT (created_by = eu) e falhava quando
+  // um editava o registro do outro (visto do instante, curtida, voto, reserva, depósito…).
+  const { id: _id, created_by: _cb, ...patch } = data;
+  const up = await sb.from(table).update(patch).eq('id', data.id).select('id');
+  if (up.error) throw up.error;
+  if (up.data && up.data.length > 0) return;
+  const { error } = await sb.from(table).insert(data);
+  if (error) {
+    // corrida: já existia (ex.: duas gravações seguidas) → tenta atualizar de novo
+    if ((error as { code?: string }).code === '23505') {
+      const again = await sb.from(table).update(patch).eq('id', data.id);
+      if (again.error) throw again.error;
+      return;
+    }
+    throw error;
+  }
 }
 export async function deleteRow(sb: SupabaseClient, table: TableName, id: string) {
   const { error } = await sb.from(table).delete().eq('id', id);

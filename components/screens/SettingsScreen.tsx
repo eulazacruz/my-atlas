@@ -7,6 +7,7 @@ import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useTestIsland } from '@/components/shell/useTestIsland';
 import { DataSettings, ExperienceSettings, SecuritySettings } from '@/components/fx/MoreSettings';
 import { GoogleCalendarSettings, IslandCalibration, IslandOutside, IslandSimulator, PrivacyAndPermissions } from './SettingsExtras';
+import { DriveSettings, ModulesSettings, PrivacySettings } from './AccountSettings';
 import { Button, Chip, Field, Glass, PageHeader, Section } from '@/components/ui/primitives';
 import { firstName, money, parseMoney } from '@/lib/utils';
 
@@ -104,7 +105,10 @@ export function SettingsScreen() {
         </Glass>
       </Section>
 
-      <Section title="Atlas Island">
+      <ModulesSettings />
+      <DriveSettings />
+
+      <Section title="Ilha de notificações">
         <Glass className="flex items-center gap-3 p-4" onClick={testIsland}>
           <BellRing size={18} />
           <div className="flex-1">
@@ -151,7 +155,8 @@ export function SettingsScreen() {
           </Button>
         </Section>
       )}
-      <p className="pb-4 text-center text-[11px] muted">My Atlas · Life & Couple OS · v6.1</p>
+      <PrivacySettings />
+      <p className="pb-4 text-center text-[11px] muted">Vivalo · sua vida, seu amor e sua fé</p>
     </div>
   );
 }

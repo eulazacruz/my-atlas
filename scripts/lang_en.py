@@ -3,7 +3,7 @@ UNITS = [
  dict(id='en1', emoji='👋', title='Primeiros passos', desc='Cumprimentos e cortesia', items=[
   ('Hello!', 'Olá!', ['Hi!']), ('Good morning!', 'Bom dia!', []), ('Good afternoon!', 'Boa tarde!', []), ('Good night!', 'Boa noite!', []),
   ('How are you?', 'Como você está?', []), ("I'm fine, thank you.", 'Estou bem, obrigado.', ['I am fine, thank you.', "I'm fine, thanks."]),
-  ('And you?', 'E você?', []), ('My name is Lázaro.', 'Meu nome é Lázaro.', ["I'm Lázaro."]), ("What's your name?", 'Qual é o seu nome?', ['What is your name?']),
+  ('And you?', 'E você?', []), ('My name is Lucas.', 'Meu nome é Lucas.', ["I'm Lucas."]), ("What's your name?", 'Qual é o seu nome?', ['What is your name?']),
   ('Nice to meet you.', 'Prazer em te conhecer.', ['Nice to meet you!']), ('Please.', 'Por favor.', []), ('Thank you!', 'Obrigado!', ['Thanks!']),
   ("You're welcome.", 'De nada.', ['You are welcome.']), ('Excuse me.', 'Com licença.', []), ("I'm sorry.", 'Me desculpe.', ['I am sorry.', 'Sorry.']),
   ('Yes.', 'Sim.', []), ('No.', 'Não.', []), ('See you later!', 'Até mais tarde!', ['See you!']), ('Goodbye!', 'Tchau!', ['Bye!']),
@@ -15,18 +15,18 @@ UNITS = [
   ('Nice to meet you! How are you today?', 'Prazer! Como você está hoje?', ['fine', 'good', 'great', 'well', 'ok', 'tired'], "I'm fine, thank you. And you?"),
   ("I'm great, thanks! Well, I have to go. See you later!", 'Estou ótima! Bom, preciso ir. Até mais!', ['bye', 'see you', 'goodbye', 'later', 'nice'], 'See you later! Bye!'),
  ])),
- dict(id='en2', emoji='👨‍👩‍👧', title='Eu e a família', desc='Família, casamento e o Atlas', items=[
+ dict(id='en2', emoji='👨‍👩‍👧', title='Eu e a família', desc='Família, casamento e o pet', items=[
   ('I am married.', 'Eu sou casado.', ["I'm married."]), ('This is my wife.', 'Esta é minha esposa.', []), ('This is my husband.', 'Este é meu marido.', []),
-  ('My wife is beautiful.', 'Minha esposa é linda.', []), ('I have a dog.', 'Eu tenho um cachorro.', []), ('His name is Atlas.', 'O nome dele é Atlas.', []),
+  ('My wife is beautiful.', 'Minha esposa é linda.', []), ('I have a dog.', 'Eu tenho um cachorro.', []), ('His name is Max.', 'O nome dele é Max.', []),
   ('my mother', 'minha mãe', []), ('my father', 'meu pai', []), ('my brother', 'meu irmão', []), ('my sister', 'minha irmã', []), ('my family', 'minha família', []),
   ('my friend', 'meu amigo', []), ('Where are you from?', 'De onde você é?', []), ("I'm from Brazil.", 'Eu sou do Brasil.', ['I am from Brazil.']),
-  ('I live in Pernambuco.', 'Eu moro em Pernambuco.', []), ('We live together.', 'Nós moramos juntos.', []), ('Do you have children?', 'Você tem filhos?', []),
+  ('I live in a big city.', 'Eu moro numa cidade grande.', []), ('We live together.', 'Nós moramos juntos.', []), ('Do you have children?', 'Você tem filhos?', []),
   ("We don't have children yet.", 'Nós ainda não temos filhos.', ['We do not have children yet.']), ('He is my best friend.', 'Ele é meu melhor amigo.', []),
   ('She is very kind.', 'Ela é muito gentil.', []), ('They are my parents.', 'Eles são meus pais.', []), ('How old is your dog?', 'Quantos anos tem seu cachorro?', []),
   ('I love my family.', 'Eu amo minha família.', []), ('We are a happy couple.', 'Nós somos um casal feliz.', []),
- ], chat=dict(title='Conversa no parque com o Atlas', who='Mike', emoji='🐕', lines=[
-  ('What a cute dog! What is his name?', 'Que cachorro fofo! Qual é o nome dele?', ['atlas', 'name is', 'his name'], 'His name is Atlas.'),
-  ('Atlas! Great name. Is he your dog?', 'Atlas! Ótimo nome. Ele é seu cachorro?', ['yes', 'my dog', 'mine', 'our dog'], "Yes, he is my dog."),
+ ], chat=dict(title='Conversa no parque com o Max', who='Mike', emoji='🐕', lines=[
+  ('What a cute dog! What is his name?', 'Que cachorro fofo! Qual é o nome dele?', ['max', 'name is', 'his name'], 'His name is Max.'),
+  ('Max! Great name. Is he your dog?', 'Max! Ótimo nome. Ele é seu cachorro?', ['yes', 'my dog', 'mine', 'our dog'], "Yes, he is my dog."),
   ('Do you live here?', 'Você mora aqui?', ['live', 'yes', 'no', 'i live'], 'Yes, I live here with my wife.'),
   ('Nice! Say hi to your family for me.', 'Legal! Manda um oi pra sua família.', ['thank', 'thanks', 'bye', 'sure', 'ok'], 'Thank you! Bye!'),
  ])),
@@ -95,7 +95,7 @@ UNITS = [
   ('Can you take a picture of us?', 'Você pode tirar uma foto da gente?', []),
  ], chat=dict(title='Check-in no hotel', who='Recepção', emoji='🏨', lines=[
   ('Welcome to the Sunset Hotel! Do you have a reservation?', 'Bem-vindos ao Sunset Hotel! Vocês têm reserva?', ['yes', 'reservation', 'have'], 'Yes, I have a reservation.'),
-  ('Under what name?', 'Em nome de quem?', ['name', 'cruz', 'lázaro', 'lazaro', 'under', "it's", 'it is'], "It's under Lázaro Cruz."),
+  ('Under what name?', 'Em nome de quem?', ['name', 'silva', 'lucas', 'under', "it's", 'it is'], "It's under Lucas Silva."),
   ('Perfect. Can I see your passport?', 'Perfeito. Posso ver seu passaporte?', ['here', 'yes', 'sure', 'passport', 'of course'], 'Sure, here it is.'),
   ('Thank you. Breakfast is from seven to ten. Enjoy your stay!', 'Obrigado. O café é das sete às dez. Boa estadia!', ['thank', 'thanks', 'great'], 'Thank you very much!'),
  ])),

@@ -1,4 +1,5 @@
 'use client';
+import { useModules } from '@/lib/modules';
 import { useSticky } from '@/lib/sticky';
 
 import { motion } from 'framer-motion';
@@ -18,7 +19,9 @@ import { dayKind } from '@/lib/cycle';
 import { addDays, cn, daysBetween, firstName, fmtDay, parseYmd, uid, WEEK_LETTERS, ymd } from '@/lib/utils';
 
 export function HealthScreen() {
-  const [seg, setSeg] = useSticky<'cycle' | 'habits' | 'mind' | 'body'>('health-seg', 'cycle');
+  const mods = useModules();
+  const [segRaw, setSeg] = useSticky<'cycle' | 'habits' | 'mind' | 'body'>('health-seg', mods.cycle ? 'cycle' : 'habits');
+  const seg = !mods.cycle && segRaw === 'cycle' ? 'habits' : segRaw;
   const { prefs: { discreet } } = usePrefs();
   const { openSheet } = useUI();
   const cycle = useCycle();
@@ -36,7 +39,7 @@ export function HealthScreen() {
         }
       />
       <div className="mb-6">
-        <Segmented id="health-seg" value={seg} onChange={setSeg} options={[{ value: 'cycle', label: 'Ciclo' }, { value: 'habits', label: 'Hábitos' }, { value: 'mind', label: 'Mente' }, { value: 'body', label: 'Corpo' }]} />
+        <Segmented id="health-seg" value={seg} onChange={setSeg} options={[...(mods.cycle ? [{ value: 'cycle' as const, label: 'Ciclo' }] : []), { value: 'habits' as const, label: 'Hábitos' }, { value: 'mind' as const, label: 'Mente' }, { value: 'body' as const, label: 'Corpo' }]} />
       </div>
       {seg === 'cycle' ? (discreet ? <p className="px-2 py-10 text-center text-[14px] muted">🔒 Modo discreto ligado. Desligue no olho da tela inicial para ver o ciclo.</p> : <CycleView />) : seg === 'habits' ? <HabitsView /> : seg === 'mind' ? <MindView /> : <BodyView />}
     </div>

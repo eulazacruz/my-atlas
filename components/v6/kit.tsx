@@ -7,13 +7,17 @@ import { useAtlas } from '@/components/providers/AtlasProvider';
 import { useUI } from '@/components/providers/UIProvider';
 import { Button } from '@/components/ui/primitives';
 import { TOOL_META } from '@/lib/tools';
+import { toolAllowed, useModules } from '@/lib/modules';
 import { cn, uid } from '@/lib/utils';
 
 export const EMERALD = '#10B981';
 
 /** Grid compacto de ferramentas: ícone + nome. Abre cada uma em sua página. */
-export function ToolGrid({ ids, cols = 3, badges }: { ids: string[]; cols?: 2 | 3 | 4; badges?: Record<string, string | number | undefined> }) {
+export function ToolGrid({ ids: all, cols = 3, badges }: { ids: string[]; cols?: 2 | 3 | 4; badges?: Record<string, string | number | undefined> }) {
   const { navigate } = useUI();
+  const mods = useModules();
+  const ids = all.filter((id) => toolAllowed(id, mods));
+  if (!ids.length) return null;
   return (
     <div className={cn('grid gap-2.5', cols === 2 ? 'grid-cols-2' : cols === 4 ? 'grid-cols-4' : 'grid-cols-3')}>
       {ids.map((id, i) => {
@@ -45,7 +49,9 @@ export function ToolGrid({ ids, cols = 3, badges }: { ids: string[]; cols?: 2 | 
 /** Linha larga de ferramenta (para listas de destaque). */
 export function ToolRow({ id, sub }: { id: string; sub?: string }) {
   const { navigate } = useUI();
+  const mods = useModules();
   const m = TOOL_META[id];
+  if (!toolAllowed(id, mods)) return null;
   return (
     <motion.button whileTap={{ scale: 0.98 }} onClick={() => navigate('tool', id)} className="glass flex w-full items-center gap-3 p-3.5 text-left">
       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[15px] bg-black/[0.05] text-[22px] dark:bg-white/[0.07]">{m.emoji}</span>

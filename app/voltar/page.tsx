@@ -25,7 +25,7 @@ export default function VoltarPage() {
       <h1 className="mt-6 text-[22px] font-bold tracking-tight">{failed ? 'Não deu para entrar' : 'Login concluído ✓'}</h1>
       <p className="mb-7 mt-1.5 max-w-[300px] text-[14px] text-white/55">{failed ? 'Volte ao app e tente de novo.' : 'Toque no botão para voltar ao aplicativo.'}</p>
       <a href={url || '#'} className="flex h-[52px] w-full max-w-[320px] items-center justify-center rounded-full bg-white text-[16px] font-bold text-black">
-        Voltar para o My Atlas
+        Voltar para o Vivalo
       </a>
       <p className="mt-4 text-[12px] text-white/35">Se nada acontecer, feche esta aba e abra o app.</p>
     </main>

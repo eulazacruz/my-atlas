@@ -11,7 +11,7 @@ async function blobToBase64(b: Blob): Promise<string> {
 }
 
 /** Salva/compartilha um arquivo: no Android abre a folha de compartilhar; no navegador baixa. */
-export async function shareFile(name: string, data: Blob | string, mime: string, title = 'My Atlas') {
+export async function shareFile(name: string, data: Blob | string, mime: string, title = 'Vivalo') {
   const blob = typeof data === 'string' ? new Blob([data], { type: mime }) : data;
   if (isNative()) {
     const { Filesystem, Directory } = await import('@capacitor/filesystem');
@@ -124,7 +124,7 @@ export async function drawStory(c: StoryCard): Promise<Blob> {
   } catch { /* sem ícone */ }
   g.fillStyle = th.fg;
   g.font = `800 44px ${sans}`;
-  g.fillText('My Atlas', X + 140, H - 190);
+  g.fillText('Vivalo', X + 140, H - 190);
   g.globalAlpha = 0.55; g.font = `500 30px ${sans}`; g.fillText('Life & Couple OS', X + 140, H - 148); g.globalAlpha = 1;
   return new Promise((res) => cv.toBlob((b) => res(b!), 'image/png'));
 }
@@ -147,7 +147,7 @@ export async function makePdf(title: string, sections: { heading: string; meta?:
   const M = 54, W = 595 - M * 2;
   let y = 70;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(22); doc.text(title, M, y); y += 18;
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(120); doc.text(`My Atlas · exportado em ${new Date().toLocaleDateString('pt-BR')}`, M, y); y += 30;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(120); doc.text(`Vivalo · exportado em ${new Date().toLocaleDateString('pt-BR')}`, M, y); y += 30;
   doc.setTextColor(20);
   for (const s of sections) {
     const body = doc.splitTextToSize(s.text || '—', W) as string[];

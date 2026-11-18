@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "My Atlas — Life & Couple OS",
-  "short_name": "My Atlas",
+  "name": "Vivalo — sua vida, seu amor e sua fé",
+  "short_name": "Vivalo",
   "description": "Produtividade, fé, saúde mental, treinos, finanças do casal e cuidados com o Atlas.",
   "lang": "pt-BR",
   "dir": "ltr",
@@ -78,7 +78,7 @@
     {
       "name": "Enviar carinho",
       "short_name": "Carinho",
-      "description": "Mandar um carinho para a Atlas Island do seu par",
+      "description": "Mandar um carinho para a ilha do seu par",
       "url": "/?action=nudge",
       "icons": [
         {

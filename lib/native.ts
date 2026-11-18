@@ -37,6 +37,7 @@ interface AtlasNativePlugin {
   openOverlaySettings(): Promise<void>;
   testIsland(opts: { title: string; body: string }): Promise<void>;
   listen(opts: { lang: string; prompt?: string }): Promise<{ results: string[] }>;
+  driveToken(opts: { interactive: boolean }): Promise<{ token: string }>;
   addListener(event: 'ttsProgress', cb: (e: { index: number }) => void): Promise<{ remove: () => void }>;
   addListener(event: 'ttsEnd', cb: () => void): Promise<{ remove: () => void }>;
   addListener(event: 'alarm', cb: (e: { id: string }) => void): Promise<{ remove: () => void }>;

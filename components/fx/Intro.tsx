@@ -91,7 +91,7 @@ export function Intro() {
           <div style={{ transform: `scale(${0.85 + 0.15 * progress})` }} className="relative">
             <AtlasGlyph size={150} progress={progress} dot={dot} color={day ? '#0B0B0C' : '#F5F5F7'} />
           </div>
-          <p className="relative mt-7 text-[30px] font-bold tracking-tight" style={{ opacity: word, letterSpacing: `${(1 - word) * 10 - 0.5}px` }}>My Atlas</p>
+          <p className="relative mt-7 text-[30px] font-bold tracking-tight" style={{ opacity: word, letterSpacing: `${(1 - word) * 10 - 0.5}px` }}>Vivalo</p>
           <p className="relative mt-1.5 text-[15px] opacity-60" style={{ opacity: hi * 0.6, transform: `translateY(${(1 - hi) * 8}px)` }}>
             {greet()}{me && status === 'ready' ? `, ${firstName(me.displayName)}` : ''}
           </p>
@@ -106,7 +106,7 @@ const SLIDES = [
   { icon: Sparkles, title: 'A vida de vocês dois num só lugar', text: 'Fé, rotina, saúde mental, finanças e o Atlas — tudo sincronizado em tempo real entre você e seu amor.' },
   { icon: HeartHandshake, title: 'Saiba como o outro está', text: 'Status, humor, bateria mental e “preciso de colo, silêncio, desabafar…”. O aviso aparece ao redor da câmera.' },
   { icon: BookOpen, title: 'Fé a dois', text: 'Leitura bíblica juntos, devocional, “orei por você”, jejum e check-in toda semana.' },
-  { icon: LayoutGrid, title: 'Widgets e botões rápidos', text: 'Segure a tela inicial → Widgets → My Atlas. No painel de cima, adicione Água, Despesa, Humor e Ansioso.' },
+  { icon: LayoutGrid, title: 'Widgets e botões rápidos', text: 'Segure a tela inicial → Widgets → Vivalo. No painel de cima, adicione Água, Despesa, Humor e Ansioso.' },
   { icon: Fingerprint, title: 'Só falta permitir', text: 'Notificações para receber os avisos do casal e localização para o mapa em tempo real. Você pode mudar depois em Ajustes.' },
 ];
 export function Onboarding() {

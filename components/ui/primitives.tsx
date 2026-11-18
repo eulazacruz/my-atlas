@@ -43,7 +43,7 @@ export function PageHeader({ title, subtitle, actions, back }: { title: string; 
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           {subtitle && <p className="mb-0.5 truncate text-[13px] muted first-letter:uppercase">{subtitle}</p>}
-          <h1 className="text-[30px] font-bold leading-[1.08] tracking-[-0.035em] [overflow-wrap:anywhere]">{title}</h1>
+          <h1 className={cn('font-bold leading-[1.08] tracking-[-0.035em] [overflow-wrap:anywhere] [text-wrap:balance]', actions && title.length > 16 ? 'text-[25px]' : 'text-[30px]')}>{title}</h1>
         </div>
         {actions && <div className="flex shrink-0 items-center gap-1.5">{actions}</div>}
       </div>

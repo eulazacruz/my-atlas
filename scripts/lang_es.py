@@ -3,7 +3,7 @@ UNITS = [
  dict(id='es1', emoji='👋', title='Primeros pasos', desc='Cumprimentos e cortesia', items=[
   ('¡Hola!', 'Olá!', []), ('¡Buenos días!', 'Bom dia!', []), ('¡Buenas tardes!', 'Boa tarde!', []), ('¡Buenas noches!', 'Boa noite!', []),
   ('¿Cómo estás?', 'Como você está?', ['¿Qué tal?']), ('Estoy bien, gracias.', 'Estou bem, obrigado.', ['Bien, gracias.']), ('¿Y tú?', 'E você?', []),
-  ('Me llamo Lázaro.', 'Meu nome é Lázaro.', ['Mi nombre es Lázaro.', 'Soy Lázaro.']), ('¿Cómo te llamas?', 'Como você se chama?', ['¿Cuál es tu nombre?']),
+  ('Me llamo Lucas.', 'Meu nome é Lucas.', ['Mi nombre es Lucas.', 'Soy Lucas.']), ('¿Cómo te llamas?', 'Como você se chama?', ['¿Cuál es tu nombre?']),
   ('Mucho gusto.', 'Muito prazer.', ['Encantado.']), ('Por favor.', 'Por favor.', []), ('¡Gracias!', 'Obrigado!', ['¡Muchas gracias!']), ('De nada.', 'De nada.', []),
   ('Perdón.', 'Desculpa.', ['Lo siento.', 'Disculpa.']), ('Con permiso.', 'Com licença.', []), ('Sí.', 'Sim.', []), ('No.', 'Não.', []),
   ('¡Hasta luego!', 'Até logo!', ['¡Nos vemos!']), ('¡Adiós!', 'Tchau!', ['¡Chau!']), ('No entiendo.', 'Eu não entendo.', []),
@@ -15,18 +15,18 @@ UNITS = [
   ('¡Mucho gusto! ¿Cómo estás hoy?', 'Muito prazer! Como você está hoje?', ['bien', 'muy bien', 'cansado', 'genial', 'más o menos'], 'Estoy bien, gracias. ¿Y tú?'),
   ('Muy bien. Bueno, me tengo que ir. ¡Hasta luego!', 'Muito bem. Bom, tenho que ir. Até logo!', ['adiós', 'hasta luego', 'chau', 'nos vemos', 'gusto'], '¡Hasta luego!'),
  ])),
- dict(id='es2', emoji='👨‍👩‍👧', title='Mi familia', desc='Família, casamento e o Atlas', items=[
+ dict(id='es2', emoji='👨‍👩‍👧', title='Mi familia', desc='Família, casamento e o pet', items=[
   ('Estoy casado.', 'Eu sou casado.', ['Soy casado.']), ('Esta es mi esposa.', 'Esta é minha esposa.', []), ('Este es mi esposo.', 'Este é meu marido.', ['Este es mi marido.']),
-  ('Mi esposa es hermosa.', 'Minha esposa é linda.', ['Mi esposa es linda.']), ('Tengo un perro.', 'Eu tenho um cachorro.', []), ('Se llama Atlas.', 'Ele se chama Atlas.', ['Su nombre es Atlas.']),
+  ('Mi esposa es hermosa.', 'Minha esposa é linda.', ['Mi esposa es linda.']), ('Tengo un perro.', 'Eu tenho um cachorro.', []), ('Se llama Max.', 'Ele se chama Max.', ['Su nombre es Max.']),
   ('mi madre', 'minha mãe', ['mi mamá']), ('mi padre', 'meu pai', ['mi papá']), ('mi hermano', 'meu irmão', []), ('mi hermana', 'minha irmã', []),
   ('mi familia', 'minha família', []), ('mi amigo', 'meu amigo', []), ('¿De dónde eres?', 'De onde você é?', []), ('Soy de Brasil.', 'Eu sou do Brasil.', []),
-  ('Vivo en Pernambuco.', 'Eu moro em Pernambuco.', []), ('Vivimos juntos.', 'Nós moramos juntos.', []), ('¿Tienes hijos?', 'Você tem filhos?', []),
+  ('Vivo en una ciudad grande.', 'Eu moro numa cidade grande.', []), ('Vivimos juntos.', 'Nós moramos juntos.', []), ('¿Tienes hijos?', 'Você tem filhos?', []),
   ('Todavía no tenemos hijos.', 'Ainda não temos filhos.', ['Aún no tenemos hijos.']), ('Él es mi mejor amigo.', 'Ele é meu melhor amigo.', []),
   ('Ella es muy amable.', 'Ela é muito gentil.', []), ('Ellos son mis padres.', 'Eles são meus pais.', []), ('Amo a mi familia.', 'Eu amo minha família.', []),
   ('Somos una pareja feliz.', 'Somos um casal feliz.', []),
- ], chat=dict(title='En el parque con Atlas', who='Diego', emoji='🐕', lines=[
-  ('¡Qué perro tan lindo! ¿Cómo se llama?', 'Que cachorro lindo! Como ele se chama?', ['atlas', 'se llama', 'nombre'], 'Se llama Atlas.'),
-  ('¡Atlas! Qué buen nombre. ¿Es tu perro?', 'Atlas! Que bom nome. É seu cachorro?', ['sí', 'si', 'mi perro', 'nuestro'], 'Sí, es mi perro.'),
+ ], chat=dict(title='En el parque con Max', who='Diego', emoji='🐕', lines=[
+  ('¡Qué perro tan lindo! ¿Cómo se llama?', 'Que cachorro lindo! Como ele se chama?', ['max', 'se llama', 'nombre'], 'Se llama Max.'),
+  ('¡Max! Qué buen nombre. ¿Es tu perro?', 'Max! Que bom nome. É seu cachorro?', ['sí', 'si', 'mi perro', 'nuestro'], 'Sí, es mi perro.'),
   ('¿Vives por aquí?', 'Você mora por aqui?', ['vivo', 'sí', 'si', 'no', 'cerca'], 'Sí, vivo aquí con mi esposa.'),
  ])),
  dict(id='es3', emoji='🔢', title='Números y tiempo', desc='Números, horas, idade e dias', items=[
@@ -91,7 +91,7 @@ UNITS = [
   ('¿Nos puede tomar una foto?', 'Pode tirar uma foto da gente?', []), ('la frontera', 'a fronteira', []), ('¿Cuánto cuesta el pasaje?', 'Quanto custa a passagem?', []),
  ], chat=dict(title='Check-in en el hotel', who='Recepción', emoji='🏨', lines=[
   ('¡Bienvenidos! ¿Tienen reserva?', 'Bem-vindos! Vocês têm reserva?', ['sí', 'si', 'reserva', 'tengo', 'tenemos'], 'Sí, tengo una reserva.'),
-  ('¿A nombre de quién?', 'Em nome de quem?', ['nombre', 'cruz', 'lázaro', 'lazaro', 'a nombre'], 'A nombre de Lázaro Cruz.'),
+  ('¿A nombre de quién?', 'Em nome de quem?', ['nombre', 'silva', 'lucas', 'a nombre'], 'A nombre de Lucas Silva.'),
   ('Perfecto. ¿Me muestra su pasaporte?', 'Perfeito. Pode me mostrar seu passaporte?', ['aquí', 'aqui', 'sí', 'si', 'claro', 'tome'], 'Claro, aquí está.'),
   ('Gracias. El desayuno es de siete a diez. ¡Buena estadía!', 'Obrigado. O café é das sete às dez. Boa estadia!', ['gracias', 'muchas'], '¡Muchas gracias!'),
  ])),
@@ -116,7 +116,7 @@ UNITS = [
   ('Necesito más tiempo.', 'Preciso de mais tempo.', []), ('¿Alguna pregunta?', 'Alguma pergunta?', []), ('Lo reviso y te aviso.', 'Vou verificar e te aviso.', []),
   ('Tengo un negocio.', 'Eu tenho um negócio.', []), ('Nuestro sistema es muy fácil de usar.', 'Nosso sistema é muito fácil de usar.', []),
   ('¿Quiere ver una demostración?', 'Quer ver uma demonstração?', []), ('El primer mes es gratis.', 'O primeiro mês é grátis.', []),
- ], chat=dict(title='Vendiendo el GoWeb', who='Dueño del bar', emoji='🍔', lines=[
+ ], chat=dict(title='Vendiendo un producto', who='Dueño del bar', emoji='🍔', lines=[
   ('Hola, ¿qué vende usted?', 'Olá, o que você vende?', ['sistema', 'menú', 'menu', 'carta', 'pedidos', 'digital', 'app'], 'Vendo un menú digital para restaurantes.'),
   ('¿Y para qué sirve?', 'E pra que serve?', ['pedidos', 'clientes', 'whatsapp', 'vender', 'más', 'fácil', 'qr'], 'Sus clientes hacen pedidos por el celular.'),
   ('¿Cuánto cuesta?', 'Quanto custa?', ['gratis', 'mes', 'precio', 'cuesta', 'dólares', 'guaraníes'], 'El primer mes es gratis.'),

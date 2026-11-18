@@ -21,8 +21,8 @@ export function createDemoData(): AtlasState {
   const now = new Date().toISOString();
 
   db.profiles = [
-    { id: DEMO_A, role: 'A', displayName: 'Lázaro', mood: 'em_paz', mentalBattery: 78, updatedAt: at(0, new Date().getHours() - 1) },
-    { id: DEMO_B, role: 'B', displayName: 'Vitória', mood: 'radiante', mentalBattery: 86, updatedAt: at(0, new Date().getHours()) },
+    { id: DEMO_A, role: 'A', displayName: 'Lucas', mood: 'em_paz', mentalBattery: 78, updatedAt: at(0, new Date().getHours() - 1) },
+    { id: DEMO_B, role: 'B', displayName: 'Ana', mood: 'radiante', mentalBattery: 86, updatedAt: at(0, new Date().getHours()) },
   ];
 
   const ma: Mood[] = ['focado', 'cansado', 'em_paz', 'radiante', 'estressado', 'focado', 'em_paz'];
@@ -57,7 +57,7 @@ export function createDemoData(): AtlasState {
   tx(0, 'expense', 'shared', 32, 'Padaria', 'Mercado', DEMO_B);
 
   /* ───── Pet ───── */
-  db.pets = [{ id: 'demo-pet', name: 'Atlas', breed: 'Vira-lata caramelo', lastBathAt: at(-9), foodRefilledAt: at(-26), foodBagDays: 30 }];
+  db.pets = [{ id: 'demo-pet', name: 'Bolinha', breed: 'Vira-lata caramelo', lastBathAt: at(-9), foodRefilledAt: at(-26), foodBagDays: 30 }];
   db.pet_walks = [{ id: uid(), petId: 'demo-pet', walkedBy: DEMO_B, walkedAt: at(0, 7, 10) }];
   const vac = (name: string, monthsAgo: number, interval: number) => {
     const applied = addMonths(new Date(), -monthsAgo);
@@ -90,7 +90,7 @@ export function createDemoData(): AtlasState {
     { id: uid(), createdBy: DEMO_A, owner: null, title: 'Culto de domingo', startsAt: at(((7 - new Date().getDay()) % 7) || 7, 18, 30), endsAt: at(((7 - new Date().getDay()) % 7) || 7, 20, 30), allDay: false, location: 'Igreja' },
     { id: uid(), createdBy: DEMO_B, owner: DEMO_B, title: 'Consulta ginecologista', startsAt: at(2, 14), endsAt: at(2, 15), allDay: false, location: 'Clínica Vida' },
     { id: uid(), createdBy: DEMO_A, owner: null, title: 'Jantar a dois 🍝', startsAt: at(3, 20), allDay: false, location: 'Recife Antigo' },
-    { id: uid(), createdBy: DEMO_A, owner: DEMO_A, title: 'Reunião de líderes AeC', startsAt: at(0, 15), endsAt: at(0, 16), allDay: false },
+    { id: uid(), createdBy: DEMO_A, owner: DEMO_A, title: 'Reunião de equipe', startsAt: at(0, 15), endsAt: at(0, 16), allDay: false },
     { id: uid(), createdBy: DEMO_B, owner: null, title: 'Banho e tosa do Atlas', startsAt: at(5, 10), allDay: false },
     { id: uid(), createdBy: DEMO_A, owner: null, title: 'Reunião do condomínio', startsAt: at(8, 19), allDay: false, location: 'Salão de festas' },
   ];
@@ -150,8 +150,8 @@ export function createDemoData(): AtlasState {
   /* ───── Datas especiais ───── */
   db.special_dates = [
     { id: uid(), createdBy: DEMO_A, title: 'Nosso casamento', date: ymd(addDays(addMonths(new Date(), -26), 34)), kind: 'casamento', recurring: true },
-    { id: uid(), createdBy: DEMO_A, title: 'Aniversário da Vitória', date: ymd(addDays(new Date(), 19)), kind: 'aniversario', recurring: true },
-    { id: uid(), createdBy: DEMO_B, title: 'Aniversário do Lázaro', date: ymd(addDays(new Date(), 140)), kind: 'aniversario', recurring: true },
+    { id: uid(), createdBy: DEMO_A, title: 'Aniversário da Ana', date: ymd(addDays(new Date(), 19)), kind: 'aniversario', recurring: true },
+    { id: uid(), createdBy: DEMO_B, title: 'Aniversário do Lucas', date: ymd(addDays(new Date(), 140)), kind: 'aniversario', recurring: true },
     { id: uid(), createdBy: DEMO_B, title: 'Viagem para Gramado', date: ymd(addDays(new Date(), 62)), kind: 'viagem', recurring: false },
   ];
 
@@ -164,7 +164,7 @@ export function createDemoData(): AtlasState {
 
   /* ───── Oração ───── */
   db.prayers = [
-    { id: uid(), createdBy: DEMO_B, title: 'Saúde da mãe da Vitória', details: 'Exames na próxima semana.', answered: false, createdAt: at(-5) },
+    { id: uid(), createdBy: DEMO_B, title: 'Saúde da mãe da Ana', details: 'Exames na próxima semana.', answered: false, createdAt: at(-5) },
     { id: uid(), createdBy: DEMO_A, title: 'Sabedoria na liderança do time', answered: false, createdAt: at(-3) },
     { id: uid(), createdBy: DEMO_A, title: 'Aprovação do financiamento', answered: true, answeredAt: at(-10), answerNote: 'Aprovado com taxa menor que o esperado!', createdAt: at(-40) },
   ];
@@ -188,14 +188,14 @@ export function createDemoData(): AtlasState {
   ];
   const v = (label: string, value: string, category: string, sort: number, by = DEMO_A) => ({ id: uid(), createdBy: by, label, value, category, sort });
   db.vault_items = [
-    v('CPF · Lázaro', '000.000.000-00', 'Documentos', 1),
-    v('CPF · Vitória', '111.111.111-11', 'Documentos', 2, DEMO_B),
+    v('CPF · Lucas', '000.000.000-00', 'Documentos', 1),
+    v('CPF · Ana', '111.111.111-11', 'Documentos', 2, DEMO_B),
     v('Pix do casal (e-mail)', 'casal@exemplo.com', 'Pix', 3),
     v('Placa da moto', 'ABC1D23', 'Veículo', 4),
     v('Renavam', '00000000000', 'Veículo', 5),
     v('Wi-Fi de casa', 'senha-exemplo', 'Casa', 6),
-    v('Medidas · Lázaro', 'Camisa M · Calça 40 · Tênis 41', 'Medidas', 7),
-    v('Medidas · Vitória', 'Blusa P · Calça 36 · Tênis 36', 'Medidas', 8, DEMO_B),
+    v('Medidas · Lucas', 'Camisa M · Calça 40 · Tênis 41', 'Medidas', 7),
+    v('Medidas · Ana', 'Blusa P · Calça 36 · Tênis 36', 'Medidas', 8, DEMO_B),
   ];
   db.bible_plan = [{ id: 'demo-plan', plan: 'nt', startDate: ymdLocal(-4) }];
   for (let i = 0; i < 4; i++) {
@@ -216,13 +216,13 @@ export function createDemoData(): AtlasState {
   const E = (kind: string, title: string, o: Partial<{ body: string; date: string | null; done: boolean; private: boolean; data: Record<string, unknown>; by: string }> = {}) =>
     db.entries.push({ id: uid(), createdBy: o.by ?? DEMO_A, kind, title, body: o.body ?? null, date: o.date ?? null, done: o.done ?? false, private: o.private ?? false, data: o.data ?? {}, sort: Date.now() + db.entries.length, createdAt: new Date(Date.now() - db.entries.length * 3600_000).toISOString() });
   const today = ymdLocal(0);
-  E('priority', 'Fechar relatório de indicadores da AeC', { date: today, done: true });
-  E('priority', 'Gravar 2 Reels de liderança', { date: today });
-  E('priority', 'Orar com a Vitória antes de dormir', { date: today });
+  E('priority', 'Fechar relatório da semana', { date: today, done: true });
+  E('priority', 'Treinar 30 minutos', { date: today });
+  E('priority', 'Orar com a Ana antes de dormir', { date: today });
   E('priority', 'Consulta às 14h', { date: today, by: DEMO_B, done: true });
   E('priority', 'Separar roupas da semana', { date: today, by: DEMO_B });
   E('focus', 'Relatório', { date: today, data: { minutes: 50 } });
-  E('idea', 'Série de Reels: liderança no dia a dia', { data: { tag: 'Conteúdo' }, body: '5 episódios curtos' });
+  E('idea', 'Viagem de fim de ano', { data: { tag: 'Casal' }, body: 'Pesquisar destinos' });
   E('idea', 'Horta vertical na varanda', { data: { tag: 'Casa' }, by: DEMO_B });
   E('book', 'Liderança com propósito', { data: { author: 'Autor exemplo', status: 'Lendo', pages: 240, page: 96, rating: 4 } });
   E('goal', 'Ler 12 livros', { date: `${new Date().getFullYear()}-12-31`, data: { area: 'Pessoal', target: 12, current: 9, unit: 'livros' } });
@@ -232,7 +232,7 @@ export function createDemoData(): AtlasState {
   E('memory', 'Filipenses 4:6', { body: 'Não andeis ansiosos de coisa alguma; em tudo, porém, sejam conhecidas, diante de Deus, as vossas petições, pela oração e pela súplica, com ações de graças.', data: { ref: 'Filipenses 4:6', box: 1, next: today } });
   E('church', 'Culto de celebração', { date: ymdLocal((7 - new Date().getDay()) % 7 || 7), data: { time: '18:00', type: 'Culto', who: 'Nós dois', place: 'Igreja' } });
   E('person', 'Pr. Marcos', { data: { relation: 'Igreja', every: 14, last: ymdLocal(-20), pray: 'Saúde da família' } });
-  E('person', 'Mãe da Vitória', { data: { relation: 'Família', every: 7, last: ymdLocal(-9) }, by: DEMO_B });
+  E('person', 'Mãe da Ana', { data: { relation: 'Família', every: 7, last: ymdLocal(-9) }, by: DEMO_B });
   E('emotion', 'Gratidão', { date: today, private: true, data: { level: 4, cause: 'Semana produtiva', helped: 'Oração da manhã' } });
   E('win', 'Bati a meta do mês na equipe', { date: ymdLocal(-2) });
   E('limit', 'Sem celular depois das 22h', { data: { days: { [ymdLocal(-1)]: true, [ymdLocal(-2)]: true } } });

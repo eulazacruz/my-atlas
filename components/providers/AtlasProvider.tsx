@@ -145,7 +145,7 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
     }
   }, [state, mode]);
 
-  /* ───────── realtime: muda o estado e avisa na Atlas Island ───────── */
+  /* ───────── realtime: muda o estado e avisa na ilha de notificações ───────── */
   /* eslint-disable @typescript-eslint/no-explicit-any */
   function onRemote(myId: string) {
     return (table: string, type: 'INSERT' | 'UPDATE' | 'DELETE', row: any, oldId?: string) => {
@@ -423,7 +423,7 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
     const now = new Date().toISOString();
     save('profiles', { ...meP, contextStatus: v, contextUpdatedAt: now, updatedAt: now });
     const st = statusOf(v);
-    island.push({ kind: 'status', title: `Status: ${st?.label} ${st?.emoji}`, subtitle: 'Seu par vê isso na Atlas Island.', duration: 2200 });
+    island.push({ kind: 'status', title: `Status: ${st?.label} ${st?.emoji}`, subtitle: 'Seu par vê isso na ilha de notificações.', duration: 2200 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [save]);
 

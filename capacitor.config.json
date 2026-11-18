@@ -1,6 +1,6 @@
 {
   "appId": "app.myatlas.twa",
-  "appName": "My Atlas",
+  "appName": "Vivalo",
   "webDir": "out",
   "android": {
     "allowMixedContent": false,

@@ -29,7 +29,7 @@ import java.io.FileOutputStream;
 import java.util.Locale;
 import org.json.JSONArray;
 
-@CapacitorPlugin(name = "AtlasNative")
+@CapacitorPlugin(name = "AtlasNative", requestCodes = {4711})
 public class AtlasNativePlugin extends Plugin {
 
     @PluginMethod
@@ -257,6 +257,47 @@ public class AtlasNativePlugin extends Plugin {
         }
         r.put("results", arr);
         call.resolve(r);
+    }
+
+
+    /* ───────── Google Drive (escopo drive.file) ───────── */
+    private static final int REQ_DRIVE = 4711;
+    private PluginCall driveCall;
+
+    @PluginMethod
+    public void driveToken(PluginCall call) {
+        java.util.List<com.google.android.gms.common.api.Scope> scopes = java.util.Collections.singletonList(new com.google.android.gms.common.api.Scope("https://www.googleapis.com/auth/drive.file"));
+        com.google.android.gms.auth.api.identity.AuthorizationRequest req = com.google.android.gms.auth.api.identity.AuthorizationRequest.builder().setRequestedScopes(scopes).build();
+        boolean interactive = call.getBoolean("interactive", true);
+        com.google.android.gms.auth.api.identity.Identity.getAuthorizationClient(getActivity()).authorize(req)
+            .addOnSuccessListener(res -> {
+                if (res.hasResolution()) {
+                    if (!interactive || res.getPendingIntent() == null) { call.reject("needs-consent"); return; }
+                    try {
+                        driveCall = call;
+                        getActivity().startIntentSenderForResult(res.getPendingIntent().getIntentSender(), REQ_DRIVE, null, 0, 0, 0, null);
+                    } catch (Exception e) { call.reject(e.getMessage()); }
+                } else {
+                    JSObject r = new JSObject();
+                    r.put("token", res.getAccessToken());
+                    call.resolve(r);
+                }
+            })
+            .addOnFailureListener(e -> call.reject(e.getMessage()));
+    }
+
+    @Override
+    protected void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
+        super.handleOnActivityResult(requestCode, resultCode, data);
+        if (requestCode != REQ_DRIVE || driveCall == null) return;
+        PluginCall c = driveCall;
+        driveCall = null;
+        try {
+            com.google.android.gms.auth.api.identity.AuthorizationResult res = com.google.android.gms.auth.api.identity.Identity.getAuthorizationClient(getActivity()).getAuthorizationResultFromIntent(data);
+            JSObject r = new JSObject();
+            r.put("token", res.getAccessToken());
+            c.resolve(r);
+        } catch (Exception e) { c.reject("Permissão do Drive negada"); }
     }
 
     /* ───────── Ilha fora do app ───────── */

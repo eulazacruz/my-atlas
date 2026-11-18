@@ -96,7 +96,7 @@ function VaultItemSheet() {
       }
     >
       <div className="space-y-4 pt-1">
-        <Field label="Nome"><input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Ex.: Chave Pix da Vitória" className="input" /></Field>
+        <Field label="Nome"><input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Ex.: Chave Pix" className="input" /></Field>
         <Field label="Valor"><input value={value} onChange={(e) => setValue(e.target.value)} placeholder="O que será copiado" className="input font-mono" /></Field>
         <Field label="Categoria"><div className="flex flex-wrap gap-2">{VAULT_CATEGORIES.map((c) => <Chip key={c} active={category === c} onClick={() => setCategory(c)}>{c}</Chip>)}</div></Field>
       </div>

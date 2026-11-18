@@ -83,7 +83,7 @@ export function IslandOutside() {
           <Switch checked={!!st?.enabled && !!st?.permission} onChange={set} label="Ilha fora do app" />
         </div>
         {st && !st.permission && <p className="text-[12.5px] muted">Precisa da permissão “Sobrepor a outros apps”. Ao ativar, o app abre essa tela: ligue para o My Atlas e volte. No Xiaomi, libere também “Mostrar janelas pop-up em segundo plano” e “Início automático”.</p>}
-        {st?.enabled && st.permission && <Button className="w-full" onClick={() => AtlasNative.testIsland({ title: 'Vitória te mandou um carinho 🤍', body: 'Assim que fica a ilha fora do app' })}>Testar agora</Button>}
+        {st?.enabled && st.permission && <Button className="w-full" onClick={() => AtlasNative.testIsland({ title: 'Seu amor te mandou um carinho 🤍', body: 'Assim que fica a ilha fora do app' })}>Testar agora</Button>}
       </Glass>
     </Section>
   );

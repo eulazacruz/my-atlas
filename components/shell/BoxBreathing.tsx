@@ -77,7 +77,7 @@ export function BoxBreathing() {
               </AnimatePresence>
             </div>
           </div>
-          <p className="mt-12 max-w-xs text-center text-[13px] muted">Faça pelo menos 4 ciclos. O timer continua na Atlas Island.</p>
+          <p className="mt-12 max-w-xs text-center text-[13px] muted">Faça pelo menos 4 ciclos. O timer continua na ilha de notificações.</p>
           <button onClick={() => setBreathingOpen(false)} className="mt-6 h-12 rounded-full bg-black px-8 text-[15px] font-semibold text-white dark:bg-white dark:text-black">
             Concluir
           </button>

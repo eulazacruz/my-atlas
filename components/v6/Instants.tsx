@@ -74,17 +74,20 @@ export function DraftSheet({ draft, onSend, onCancel }: { draft: { path: string 
 }
 
 /* ───────── Visualizador (uma vez só) ───────── */
-export function Viewer({ list, onClose, onReply }: { list: Entry[]; onClose: () => void; onReply: (id: string) => void }) {
+export function Viewer({ list: live, onClose, onReply }: { list: Entry[]; onClose: () => void; onReply: (id: string) => void }) {
   const { nameOf } = useAtlas();
   const { put } = useEntryActions();
+  // congela a lista ao abrir: marcar como visto não pode fazer o instante sumir da tela
+  const [list] = useState(live);
   const [i, setI] = useState(0);
   const e = list[i];
   const seen = useRef(new Set<string>());
-  useEffect(() => {
-    if (!e || seen.current.has(e.id)) return;
-    seen.current.add(e.id);
-    put('instant', { data: { seenAt: new Date().toISOString() } }, e);
-  }, [e]); // eslint-disable-line react-hooks/exhaustive-deps
+  const markSeen = (x?: Entry) => {
+    if (!x || seen.current.has(x.id)) return;
+    seen.current.add(x.id);
+    put('instant', { data: { seenAt: new Date().toISOString() } }, x);
+  };
+  useEffect(() => () => { markSeen(list[i]); }, [i]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!e) return null;
   const next = () => (i < list.length - 1 ? setI(i + 1) : onClose());
   return (
@@ -100,7 +103,7 @@ export function Viewer({ list, onClose, onReply }: { list: Entry[]; onClose: () 
       {e.title && <p className="absolute inset-x-0 bottom-36 text-center text-[17px] font-semibold drop-shadow">{e.title}</p>}
       <div className="flex items-center gap-2 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
         {['🤍', '😂', '😍', '🔥', '🥺'].map((em) => (
-          <motion.button key={em} whileTap={{ scale: 1.4 }} onClick={() => { put('instant', { data: { reaction: em } }, e); vibe('love'); next(); }} className="grid h-12 w-12 place-items-center rounded-full bg-white/10 text-[22px]">{em}</motion.button>
+          <motion.button key={em} whileTap={{ scale: 1.4 }} onClick={() => { seen.current.add(e.id); put('instant', { data: { reaction: em, seenAt: new Date().toISOString() } }, e); vibe('love'); next(); }} className="grid h-12 w-12 place-items-center rounded-full bg-white/10 text-[22px]">{em}</motion.button>
         ))}
         <button onClick={() => { onClose(); onReply(e.id); }} className="ml-auto flex h-12 items-center gap-1.5 rounded-full bg-white px-4 text-[14px] font-semibold text-black"><Camera size={16} /> Responder</button>
       </div>

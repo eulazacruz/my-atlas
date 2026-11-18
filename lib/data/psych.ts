@@ -139,7 +139,7 @@ export const REFRAME = [
 export const ACTIVITIES = [
   { t: 'Caminhar 10 minutos ao ar livre', k: 'P' }, { t: 'Tomar sol por 15 minutos', k: 'P' }, { t: 'Ouvir 3 louvores que eu amo', k: 'P' },
   { t: 'Ligar para um amigo', k: 'P' }, { t: 'Tomar um banho demorado', k: 'P' }, { t: 'Cozinhar algo gostoso', k: 'P' },
-  { t: 'Brincar com o Atlas', k: 'P' }, { t: 'Ver o pôr do sol', k: 'P' }, { t: 'Ler 10 páginas de um livro', k: 'P' },
+  { t: 'Brincar com o pet', k: 'P' }, { t: 'Ver o pôr do sol', k: 'P' }, { t: 'Ler 10 páginas de um livro', k: 'P' },
   { t: 'Arrumar a cama', k: 'D' }, { t: 'Lavar a louça', k: 'D' }, { t: 'Responder um e-mail que estou adiando', k: 'D' },
   { t: 'Organizar uma gaveta', k: 'D' }, { t: 'Pagar uma conta', k: 'D' }, { t: 'Fazer 15 minutos de exercício', k: 'D' },
   { t: 'Planejar as refeições da semana', k: 'D' }, { t: 'Ler um capítulo da Bíblia', k: 'D' }, { t: 'Beber 2 copos de água', k: 'D' },

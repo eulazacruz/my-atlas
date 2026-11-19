@@ -27,7 +27,7 @@ export function useModules(): Modules {
 }
 
 /** Recursos que só fazem sentido em casal (com o par já conectado). */
-export const COUPLE_TOOLS = new Set(['social', 'journey', 'wishlist', 'challenges', 'trilha']);
+export const COUPLE_TOOLS = new Set(['social', 'journey', 'reclamacoes', 'wishlist', 'challenges', 'trilha']);
 export const FAITH_TOOLS = new Set(['psalm', 'lectio', 'acts', 'examen', 'prayertimes', 'fruit', 'gifts', 'grace', 'narrated', 'churchday']);
 export function toolAllowed(id: string, m: Modules) {
   if (COUPLE_TOOLS.has(id)) return m.couple && m.hasPartner;

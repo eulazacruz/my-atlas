@@ -61,6 +61,7 @@ export function MoreScreen() {
         <Grid items={[
           { tool: 'social', title: 'Cantinho' },
           { view: 'couple', title: 'Nós dois', icon: Heart, need: 'duo' },
+          { tool: 'reclamacoes', title: 'Reclame Aqui' },
           { tool: 'journey', title: 'Jornada a Dois' },
           { view: 'checkin', title: 'Check-in', icon: MessagesSquare, need: 'duo' },
           { tool: 'games', title: 'Jogos' },

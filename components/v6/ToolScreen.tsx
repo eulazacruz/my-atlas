@@ -12,6 +12,7 @@ const MAP: Record<string, React.ComponentType> = {
   social: d(() => import('./Social').then((m) => m.SocialTool)),
   journey: d(() => import('./Journey').then((m) => m.JourneyTool)),
   games: d(() => import('./Games').then((m) => m.GamesTool)),
+  reclamacoes: d(() => import('./Complaints').then((m) => m.ComplaintsTool)),
   wishlist: d(() => import('./LifePlus').then((m) => m.WishlistTool)),
   challenges: d(() => import('./LifePlus').then((m) => m.ChallengesTool)),
   trilha: d(() => import('./LifePlus').then((m) => m.TrilhaTool)),

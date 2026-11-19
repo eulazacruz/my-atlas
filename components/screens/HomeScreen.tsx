@@ -1,6 +1,7 @@
 'use client';
 import { homeAllowed, useModules } from '@/lib/modules';
 import { InstantsStrip } from '@/components/v6/Instants';
+import { ComplaintBanner } from '@/components/v6/Complaints';
 import dynamic from 'next/dynamic';
 const LangHomeCard = dynamic(() => import('@/components/v6/Lang').then((m) => m.LangHomeCard), { ssr: false });
 
@@ -107,7 +108,7 @@ export function HomeScreen() {
 
   const mods = useModules();
   const blocks: Record<HomeSectionId, JSX.Element | null> = {
-    social: <Section><InstantsStrip /></Section>,
+    social: <Section><ComplaintBanner /><InstantsStrip /></Section>,
     lang: <Section><LangHomeCard /></Section>,
     status: (
       <>
@@ -268,7 +269,7 @@ export function HomeScreen() {
     ),
     pet: (
       <>
-      <Section title="Atlas virtual" action={<button onClick={() => navigate('pet')} className="text-[13px] font-medium muted">Prontuário</button>}>
+      <Section title="Pet virtual" action={<button onClick={() => navigate('pet')} className="text-[13px] font-medium muted">Prontuário</button>}>
         <VirtualAtlas compact />
       </Section>
       </>

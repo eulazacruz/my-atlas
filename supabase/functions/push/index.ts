@@ -1,4 +1,4 @@
-// My Atlas — envio de push (FCM HTTP v1) disparado por gatilhos do banco.
+// Vivalo — envio de push (FCM HTTP v1) disparado por gatilhos do banco.
 // Segredos: FIREBASE_SERVICE_ACCOUNT (JSON da conta de serviço). SUPABASE_URL e
 // SUPABASE_SERVICE_ROLE_KEY são injetados automaticamente pelo Supabase.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
@@ -11,8 +11,8 @@ type Row = Record<string, any>;
 const MOODS: Record<string, string> = { radiante: 'radiante ☀️', focado: 'focado 🎯', em_paz: 'em paz 🕊️', cansado: 'cansado 🥱', estressado: 'estressado 🌪️' };
 const STATUS: Record<string, string> = { foco: 'Em foco / Trabalho 💻', transito: 'No trânsito 🛵', treino: 'Treinando 🏋️', saindo: 'Saindo do trabalho 🚀', casa: 'Em casa 🏠' };
 const NEEDS: Record<string, string> = { silencio: 'precisa de silêncio / espaço 🔇', colo: 'precisa de colo / atenção 🫂', desabafar: 'precisa só desabafar 🗣️', comer: 'quer sair pra comer algo 🍔' };
-const PET: Record<string, string> = { pet_cabo: 'está brincando de cabo de guerra com o Atlas 🪢', pet_petisco: 'deu um petisco pro Atlas 🦴', pet_carinho: 'está fazendo carinho no Atlas 👋', pet_lambida: 'mandou uma lambida do Atlas pra você 🐾' };
-const HOUSE: Record<string, string> = { louca: 'lavou a louça 🍽️', lixo: 'tirou o lixo 🗑️', atlas: 'passeou com o Atlas 🐕', casa: 'organizou a casa 🧹', compras: 'fez as compras 🛒' };
+const PET: Record<string, string> = { pet_cabo: 'está brincando de cabo de guerra com o pet 🪢', pet_petisco: 'deu um petisco pro pet 🦴', pet_carinho: 'está fazendo carinho no pet 👋', pet_lambida: 'mandou uma lambida do pet pra você 🐾' };
+const HOUSE: Record<string, string> = { louca: 'lavou a louça 🍽️', lixo: 'tirou o lixo 🗑️', atlas: 'passeou com o pet 🐕', casa: 'organizou a casa 🧹', compras: 'fez as compras 🛒' };
 const brl = (n: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
 
 /* ───────── OAuth do Google com a conta de serviço (JWT RS256) ───────── */
@@ -42,7 +42,10 @@ async function accessToken(sa: Row) {
 
 /* ───────── Monta a mensagem a partir do evento ───────── */
 async function build(table: string, type: string, r: Row, old: Row | null) {
-  const actor: string | undefined = r.created_by ?? r.walked_by ?? r.from_profile ?? r.profile_id ?? (table === 'profiles' ? r.id : undefined);
+  // Reclamações: o autor da ação depende do status (quem abre/aceita/reabre é o autor; quem trata/resolve é o reclamado)
+  let actor: string | undefined = r.created_by ?? r.walked_by ?? r.from_profile ?? r.profile_id ?? (table === 'profiles' ? r.id : undefined);
+  const cd = table === 'entries' && r.kind === 'complaint' ? (r.data ?? {}) : null;
+  if (cd && type === 'UPDATE' && (cd.status === 'progress' || cd.status === 'resolved')) actor = cd.against;
   if (!actor) return null;
   const { data: who } = await sb.from('profiles').select('display_name, couple_id').eq('id', actor).single();
   if (!who?.couple_id) return null;
@@ -56,7 +59,7 @@ async function build(table: string, type: string, r: Row, old: Row | null) {
     const k = r.message || r.kind;
     to = r.to_profile;
     if (NEEDS[k]) [title, body] = [`${name} ${NEEDS[k]}`, 'Toque para responder'];
-    else if (PET[k]) [title, body, link] = [`${name} ${PET[k]}`, 'Atlas virtual', 'app.myatlas://action/open/pet'];
+    else if (PET[k]) [title, body, link] = [`${name} ${PET[k]}`, 'Pet virtual', 'app.myatlas://action/open/pet'];
     else if (k === 'carinho') [title, body] = [`${name} te mandou um carinho 🤍`, 'Pensando em você agora.'];
     else [title, body] = [`${name} te cutucou 👉`, 'Ei! Dá uma olhadinha aqui.'];
   } else if (table === 'profiles') {
@@ -73,6 +76,18 @@ async function build(table: string, type: string, r: Row, old: Row | null) {
   else if (table === 'bible_reads') [title, body, link] = [`${name} leu a Bíblia de hoje 📖`, 'Leitura a dois', 'app.myatlas://action/open/bible'];
   else if (table === 'entries') {
     const d = r.data ?? {};
+    if (r.kind === 'complaint') {
+      const st = d.status, prev = old?.data?.status;
+      const cat = d.categoryLabel ? `${d.categoryLabel} · ` : '';
+      link = 'app.myatlas://action/tool/reclamacoes';
+      if (type === 'INSERT') { [title, body] = [`${name} abriu uma reclamação 📢`, `${cat}${r.title} — prazo de ${d.slaHours ?? 48}h`]; to = d.against ?? null; }
+      else if (st === prev) return null;
+      else if (st === 'progress') { [title, body] = [`${name} está tratando sua reclamação 🛠️`, d.response ? String(d.response).slice(0, 140) : r.title]; to = r.created_by; }
+      else if (st === 'resolved') { [title, body] = [`${name} marcou como resolvida ✅`, 'Confirme se ficou bom ou reabra']; to = r.created_by; }
+      else if (st === 'closed') { [title, body] = [`${name} aceitou a solução 🤝`, d.rating ? `Nota ${'★'.repeat(d.rating)}` : r.title]; to = d.against ?? null; }
+      else if (st === 'reopened') { [title, body] = [`${name} reabriu a reclamação 😤`, `${r.title} — novo prazo de 24h`]; to = d.against ?? null; }
+      else return null;
+    } else
     if (r.kind === 'prayed') { [title, body] = [`${name} orou pelo seu pedido 🙏`, r.title || 'Estou orando por você']; to = d.to ?? null; }
     else if (r.kind === 'sos') [title, body] = [`${name} precisa de você agora 🫂`, 'Momento de ansiedade — liga ou manda um carinho'];
     else if (r.kind === 'devotional') [title, body, link] = [`${name} escreveu o devocional de hoje ✍️`, r.title || 'Leitura a dois', 'app.myatlas://action/open/faith'];
@@ -88,7 +103,7 @@ async function build(table: string, type: string, r: Row, old: Row | null) {
     else if (r.kind === 'challenge') [title, body, link] = [`${name} começou um desafio 🏁`, r.title, 'app.myatlas://action/tool/challenges'];
     else return null;
   }
-  else if (table === 'pet_walks') [title, body, link] = [`${name} levou o Atlas para passear 🐾`, 'Passeio do dia registrado', 'app.myatlas://action/open/pet'];
+  else if (table === 'pet_walks') [title, body, link] = [`${name} levou o pet para passear 🐾`, 'Passeio do dia registrado', 'app.myatlas://action/open/pet'];
   else return null;
 
   // destinatário: o parceiro (ou o alvo explícito do cutucão)

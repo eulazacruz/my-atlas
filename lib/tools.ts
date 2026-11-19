@@ -7,6 +7,7 @@ export const TOOL_META: Record<string, ToolMeta> = {
   social: { title: 'Nosso cantinho', hint: 'Instantes, timeline e mural', emoji: '📸', tab: 'home' },
   journey: { title: 'Jornada a Dois', hint: 'Conversas que aproximam', emoji: '🧭', tab: 'more' },
   games: { title: 'Jogos', hint: 'Quiz, memória e Pet Run', emoji: '🎮', tab: 'more' },
+  reclamacoes: { title: 'Reclame Aqui', hint: 'Reclamações do casal com prazo', emoji: '📢', tab: 'more' },
   wishlist: { title: 'Lista de desejos', hint: 'Reserve presentes em segredo', emoji: '🎁', tab: 'more' },
   challenges: { title: 'Desafios de 30 dias', hint: 'Pequenos hábitos a dois', emoji: '🏁', tab: 'more' },
   trilha: { title: 'Nossa trilha', hint: 'As músicas do casal', emoji: '🎵', tab: 'more' },

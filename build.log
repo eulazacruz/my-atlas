@@ -1,0 +1,200 @@
+> Task :capacitor-push-notifications:prepareReleaseArtProfile
+> Task :capacitor-push-notifications:mergeReleaseJavaResource
+> Task :capacitor-push-notifications:extractProguardFiles
+> Task :capacitor-push-notifications:syncReleaseLibJars
+> Task :capacitor-push-notifications:bundleReleaseLocalLintAar
+> Task :capacitor-push-notifications:writeReleaseLintModelMetadata
+> Task :capacitor-share:bundleLibRuntimeToJarRelease
+> Task :capacitor-share:processReleaseJavaRes NO-SOURCE
+> Task :capacitor-push-notifications:generateReleaseLintModel
+> Task :capacitor-share:createFullJarRelease
+> Task :capacitor-share:mergeReleaseJniLibFolders
+> Task :capacitor-share:mergeReleaseNativeLibs NO-SOURCE
+> Task :capacitor-share:stripReleaseDebugSymbols NO-SOURCE
+> Task :capacitor-share:copyReleaseJniLibsProjectAndLocalJars
+> Task :capacitor-share:extractDeepLinksForAarRelease
+> Task :capacitor-share:extractReleaseAnnotations
+> Task :capacitor-share:mergeReleaseGeneratedProguardFiles
+> Task :capacitor-share:mergeReleaseConsumerProguardFiles
+> Task :capacitor-share:mergeReleaseShaders
+> Task :capacitor-share:compileReleaseShaders NO-SOURCE
+> Task :capacitor-share:generateReleaseAssets UP-TO-DATE
+> Task :capacitor-share:packageReleaseAssets
+> Task :capacitor-share:prepareReleaseArtProfile
+> Task :capacitor-share:prepareLintJarForPublish
+> Task :capacitor-share:mergeReleaseJavaResource
+> Task :capacitor-share:extractProguardFiles
+> Task :capacitor-share:syncReleaseLibJars
+> Task :capacitor-share:bundleReleaseLocalLintAar
+> Task :capacitor-share:writeReleaseLintModelMetadata
+> Task :capacitor-status-bar:bundleLibRuntimeToJarRelease
+> Task :capacitor-status-bar:processReleaseJavaRes NO-SOURCE
+> Task :capacitor-share:generateReleaseLintModel
+> Task :capacitor-status-bar:createFullJarRelease
+> Task :capacitor-status-bar:mergeReleaseJniLibFolders
+> Task :capacitor-status-bar:mergeReleaseNativeLibs NO-SOURCE
+> Task :capacitor-status-bar:stripReleaseDebugSymbols NO-SOURCE
+> Task :capacitor-status-bar:copyReleaseJniLibsProjectAndLocalJars
+> Task :capacitor-status-bar:extractDeepLinksForAarRelease
+> Task :capacitor-status-bar:extractReleaseAnnotations
+> Task :capacitor-status-bar:mergeReleaseGeneratedProguardFiles
+> Task :capacitor-status-bar:mergeReleaseConsumerProguardFiles
+> Task :capacitor-status-bar:mergeReleaseShaders
+> Task :capacitor-status-bar:compileReleaseShaders NO-SOURCE
+> Task :capacitor-status-bar:generateReleaseAssets UP-TO-DATE
+> Task :capacitor-status-bar:packageReleaseAssets
+> Task :capacitor-status-bar:prepareLintJarForPublish
+> Task :capacitor-status-bar:prepareReleaseArtProfile
+> Task :capacitor-status-bar:mergeReleaseJavaResource
+> Task :capacitor-status-bar:extractProguardFiles
+> Task :capacitor-status-bar:syncReleaseLibJars
+> Task :capacitor-status-bar:bundleReleaseLocalLintAar
+> Task :capacitor-status-bar:writeReleaseLintModelMetadata
+> Task :capacitor-android:generateReleaseLintVitalModel
+> Task :capacitor-status-bar:generateReleaseLintModel
+> Task :app:generateReleaseLintVitalReportModel
+> Task :capacitor-app:generateReleaseLintVitalModel
+> Task :capacitor-browser:generateReleaseLintVitalModel
+> Task :capacitor-community-background-geolocation:generateReleaseLintVitalModel
+> Task :capacitor-cordova-android-plugins:generateReleaseLintVitalModel
+> Task :capacitor-filesystem:generateReleaseLintVitalModel
+> Task :capacitor-geolocation:generateReleaseLintVitalModel
+> Task :capacitor-haptics:generateReleaseLintVitalModel
+> Task :capacitor-local-notifications:generateReleaseLintVitalModel
+> Task :capacitor-push-notifications:generateReleaseLintVitalModel
+> Task :capacitor-share:generateReleaseLintVitalModel
+> Task :capacitor-status-bar:generateReleaseLintVitalModel
+> Task :aparajita-capacitor-biometric-auth:copyReleaseJniLibsProjectOnly
+> Task :app:mergeReleaseJniLibFolders
+> Task :capacitor-app:copyReleaseJniLibsProjectOnly
+> Task :capacitor-android:copyReleaseJniLibsProjectOnly
+> Task :capacitor-browser:copyReleaseJniLibsProjectOnly
+> Task :capacitor-community-background-geolocation:copyReleaseJniLibsProjectOnly
+> Task :capacitor-cordova-android-plugins:copyReleaseJniLibsProjectOnly
+> Task :capacitor-filesystem:copyReleaseJniLibsProjectOnly
+> Task :capacitor-geolocation:copyReleaseJniLibsProjectOnly
+> Task :capacitor-local-notifications:copyReleaseJniLibsProjectOnly
+> Task :capacitor-haptics:copyReleaseJniLibsProjectOnly
+> Task :capacitor-push-notifications:copyReleaseJniLibsProjectOnly
+> Task :capacitor-share:copyReleaseJniLibsProjectOnly
+> Task :capacitor-status-bar:copyReleaseJniLibsProjectOnly
+> Task :aparajita-capacitor-biometric-auth:bundleLibRuntimeToDirRelease
+> Task :app:mergeReleaseNativeLibs NO-SOURCE
+> Task :app:stripReleaseDebugSymbols NO-SOURCE
+> Task :app:extractReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :capacitor-community-background-geolocation:bundleLibRuntimeToDirRelease
+> Task :capacitor-app:bundleLibRuntimeToDirRelease
+> Task :capacitor-browser:bundleLibRuntimeToDirRelease
+> Task :capacitor-filesystem:bundleLibRuntimeToDirRelease
+> Task :capacitor-geolocation:bundleLibRuntimeToDirRelease
+> Task :capacitor-haptics:bundleLibRuntimeToDirRelease
+> Task :capacitor-local-notifications:bundleLibRuntimeToDirRelease
+> Task :capacitor-push-notifications:bundleLibRuntimeToDirRelease
+> Task :capacitor-share:bundleLibRuntimeToDirRelease
+> Task :capacitor-status-bar:bundleLibRuntimeToDirRelease
+> Task :capacitor-android:bundleLibRuntimeToDirRelease
+> Task :capacitor-cordova-android-plugins:bundleLibRuntimeToDirRelease
+> Task :app:checkReleaseDuplicateClasses
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:dexBuilderRelease
+> Task :app:desugarReleaseFileDependencies
+> Task :capacitor-app:lintVitalAnalyzeRelease
+> Task :app:mergeReleaseArtProfile
+> Task :capacitor-browser:lintVitalAnalyzeRelease
+> Task :app:mergeReleaseGlobalSynthetics
+> Task :app:mergeReleaseShaders
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets
+> Task :app:mergeExtDexRelease
+> Task :app:compressReleaseAssets
+> Task :app:processReleaseJavaRes NO-SOURCE
+> Task :capacitor-android:lintVitalAnalyzeRelease
+> Task :capacitor-community-background-geolocation:lintVitalAnalyzeRelease
+> Task :app:mergeReleaseJavaResource
+> Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
+> Task :capacitor-filesystem:lintVitalAnalyzeRelease
+> Task :app:optimizeReleaseResources
+> Task :app:collectReleaseDependencies
+> Task :app:sdkReleaseDependencyData
+> Task :app:validateSigningRelease
+> Task :app:writeReleaseAppMetadata
+> Task :app:writeReleaseSigningConfigVersions
+> Task :capacitor-android:bundleReleaseAar
+> Task :capacitor-android:mapReleaseSourceSetPaths
+> Task :app:mergeDexRelease
+> Task :capacitor-android:mergeReleaseResources
+> Task :capacitor-geolocation:lintVitalAnalyzeRelease
+> Task :capacitor-haptics:lintVitalAnalyzeRelease
+> Task :app:compileReleaseArtProfile
+> Task :capacitor-android:verifyReleaseResources
+> Task :capacitor-android:assembleRelease
+> Task :capacitor-app:bundleReleaseAar
+> Task :capacitor-app:mapReleaseSourceSetPaths
+> Task :capacitor-app:mergeReleaseResources
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect
+> Task :capacitor-browser:bundleReleaseAar
+> Task :capacitor-browser:mapReleaseSourceSetPaths
+> Task :capacitor-local-notifications:lintVitalAnalyzeRelease
+> Task :capacitor-push-notifications:lintVitalAnalyzeRelease
+> Task :capacitor-app:verifyReleaseResources
+> Task :capacitor-browser:mergeReleaseResources
+> Task :capacitor-app:assembleRelease
+> Task :capacitor-community-background-geolocation:bundleReleaseAar
+> Task :capacitor-community-background-geolocation:mapReleaseSourceSetPaths
+> Task :capacitor-browser:verifyReleaseResources
+> Task :capacitor-community-background-geolocation:mergeReleaseResources
+> Task :capacitor-browser:assembleRelease
+> Task :capacitor-cordova-android-plugins:bundleReleaseAar
+> Task :capacitor-cordova-android-plugins:mapReleaseSourceSetPaths
+> Task :capacitor-share:lintVitalAnalyzeRelease
+> Task :capacitor-cordova-android-plugins:mergeReleaseResources
+> Task :capacitor-community-background-geolocation:verifyReleaseResources
+> Task :capacitor-community-background-geolocation:assembleRelease
+> Task :capacitor-filesystem:bundleReleaseAar
+> Task :capacitor-filesystem:mapReleaseSourceSetPaths
+> Task :capacitor-status-bar:lintVitalAnalyzeRelease
+> Task :capacitor-filesystem:mergeReleaseResources
+> Task :capacitor-geolocation:bundleReleaseAar
+> Task :capacitor-geolocation:mapReleaseSourceSetPaths
+> Task :app:lintVitalReportRelease
+> Task :capacitor-cordova-android-plugins:verifyReleaseResources
+> Task :capacitor-geolocation:mergeReleaseResources
+> Task :app:lintVitalRelease
+> Task :app:assembleRelease
+> Task :capacitor-cordova-android-plugins:assembleRelease
+> Task :capacitor-haptics:bundleReleaseAar
+> Task :capacitor-haptics:mapReleaseSourceSetPaths
+> Task :capacitor-filesystem:verifyReleaseResources
+> Task :capacitor-haptics:mergeReleaseResources
+> Task :capacitor-filesystem:assembleRelease
+> Task :capacitor-local-notifications:bundleReleaseAar
+> Task :capacitor-local-notifications:mapReleaseSourceSetPaths
+> Task :capacitor-geolocation:verifyReleaseResources
+> Task :capacitor-local-notifications:mergeReleaseResources
+> Task :capacitor-geolocation:assembleRelease
+> Task :capacitor-push-notifications:bundleReleaseAar
+> Task :capacitor-push-notifications:mapReleaseSourceSetPaths
+> Task :capacitor-haptics:verifyReleaseResources
+> Task :capacitor-push-notifications:mergeReleaseResources
+> Task :capacitor-haptics:assembleRelease
+> Task :capacitor-share:bundleReleaseAar
+> Task :capacitor-share:mapReleaseSourceSetPaths
+> Task :capacitor-local-notifications:verifyReleaseResources
+> Task :capacitor-share:mergeReleaseResources
+> Task :capacitor-local-notifications:assembleRelease
+> Task :capacitor-status-bar:bundleReleaseAar
+> Task :capacitor-status-bar:mapReleaseSourceSetPaths
+> Task :capacitor-push-notifications:verifyReleaseResources
+> Task :capacitor-status-bar:mergeReleaseResources
+> Task :capacitor-push-notifications:assembleRelease
+> Task :capacitor-share:verifyReleaseResources
+> Task :capacitor-share:assembleRelease
+> Task :capacitor-status-bar:verifyReleaseResources
+> Task :capacitor-status-bar:assembleRelease
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/build-1795097769690.json
+
+BUILD SUCCESSFUL in 50s
+521 actionable tasks: 521 executed

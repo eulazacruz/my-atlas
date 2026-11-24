@@ -114,6 +114,9 @@ export interface Task {
   title: string;
   notes?: string | null;
   dueDate?: string | null;
+  dueTime?: string | null;
+  mandatory?: boolean;
+  needsProof?: boolean;
   priority: number;
   done: boolean;
   doneAt?: string | null;

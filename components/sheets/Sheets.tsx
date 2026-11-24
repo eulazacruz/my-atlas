@@ -116,8 +116,14 @@ function TaskSheet() {
   const [due, setDue] = useState('');
   const [assignee, setAssignee] = useState<string | null>(null);
   const [priority, setPriority] = useState(0);
+  const [time, setTime] = useState('');
+  const [mandatory, setMandatory] = useState(false);
+  const [proof, setProof] = useState(false);
   useEffect(() => {
     if (!open) return;
+    setTime(t?.dueTime ?? '');
+    setMandatory(t?.mandatory ?? false);
+    setProof(t?.needsProof ?? false);
     setTitle(t?.title ?? '');
     setNotes(t?.notes ?? '');
     setDue(t?.dueDate ?? sheet?.payload?.date ?? '');
@@ -129,7 +135,7 @@ function TaskSheet() {
     if (!title.trim()) return;
     save('tasks', {
       id: t?.id ?? uid(), createdBy: t?.createdBy ?? me.id, assignee, title: title.trim(), notes: notes.trim() || null,
-      dueDate: due || null, priority, done: t?.done ?? false, doneAt: t?.doneAt ?? null, doneBy: t?.doneBy ?? null, createdAt: t?.createdAt ?? new Date().toISOString(),
+      dueDate: due || null, dueTime: due && time ? time : null, mandatory: !!(due && time && mandatory), needsProof: proof, priority, done: t?.done ?? false, doneAt: t?.doneAt ?? null, doneBy: t?.doneBy ?? null, createdAt: t?.createdAt ?? new Date().toISOString(),
     });
     closeSheet();
   };
@@ -157,9 +163,20 @@ function TaskSheet() {
         <Field label="Prazo">
           <div className="flex gap-2">
             <input type="date" value={due} onChange={(e) => setDue(e.target.value)} className="input" />
-            {due && <Button onClick={() => setDue('')}>Limpar</Button>}
+            {due && <input type="time" value={time} onChange={(e) => { setTime(e.target.value); if (e.target.value && !time) setMandatory(true); }} className="input w-[120px]" />}
+            {due && <Button onClick={() => { setDue(''); setTime(''); }}>Limpar</Button>}
           </div>
         </Field>
+        {due && time && (
+          <div className="glass-thin flex items-center gap-3 rounded-[18px] p-3.5">
+            <div className="flex-1"><p className="text-[14.5px] font-semibold">⏰ Obrigatória</p><p className="text-[12px] muted">Toca como alarme na hora e só para quando concluir.</p></div>
+            <Switch checked={mandatory} onChange={setMandatory} label="Obrigatória" />
+          </div>
+        )}
+        <div className="glass-thin flex items-center gap-3 rounded-[18px] p-3.5">
+          <div className="flex-1"><p className="text-[14.5px] font-semibold">📸 Exigir foto como prova</p><p className="text-[12px] muted">{assignee && assignee !== me.id ? 'Você aprova a foto antes de contar como feita.' : 'Só conclui anexando uma foto.'}</p></div>
+          <Switch checked={proof} onChange={setProof} label="Exigir foto" />
+        </div>
         <Field label="Prioridade">
           <Segmented id="prio" value={String(priority)} onChange={(v) => setPriority(Number(v))} options={PRIORITY.map((p) => ({ value: String(p.value), label: p.label }))} />
         </Field>

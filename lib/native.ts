@@ -30,6 +30,9 @@ interface AtlasNativePlugin {
   setAlarms(opts: { data: string }): Promise<{ exact: boolean; fullScreen: boolean }>;
   stopAlarm(): Promise<void>;
   alarmState(): Promise<{ ringing: boolean; id?: string }>;
+  alarmSounds(): Promise<{ sounds: { title: string; uri: string }[] }>;
+  previewSound(o: { uri: string; short?: boolean }): Promise<void>;
+  stopPreview(): Promise<void>;
   openAlarmSettings(opts: { which: 'exact' | 'fullscreen' }): Promise<void>;
   setInstantWidget(opts: { image: string; caption: string; from: string }): Promise<void>;
   islandOverlayState(): Promise<{ permission: boolean; enabled: boolean }>;

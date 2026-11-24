@@ -35,6 +35,8 @@ public class AlarmScheduler {
 
     /** Próximo disparo de um alarme (ms) ou -1. */
     static long next(JSONObject a, long now) {
+        long at = a.optLong("at", 0);
+        if (at > 0) return at > now + 1000 ? at : -1;
         try {
             String[] t = a.getString("time").split(":");
             int h = Integer.parseInt(t[0]), m = Integer.parseInt(t[1]);
@@ -90,6 +92,13 @@ public class AlarmScheduler {
         } catch (SecurityException e) {
             am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, op);
         }
+    }
+
+    /** Busca a configuração de um alarme pelo id (título, texto, som, tipo). */
+    public static JSONObject find(Context c, String id) {
+        JSONArray list = read(c).optJSONArray("alarms");
+        if (list != null && id != null) for (int i = 0; i < list.length(); i++) { JSONObject a = list.optJSONObject(i); if (a != null && id.equals(a.optString("id"))) return a; }
+        return new JSONObject();
     }
 
     static PendingIntent pi(Context c, int req, String id) {

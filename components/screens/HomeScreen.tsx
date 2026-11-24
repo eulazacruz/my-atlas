@@ -2,6 +2,7 @@
 import { homeAllowed, useModules } from '@/lib/modules';
 import { InstantsStrip } from '@/components/v6/Instants';
 import { ComplaintBanner } from '@/components/v6/Complaints';
+import { ProofBanner } from '@/components/v6/Duty';
 import dynamic from 'next/dynamic';
 const LangHomeCard = dynamic(() => import('@/components/v6/Lang').then((m) => m.LangHomeCard), { ssr: false });
 
@@ -108,7 +109,7 @@ export function HomeScreen() {
 
   const mods = useModules();
   const blocks: Record<HomeSectionId, JSX.Element | null> = {
-    social: <Section><ComplaintBanner /><InstantsStrip /></Section>,
+    social: <Section><ProofBanner /><ComplaintBanner /><InstantsStrip /></Section>,
     lang: <Section><LangHomeCard /></Section>,
     status: (
       <>

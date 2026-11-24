@@ -1,5 +1,6 @@
 'use client';
 
+import { DutySettings } from '@/components/v6/Duty';
 import { BellRing, Check, Copy, LogOut, Monitor, Moon, RefreshCw, Repeat, Smartphone, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
@@ -107,6 +108,7 @@ export function SettingsScreen() {
 
       <ModulesSettings />
       <DriveSettings />
+      <DutySettings />
 
       <Section title="Ilha de notificações">
         <Glass className="flex items-center gap-3 p-4" onClick={testIsland}>

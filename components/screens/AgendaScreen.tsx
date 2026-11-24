@@ -214,7 +214,7 @@ function TaskRow({ t }: { t: Task }) {
   const overdue = !t.done && t.dueDate && t.dueDate < ymd();
   return (
     <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} className="flex items-center gap-3 border-b px-4 py-3 last:border-0 hairline">
-      <CheckCircle checked={t.done} onClick={() => patch('tasks', t.id, { done: !t.done, doneAt: t.done ? null : new Date().toISOString(), doneBy: t.done ? null : me?.id })} />
+      <CheckCircle checked={t.done} onClick={() => { if (!t.done && me && (t.needsProof || (t.createdBy !== me.id && t.assignee === me.id))) { window.dispatchEvent(new CustomEvent('atlas:task-proof', { detail: t.id })); return; } patch('tasks', t.id, { done: !t.done, doneAt: t.done ? null : new Date().toISOString(), doneBy: t.done ? null : me?.id }); }} />
       <button onClick={() => openSheet('task', { task: t })} className="min-w-0 flex-1 text-left">
         <p className={cn('truncate text-[15px]', t.done && 'line-through muted')}>
           {t.priority === 2 && <span className="mr-1 font-bold">!!</span>}

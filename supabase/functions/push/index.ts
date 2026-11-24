@@ -46,6 +46,7 @@ async function build(table: string, type: string, r: Row, old: Row | null) {
   let actor: string | undefined = r.created_by ?? r.walked_by ?? r.from_profile ?? r.profile_id ?? (table === 'profiles' ? r.id : undefined);
   const cd = table === 'entries' && r.kind === 'complaint' ? (r.data ?? {}) : null;
   if (cd && type === 'UPDATE' && (cd.status === 'progress' || cd.status === 'resolved')) actor = cd.against;
+  if (table === 'entries' && r.kind === 'task_proof' && type === 'UPDATE') actor = r.data?.approver ?? actor;
   if (!actor) return null;
   const { data: who } = await sb.from('profiles').select('display_name, couple_id').eq('id', actor).single();
   if (!who?.couple_id) return null;
@@ -87,6 +88,15 @@ async function build(table: string, type: string, r: Row, old: Row | null) {
       else if (st === 'closed') { [title, body] = [`${name} aceitou a solução 🤝`, d.rating ? `Nota ${'★'.repeat(d.rating)}` : r.title]; to = d.against ?? null; }
       else if (st === 'reopened') { [title, body] = [`${name} reabriu a reclamação 😤`, `${r.title} — novo prazo de 24h`]; to = d.against ?? null; }
       else return null;
+    } else if (r.kind === 'task_proof') {
+      const st = d.status, prev = old?.data?.status;
+      if (type === 'INSERT') { if (st !== 'pending') return null; [title, body] = [`${name} concluiu uma tarefa 📸`, `${r.title} — toque para aprovar`]; to = d.approver ?? null; }
+      else if (st === prev) return null;
+      else if (st === 'approved') { [title, body] = [`${name} aprovou sua tarefa ✅`, r.title]; to = r.created_by; }
+      else if (st === 'rejected') { [title, body] = [`${name} devolveu a tarefa ↩️`, d.why ? `${r.title}: ${String(d.why).slice(0, 120)}` : r.title]; to = r.created_by; }
+      else return null;
+    } else if (r.kind === 'duty_miss') {
+      [title, body] = r.title === 'humor' ? [`${name} adiou o check-in de humor 👀`, 'Manda uma mensagem pra saber como está'] : [`${name} adiou uma tarefa obrigatória 👀`, r.title];
     } else
     if (r.kind === 'prayed') { [title, body] = [`${name} orou pelo seu pedido 🙏`, r.title || 'Estou orando por você']; to = d.to ?? null; }
     else if (r.kind === 'sos') [title, body] = [`${name} precisa de você agora 🫂`, 'Momento de ansiedade — liga ou manda um carinho'];

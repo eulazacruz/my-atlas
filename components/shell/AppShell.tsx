@@ -25,6 +25,7 @@ import { Sheets } from '@/components/sheets/Sheets';
 import { BoxBreathing } from './BoxBreathing';
 import { TabBar } from './TabBar';
 import { AlarmHost } from '@/components/v6/Alarm';
+import { DutyHost, DutySync, TaskProofHost } from '@/components/v6/Duty';
 import { Setup } from '@/components/fx/Setup';
 import { UpdateGate } from '@/components/fx/UpdateGate';
 import { InstantWidgetSync } from '@/components/v6/Instants';
@@ -154,6 +155,9 @@ export function AppShell() {
       <TextScale />
       <NativeEffects />
       <AlarmHost />
+      <DutySync />
+      <DutyHost />
+      <TaskProofHost />
       <Setup />
       <UpdateGate />
       <InstantWidgetSync />

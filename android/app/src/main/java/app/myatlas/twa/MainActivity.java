@@ -66,6 +66,23 @@ public class MainActivity extends BridgeActivity {
         visible = false;
     }
 
+    /** Saiu do app com alarme/compromisso tocando: volta para a tela em poucos segundos. */
+    private final android.os.Handler back = new android.os.Handler(android.os.Looper.getMainLooper());
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (!app.myatlas.twa.alarm.AlarmReceiver.ringing) return;
+        back.postDelayed(() -> {
+            if (visible || !app.myatlas.twa.alarm.AlarmReceiver.ringing) return;
+            try {
+                android.content.Intent i = new android.content.Intent(this, MainActivity.class);
+                i.putExtra("atlas_alarm", app.myatlas.twa.alarm.AlarmReceiver.ringingId == null ? "x" : app.myatlas.twa.alarm.AlarmReceiver.ringingId);
+                i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP | android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(i);
+            } catch (Exception ignored) { }
+        }, 8000);
+    }
+
     /** Mede a câmera para a ilha que aparece fora do app. */
     void saveCutout() {
         try {

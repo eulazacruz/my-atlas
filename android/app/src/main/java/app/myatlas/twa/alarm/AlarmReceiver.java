@@ -19,7 +19,7 @@ import app.myatlas.twa.R;
 
 /** Dispara o alarme: notificação em tela cheia com som de alarme insistente (toca até a missão ser cumprida). */
 public class AlarmReceiver extends BroadcastReceiver {
-    public static final String CHANNEL = "despertador";
+    public static final String CHANNEL = "despertador_v2";
     public static final int NOTIF_ID = 777;
     public static volatile boolean ringing = false;
     public static volatile String ringingId = null;
@@ -36,6 +36,10 @@ public class AlarmReceiver extends BroadcastReceiver {
         ringingId = id;
         c.getSharedPreferences(AlarmScheduler.PREFS, Context.MODE_PRIVATE).edit().putBoolean("ringing", true).putString("ringingId", id).apply();
         ensureChannel(c);
+        org.json.JSONObject cfg = AlarmScheduler.find(c, id);
+        String kind = cfg.optString("kind", "alarm");
+        boolean isAlarm = "alarm".equals(kind);
+        AlarmSound.start(c, cfg.optString("sound", ""), (float) cfg.optDouble("volume", 1.0), isAlarm ? 40_000 : 15_000, true);
 
         Intent open = new Intent(c, MainActivity.class);
         open.putExtra("atlas_alarm", id == null ? "x" : id);
@@ -44,18 +48,17 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         NotificationCompat.Builder b = new NotificationCompat.Builder(c, CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_atlas)
-            .setContentTitle("⏰ Hora de acordar")
-            .setContentText("Toque para cumprir a missão e desligar")
+            .setContentTitle(cfg.optString("title", "⏰ Hora de acordar"))
+            .setContentText(cfg.optString("text", "Toque para cumprir a missão e desligar"))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setOngoing(true)
             .setAutoCancel(false)
             .setContentIntent(full)
             .setFullScreenIntent(full, true)
-            .setSound(alarmUri(), android.media.AudioManager.STREAM_ALARM)
-            .setVibrate(new long[]{0, 800, 400, 800, 400, 800});
+            .setSilent(true);
         Notification n = b.build();
-        n.flags |= Notification.FLAG_INSISTENT | Notification.FLAG_NO_CLEAR;
+        n.flags |= Notification.FLAG_NO_CLEAR;
         NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
         if (nm != null) nm.notify(NOTIF_ID, n);
         try { c.startActivity(open); } catch (Exception ignored) { }
@@ -72,17 +75,17 @@ public class AlarmReceiver extends BroadcastReceiver {
         if (Build.VERSION.SDK_INT < 26) return;
         NotificationManager nm = c.getSystemService(NotificationManager.class);
         if (nm == null || nm.getNotificationChannel(CHANNEL) != null) return;
-        NotificationChannel ch = new NotificationChannel(CHANNEL, "Despertador", NotificationManager.IMPORTANCE_HIGH);
-        ch.setDescription("Toca o alarme mesmo no silencioso");
-        ch.setSound(alarmUri(), new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build());
-        ch.enableVibration(true);
-        ch.setVibrationPattern(new long[]{0, 800, 400, 800});
+        NotificationChannel ch = new NotificationChannel(CHANNEL, "Despertador e compromissos", NotificationManager.IMPORTANCE_HIGH);
+        ch.setDescription("Tela cheia do despertador, do check-in de humor e das tarefas obrigatórias");
+        ch.setSound(null, null);
+        ch.enableVibration(false);
         ch.setBypassDnd(true);
         ch.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
         nm.createNotificationChannel(ch);
     }
 
     public static void stop(Context c) {
+        AlarmSound.stop();
         ringing = false;
         ringingId = null;
         c.getSharedPreferences(AlarmScheduler.PREFS, Context.MODE_PRIVATE).edit().putBoolean("ringing", false).apply();

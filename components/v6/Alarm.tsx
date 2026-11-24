@@ -12,9 +12,12 @@ import { celebrate, playSound } from '@/lib/fx';
 import { AtlasNative, isNative } from '@/lib/native';
 import { cn, firstName, uid, ymd } from '@/lib/utils';
 import { EMERALD, norm, useLocal } from './kit';
+import { DutySettings } from './Duty';
 
 export type Mission = 'math' | 'shake' | 'type' | 'barcode';
-export interface AlarmCfg { id: string; time: string; days: number[]; on: boolean; mission: Mission; level: 1 | 2 | 3; label: string; notify: boolean; code?: string }
+export interface AlarmCfg { id: string; time: string; days: number[]; on: boolean; mission: Mission; level: 1 | 2 | 3; label: string; notify: boolean; code?: string; sound?: string; soundTitle?: string }
+const SOUND_KEY = 'my-atlas:alarm-sound';
+export const readSound = (): { uri?: string; title?: string } => { try { return JSON.parse(localStorage.getItem(SOUND_KEY) || '{}'); } catch { return {}; } };
 const KEY = 'my-atlas:alarms';
 const MISSIONS: { id: Mission; emoji: string; t: string; h: string }[] = [
   { id: 'math', emoji: '🧮', t: 'Contas', h: 'Resolver 3 contas' },
@@ -26,11 +29,17 @@ const DAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 const SHORT_VERSES = ['O Senhor é o meu pastor, nada me faltará', 'Tudo posso naquele que me fortalece', 'As misericórdias do Senhor se renovam a cada manhã', 'Este é o dia que o Senhor fez', 'Esforça-te e tem bom ânimo'];
 
 const readAlarms = (): AlarmCfg[] => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
-export async function syncAlarms(list: AlarmCfg[], snoozeAt: number | null = null) {
+export async function syncAlarms(list: AlarmCfg[], snoozeAt: number | null = null, lastId?: string) {
   try { localStorage.setItem(KEY, JSON.stringify(list)); } catch { /* noop */ }
   if (!isNative()) return { exact: true, fullScreen: true };
-  try { return await AtlasNative.setAlarms({ data: JSON.stringify({ alarms: list.filter((a) => a.on), snoozeAt }) }); } catch { return { exact: true, fullScreen: true }; }
+  let extra: Record<string, unknown>[] = [];
+  try { extra = JSON.parse(localStorage.getItem('my-atlas:alarms-extra') || '[]'); } catch { /* noop */ }
+  const snd = readSound();
+  const alarms = [...list.filter((a) => a.on).map((a) => ({ ...a, kind: 'alarm', title: '⏰ Hora de acordar', text: 'Toque para cumprir a missão e desligar', sound: a.sound ?? snd.uri })), ...extra.map((x) => ({ ...x, sound: snd.uri, volume: 0.8 }))];
+  try { return await AtlasNative.setAlarms({ data: JSON.stringify({ alarms, snoozeAt, lastId: lastId ?? list[0]?.id }) }); } catch { return { exact: true, fullScreen: true }; }
 }
+/** Reagenda tudo (despertadores + compromissos obrigatórios). */
+export const resync = (snoozeAt: number | null = null, lastId?: string) => syncAlarms(readAlarms(), snoozeAt, lastId);
 const nextLabel = (a: AlarmCfg) => {
   const [h, m] = a.time.split(':').map(Number);
   const now = new Date();
@@ -78,6 +87,8 @@ export function AlarmTool() {
         ))}
       </div>
       <Button variant="primary" className="mt-4 w-full" onClick={() => setEdit({ id: uid(), time: '06:00', days: [1, 2, 3, 4, 5], on: true, mission: 'math', level: 2, label: '', notify: true })}><Plus size={16} /> Novo alarme</Button>
+      <SoundPicker />
+      <DutySettings />
       <Section className="mt-7" title="Como funciona">
         <Glass className="space-y-2 p-4 text-[13.5px] leading-snug">
           <p>🔊 Toca no volume de alarme, mesmo com o celular no silencioso, e não para sozinho.</p>
@@ -235,7 +246,12 @@ export function Ringing({ cfg, test, onDone }: { cfg: AlarmCfg; test?: boolean; 
   const [now, setNow] = useState(new Date());
   useEffect(() => { const t = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(t); }, []);
   const word = wordOfTheDay();
-  const stop = async () => { if (!test && isNative()) await AtlasNative.stopAlarm().catch(() => {}); };
+  useEffect(() => {
+    if (!test || !isNative()) return;
+    AtlasNative.previewSound({ uri: cfg.sound ?? readSound().uri ?? '' }).catch(() => {});
+    return () => { AtlasNative.stopPreview().catch(() => {}); };
+  }, [test, cfg.sound]);
+  const stop = async () => { if (isNative()) await (test ? AtlasNative.stopPreview() : AtlasNative.stopAlarm()).catch(() => {}); };
   const dismiss = async () => {
     await stop();
     if (!test) finishSleep(true);
@@ -246,7 +262,7 @@ export function Ringing({ cfg, test, onDone }: { cfg: AlarmCfg; test?: boolean; 
     await stop();
     setSnoozes(snoozes + 1);
     if (!test) {
-      await syncAlarms(readAlarms(), Date.now() + 5 * 60_000);
+      await syncAlarms(readAlarms(), Date.now() + 5 * 60_000, cfg.id);
       if (cfg.notify) put('alarm_snooze', { title: `${firstName(me?.displayName ?? '')} apertou soneca`, date: ymd(), data: { n: snoozes + 1 } });
     }
     onDone();
@@ -291,6 +307,7 @@ export function AlarmHost() {
   useEffect(() => {
     if (!isNative()) return;
     const show = (id?: string) => {
+      if (id && (id.startsWith('mood-') || id.startsWith('task-'))) { window.dispatchEvent(new CustomEvent('atlas:duty', { detail: id })); return; }
       const l = readAlarms();
       setRing(l.find((a) => a.id === id) ?? l[0] ?? { id: 'x', time: '', days: [], on: true, mission: 'math', level: 2, label: '', notify: true });
     };
@@ -302,4 +319,44 @@ export function AlarmHost() {
     return () => { h?.remove(); document.removeEventListener('visibilitychange', vis); };
   }, []);
   return <AnimatePresence>{ring && <Ringing cfg={ring} onDone={() => setRing(null)} />}</AnimatePresence>;
+}
+
+/* ───── escolha do som ───── */
+function SoundPicker() {
+  const [list, setList] = useState<{ title: string; uri: string }[]>([]);
+  const [cur, setCur] = useState(readSound());
+  const [playing, setPlaying] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  useEffect(() => { if (isNative()) AtlasNative.alarmSounds().then((r) => setList(r.sounds)).catch(() => {}); return () => { if (isNative()) AtlasNative.stopPreview().catch(() => {}); }; }, []);
+  if (!isNative()) return null;
+  const choose = (s: { title: string; uri: string }) => {
+    const v = { uri: s.uri, title: s.title };
+    try { localStorage.setItem(SOUND_KEY, JSON.stringify(v)); } catch { /* noop */ }
+    setCur(v); resync();
+  };
+  const play = async (uri: string) => {
+    if (playing === uri) { await AtlasNative.stopPreview().catch(() => {}); setPlaying(null); return; }
+    await AtlasNative.previewSound({ uri, short: true }).catch(() => {}); setPlaying(uri);
+  };
+  return (
+    <Section className="mt-7" title="Som do alarme">
+      <Glass className="p-2">
+        <button onClick={() => setOpen(!open)} className="flex w-full items-center gap-3 p-2.5 text-left">
+          <span className="text-[22px]">🔔</span>
+          <span className="flex-1"><span className="block text-[15px] font-medium">{cur.title ?? 'Padrão do celular'}</span><span className="text-[12px] muted">Toca em repetição e vai aumentando o volume</span></span>
+          <span className="text-[13px] font-semibold muted">{open ? 'Fechar' : 'Trocar'}</span>
+        </button>
+        {open && (
+          <div className="max-h-[320px] overflow-y-auto border-t border-black/5 pt-1 dark:border-white/10">
+            {[{ title: 'Padrão do celular', uri: '' }, ...list].map((s) => (
+              <div key={s.uri || 'def'} className="flex items-center gap-2 px-2.5 py-1.5">
+                <button onClick={() => play(s.uri)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-black/[0.05] text-[13px] dark:bg-white/[0.08]">{playing === s.uri ? '■' : '▶'}</button>
+                <button onClick={() => choose(s)} className={cn('flex-1 truncate py-2 text-left text-[14.5px]', (cur.uri ?? '') === s.uri && 'font-bold')}>{s.title}{(cur.uri ?? '') === s.uri ? ' ✓' : ''}</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Glass>
+    </Section>
+  );
 }

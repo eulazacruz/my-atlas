@@ -198,6 +198,38 @@ public class AtlasNativePlugin extends Plugin {
     }
 
     @PluginMethod
+    public void alarmSounds(PluginCall call) {
+        com.getcapacitor.JSArray arr = new com.getcapacitor.JSArray();
+        try {
+            android.media.RingtoneManager rm = new android.media.RingtoneManager(getActivity());
+            rm.setType(android.media.RingtoneManager.TYPE_ALARM);
+            android.database.Cursor cur = rm.getCursor();
+            while (cur.moveToNext()) {
+                JSObject o = new JSObject();
+                o.put("title", cur.getString(android.media.RingtoneManager.TITLE_COLUMN_INDEX));
+                o.put("uri", rm.getRingtoneUri(cur.getPosition()).toString());
+                arr.put(o);
+            }
+        } catch (Exception ignored) { }
+        JSObject r = new JSObject();
+        r.put("sounds", arr);
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void previewSound(PluginCall call) {
+        boolean shortPreview = call.getBoolean("short", false);
+        app.myatlas.twa.alarm.AlarmSound.start(getContext(), call.getString("uri", ""), shortPreview ? 0.7f : 1f, shortPreview ? 1 : 8_000, !shortPreview);
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void stopPreview(PluginCall call) {
+        app.myatlas.twa.alarm.AlarmSound.stop();
+        call.resolve();
+    }
+
+    @PluginMethod
     public void openAlarmSettings(PluginCall call) {
         String which = call.getString("which", "exact");
         Intent i;

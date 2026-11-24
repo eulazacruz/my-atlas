@@ -1,0 +1,2 @@
+success run=17 sha=ec19a98dd4088dd78925c3136ae91acd329eb097 node=success java=success web=success gradle=success build=success release=success
+-rw-r--r-- 1 runner runner 12907900 Nov 24 01:04 /home/runner/work/my-atlas/my-atlas/MyAtlas.apk
